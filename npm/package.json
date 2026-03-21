@@ -1,0 +1,16 @@
+{
+  "name": "prova-pdf",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Purpose-built exam PDF generator compiled to WebAssembly",
+  "main": "prova_pdf.js",
+  "types": "prova-pdf.d.ts",
+  "files": [
+    "prova_pdf.js",
+    "prova_pdf_bg.wasm",
+    "prova_pdf_bg.wasm.d.ts",
+    "prova-pdf.d.ts"
+  ],
+  "keywords": ["pdf", "wasm", "exam", "prova"],
+  "license": "MIT"
+}

@@ -1,0 +1,68 @@
+[package]
+name = "prova-pdf"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["math", "images", "browser"]
+
+# Browser/npm target via wasm-bindgen
+browser = ["dep:wasm-bindgen", "dep:serde-wasm-bindgen", "dep:js-sys"]
+
+# WASI C-ABI target (Python/Go via wasmtime/wazero)
+wasi-lib = ["dep:serde_json"]
+
+# LaTeX math via OpenType MATH table
+math = ["dep:pulldown-latex"]
+
+# Image embedding (PNG + JPEG)
+images = ["dep:image"]
+
+[dependencies]
+# Serialization
+serde      = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1",   optional = true }
+
+# Browser bindings
+wasm-bindgen       = { version = "0.2", optional = true }
+serde-wasm-bindgen = { version = "0.6", optional = true }
+js-sys             = { version = "0.3", optional = true }
+
+# PDF emission
+pdf-writer = "0.14"
+
+# Error handling
+thiserror = "2"
+
+# Font shaping and subsetting
+ttf-parser    = { version = "0.25", features = ["opentype-layout"] }
+rustybuzz     = "0.20"
+subsetter     = "0.2"
+
+# Compression
+miniz_oxide = "0.8"
+
+# Line breaking
+unicode-linebreak = "0.1"
+
+# Optional: math
+pulldown-latex = { version = "0.7", optional = true }
+
+# Optional: images
+image = { version = "0.25", optional = true, default-features = false, features = ["png", "jpeg"] }
+
+[dev-dependencies]
+serde_json = "1"
+
+[profile.release]
+opt-level     = 'z'
+lto           = true
+codegen-units = 1
+strip         = true
+panic         = "abort"
+
+[profile.release.package."*"]
+opt-level = 'z'
