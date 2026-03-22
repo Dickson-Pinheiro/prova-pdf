@@ -57,6 +57,40 @@ pub enum BorderStyle {
     Dotted,
 }
 
+/// Fully-resolved style for a specific element (after cascading from PrintConfig
+/// → Section → Question → InlineContent). All fields have concrete values.
+///
+/// Produced by the style-cascade phase (TASK-010); consumed by the layout engine.
+#[derive(Debug, Clone)]
+pub struct ResolvedStyle {
+    pub font_size:    f64,
+    pub font_weight:  FontWeight,
+    pub font_style:   FontStyle,
+    /// Explicit font-family override; `None` = follow FontRules for the current role.
+    pub font_family:  Option<String>,
+    /// Normalised RGB in \[0, 1\].
+    pub color:        (f32, f32, f32),
+    pub underline:    bool,
+    pub text_align:   TextAlign,
+    /// Multiplier applied to `font_size` to get the inter-baseline distance.
+    pub line_spacing: f64,
+}
+
+impl Default for ResolvedStyle {
+    fn default() -> Self {
+        Self {
+            font_size:    12.0,
+            font_weight:  FontWeight::Normal,
+            font_style:   FontStyle::Normal,
+            font_family:  None,
+            color:        (0.0, 0.0, 0.0),
+            underline:    false,
+            text_align:   TextAlign::Left,
+            line_spacing: 1.4,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

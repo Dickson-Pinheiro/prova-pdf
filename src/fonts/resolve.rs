@@ -48,7 +48,28 @@ impl<'a> FontResolver<'a> {
         pick_variant(family, weight, style)
     }
 
-    fn role_name(&self, role: FontRole) -> &str {
+    /// Return the registered family name that would be chosen for the given role
+    /// and optional override. Mirrors the lookup order in `resolve()`.
+    pub fn resolve_family_name<'b>(&self, role: FontRole, family_override: Option<&'b str>) -> &'b str
+    where
+        'a: 'b,
+    {
+        if let Some(name) = family_override {
+            if self.registry.get(name).is_some() {
+                return name;
+            }
+        }
+        let role_name = self.role_name(role);
+        if self.registry.get(role_name).is_some() {
+            return role_name;
+        }
+        if self.registry.body().is_some() {
+            return "body";
+        }
+        self.registry.family_names().next().unwrap_or("body")
+    }
+
+    fn role_name(&self, role: FontRole) -> &'a str {
         match role {
             FontRole::Body     => &self.rules.body,
             FontRole::Heading  => &self.rules.heading,

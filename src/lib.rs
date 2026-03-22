@@ -6,3 +6,6 @@ pub mod math;
 pub mod pdf;
 pub mod pipeline;
 pub mod spec;
+
+#[cfg(test)]
+pub mod test_helpers;

@@ -29,6 +29,7 @@ impl From<FaceParsingError> for FontError {
 
 /// Dados e métricas de uma fonte TTF/OTF.
 /// Mantém os bytes brutos para permitir re-parse ao calcular métricas de glifos.
+#[derive(Clone)]
 pub struct FontData {
     pub raw_bytes: Vec<u8>,
     pub units_per_em: u16,
@@ -66,14 +67,25 @@ impl FontData {
         self.raw_bytes.is_empty()
     }
 
+    /// Parse the raw bytes into a `ttf_parser::Face`.
+    ///
+    /// The bytes are already validated in `from_bytes()`, so this is a
+    /// lightweight re-parse of the table directory (no allocation).
+    /// Callers that need multiple lookups should call this once and
+    /// reuse the returned `Face`.
+    #[inline]
+    pub fn face(&self) -> Option<Face<'_>> {
+        Face::parse(&self.raw_bytes, 0).ok()
+    }
+
     /// Retorna o GlyphId de um caractere, ou None se não existir na fonte.
     pub fn glyph_id(&self, c: char) -> Option<GlyphId> {
-        Face::parse(&self.raw_bytes, 0).ok()?.glyph_index(c)
+        self.face()?.glyph_index(c)
     }
 
     /// Avanço horizontal de um glifo em unidades da fonte.
     pub fn advance_width(&self, glyph: GlyphId) -> Option<u16> {
-        Face::parse(&self.raw_bytes, 0).ok()?.glyph_hor_advance(glyph)
+        self.face()?.glyph_hor_advance(glyph)
     }
 
     /// Largura de um texto em pontos PDF para um dado tamanho de fonte.
@@ -81,9 +93,9 @@ impl FontData {
     /// Soma os avanços horizontais dos glifos correspondentes a cada caractere.
     /// Caracteres ausentes na fonte são ignorados.
     pub fn text_width(&self, text: &str, font_size: f64) -> f64 {
-        let face = match Face::parse(&self.raw_bytes, 0) {
-            Ok(f) => f,
-            Err(_) => return 0.0,
+        let face = match self.face() {
+            Some(f) => f,
+            None => return 0.0,
         };
         let scale = font_size / self.units_per_em as f64;
         text.chars()
@@ -102,6 +114,7 @@ impl FontData {
 ///
 /// Apenas a variante regular é obrigatória. As demais são opcionais;
 /// se ausentes, o renderizador recorre ao regular como fallback.
+#[derive(Clone)]
 pub struct FontFamily {
     pub regular: FontData,
     pub bold: Option<FontData>,
@@ -124,8 +137,7 @@ impl FontFamily {
 mod tests {
     use super::*;
 
-    // Embedda DejaVu Sans (incluída no diretório fonts/) para testes offline.
-    const DEJAVU_SANS: &[u8] = include_bytes!("../../fonts/DejaVuSans.ttf");
+    use crate::test_helpers::fixtures::DEJAVU_SANS;
 
     #[test]
     fn parse_units_per_em() {

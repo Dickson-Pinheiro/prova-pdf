@@ -16,6 +16,7 @@ pub enum RegistryError {
 ///
 /// The key "body" is the default and must be registered before generating a PDF.
 /// Other names are used via Style.font_family or FontRules.
+#[derive(Clone)]
 pub struct FontRegistry {
     families: HashMap<String, FontFamily>,
 }
@@ -33,6 +34,9 @@ impl FontRegistry {
     /// Register a single variant of a (possibly new) family.
     /// variant: 0=regular (mandatory first), 1=bold, 2=italic, 3=bold-italic.
     pub fn add_variant(&mut self, family_name: &str, variant: u8, data: Vec<u8>) -> Result<(), RegistryError> {
+        if variant > 3 {
+            return Err(RegistryError::InvalidVariant(variant));
+        }
         let font_data = FontData::from_bytes(&data)
             .map_err(|e| RegistryError::ParseError(e.to_string()))?;
 

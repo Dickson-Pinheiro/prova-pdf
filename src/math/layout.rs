@@ -47,38 +47,6 @@ pub enum MathDrawCommand {
         half_height: f64,
         thickness: f64,
     },
-    /// Parêntese esquerdo ( desenhado como curva Bézier.
-    LeftParen {
-        x: f64,
-        y_center: f64,
-        half_height: f64,
-        delim_w: f64,
-        stroke_w: f64,
-    },
-    /// Parêntese direito ) desenhado como curva Bézier.
-    RightParen {
-        x: f64,
-        y_center: f64,
-        half_height: f64,
-        delim_w: f64,
-        stroke_w: f64,
-    },
-    /// Colchete esquerdo [ desenhado como traçado.
-    LeftBracket {
-        x: f64,
-        y_center: f64,
-        half_height: f64,
-        delim_w: f64,
-        stroke_w: f64,
-    },
-    /// Colchete direito ] desenhado como traçado.
-    RightBracket {
-        x: f64,
-        y_center: f64,
-        half_height: f64,
-        delim_w: f64,
-        stroke_w: f64,
-    },
 }
 
 impl MathDrawCommand {
@@ -88,11 +56,7 @@ impl MathDrawCommand {
                 *x += dx;
                 *y += dy;
             }
-            MathDrawCommand::VBar { x, y_center, .. }
-            | MathDrawCommand::LeftParen { x, y_center, .. }
-            | MathDrawCommand::RightParen { x, y_center, .. }
-            | MathDrawCommand::LeftBracket { x, y_center, .. }
-            | MathDrawCommand::RightBracket { x, y_center, .. } => {
+            MathDrawCommand::VBar { x, y_center, .. } => {
                 *x += dx;
                 *y_center += dy;
             }
@@ -796,55 +760,12 @@ fn make_drawn_delimiter(
     em: f64,
 ) -> Option<MathLayoutResult> {
     if delim.is_empty() { return None; }
-    let stroke_w = (em * 0.07).max(0.4_f64).min(1.0);
     let height = y_center + half_height;
     let depth  = (half_height - y_center).max(0.0);
 
     match delim {
-        "(" => {
-            let delim_w = (half_height * 0.30).max(em * 0.18).min(em * 0.42);
-            let mut r = MathLayoutResult::empty();
-            r.width  = delim_w;
-            r.height = height;
-            r.depth  = depth;
-            r.rules.push(MathDrawCommand::LeftParen {
-                x: 0.0, y_center, half_height, delim_w, stroke_w,
-            });
-            Some(r)
-        }
-        ")" => {
-            let delim_w = (half_height * 0.30).max(em * 0.18).min(em * 0.42);
-            let mut r = MathLayoutResult::empty();
-            r.width  = delim_w;
-            r.height = height;
-            r.depth  = depth;
-            r.rules.push(MathDrawCommand::RightParen {
-                x: 0.0, y_center, half_height, delim_w, stroke_w,
-            });
-            Some(r)
-        }
-        "[" => {
-            let delim_w = em * 0.20;
-            let mut r = MathLayoutResult::empty();
-            r.width  = delim_w;
-            r.height = height;
-            r.depth  = depth;
-            r.rules.push(MathDrawCommand::LeftBracket {
-                x: 0.0, y_center, half_height, delim_w, stroke_w,
-            });
-            Some(r)
-        }
-        "]" => {
-            let delim_w = em * 0.20;
-            let mut r = MathLayoutResult::empty();
-            r.width  = delim_w;
-            r.height = height;
-            r.depth  = depth;
-            r.rules.push(MathDrawCommand::RightBracket {
-                x: 0.0, y_center, half_height, delim_w, stroke_w,
-            });
-            Some(r)
-        }
+        // Parens and brackets use font glyphs (handled by the fallback in layout_delimited).
+        "(" | ")" | "[" | "]" | "{" | "}" => None,
         "|" => {
             let thickness = (em * 0.06).max(0.4_f64).min(0.8);
             let delim_w   = thickness + em * 0.06;

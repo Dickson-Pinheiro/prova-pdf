@@ -40,10 +40,11 @@ pub fn shape_text(font_data: &FontData, text: &str) -> Vec<ShapedGlyph> {
         return vec![];
     }
 
-    let face = match rustybuzz::Face::from_slice(&font_data.raw_bytes, 0) {
+    let ttf_face = match font_data.face() {
         Some(f) => f,
         None => return vec![],
     };
+    let face = rustybuzz::Face::from_face(ttf_face);
 
     let mut buffer = rustybuzz::UnicodeBuffer::new();
     buffer.push_str(text);
@@ -292,8 +293,7 @@ fn apply_alignment(
 mod tests {
     use super::*;
     use crate::fonts::data::FontData;
-
-    const DEJAVU_SANS: &[u8] = include_bytes!("../../fonts/DejaVuSans.ttf");
+    use crate::test_helpers::fixtures::DEJAVU_SANS;
 
     fn font() -> FontData {
         FontData::from_bytes(DEJAVU_SANS).expect("DejaVu Sans deve parsear")
