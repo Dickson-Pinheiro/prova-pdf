@@ -119,6 +119,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: master
           fetch-depth: 0
 
       - uses: actions/download-artifact@v4
@@ -142,7 +143,7 @@ jobs:
           git add packages/go/provapdf/prova_pdf.wasm
           git diff --cached --quiet && echo "No changes" || git commit -m "chore: bundle WASM for Go release ${{ steps.go-tag.outputs.tag }}"
           git tag "${{ steps.go-tag.outputs.tag }}"
-          git push origin HEAD "${{ steps.go-tag.outputs.tag }}"
+          git push origin master "${{ steps.go-tag.outputs.tag }}"
 
   # ── GitHub Release ─────────────────────────────────────────────────────────
   github-release:

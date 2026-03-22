@@ -32,7 +32,7 @@
   "author": "Dickson Pinheiro",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Dickson-Pinheiro/prova-pdf"
+    "url": "git+https://github.com/Dickson-Pinheiro/prova-pdf.git"
   },
   "homepage": "https://github.com/Dickson-Pinheiro/prova-pdf"
 }
