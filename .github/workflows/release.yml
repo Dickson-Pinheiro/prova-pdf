@@ -111,6 +111,7 @@ jobs:
         with:
           packages-dir: packages/python/dist/
           password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
 
   # ── Tag Go submodule ───────────────────────────────────────────────────────
   publish-go:
