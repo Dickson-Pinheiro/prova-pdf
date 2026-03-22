@@ -49,6 +49,7 @@ jobs:
           cp pkg/prova_pdf.d.ts _site/pkg/ 2>/dev/null || true
           cp fonts/DejaVuSans*.ttf _site/fonts/
           cp img/logo.jpg _site/img/
+          cp -r tests/fixtures _site/tests/fixtures
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
