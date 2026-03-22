@@ -1,0 +1,172 @@
+name: Release — publish npm, PyPI, Go
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ── Build WASM binaries ────────────────────────────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown,wasm32-wasip1
+
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli --locked
+
+      - name: Install wasm-opt (binaryen)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq binaryen
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-release-${{ hashFiles('Cargo.lock') }}
+          restore-keys: cargo-release-
+
+      - name: Build browser (wasm-bindgen)
+        run: make build-browser
+
+      - name: Build WASI (C-ABI)
+        run: make build-wasi
+
+      - name: Upload pkg/ artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkg-browser
+          path: pkg/
+
+      - name: Upload wasm/ artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-wasi
+          path: wasm/
+
+  # ── Publish to npm ─────────────────────────────────────────────────────────
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pkg-browser
+          path: pkg/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish to npm
+        working-directory: pkg
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ── Publish to PyPI ────────────────────────────────────────────────────────
+  publish-pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wasm-wasi
+          path: wasm/
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Bundle WASM into Python package
+        run: cp wasm/prova_pdf.wasm packages/python/prova_pdf/prova_pdf.wasm
+
+      - name: Build wheel
+        run: |
+          pip install build
+          cd packages/python && python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/python/dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  # ── Tag Go submodule ───────────────────────────────────────────────────────
+  publish-go:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wasm-wasi
+          path: wasm/
+
+      - name: Copy WASM into Go package
+        run: cp wasm/prova_pdf.wasm packages/go/provapdf/prova_pdf.wasm
+
+      - name: Derive Go tag from release tag
+        id: go-tag
+        run: |
+          VERSION="${GITHUB_REF_NAME}"            # e.g. v0.2.0
+          echo "tag=packages/go/${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Commit WASM and push Go tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/go/provapdf/prova_pdf.wasm
+          git diff --cached --quiet && echo "No changes" || git commit -m "chore: bundle WASM for Go release ${{ steps.go-tag.outputs.tag }}"
+          git tag "${{ steps.go-tag.outputs.tag }}"
+          git push origin HEAD "${{ steps.go-tag.outputs.tag }}"
+
+  # ── GitHub Release ─────────────────────────────────────────────────────────
+  github-release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pkg-browser
+          path: pkg/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wasm-wasi
+          path: wasm/
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "prova-pdf $GITHUB_REF_NAME" \
+            --generate-notes \
+            pkg/prova_pdf_bg.wasm \
+            wasm/prova_pdf.wasm

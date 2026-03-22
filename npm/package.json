@@ -28,5 +28,11 @@
     }
   },
   "keywords": ["pdf", "wasm", "exam", "prova"],
-  "license": "MIT"
+  "license": "MIT",
+  "author": "Dickson Pinheiro",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dickson-Pinheiro/prova-pdf"
+  },
+  "homepage": "https://github.com/Dickson-Pinheiro/prova-pdf"
 }

@@ -1,4 +1,4 @@
-module github.com/prova-pdf/prova-pdf/packages/go
+module github.com/Dickson-Pinheiro/prova-pdf/packages/go
 
 go 1.22
 

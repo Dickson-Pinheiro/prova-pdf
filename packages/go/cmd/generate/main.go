@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/prova-pdf/prova-pdf/packages/go/provapdf"
+	"github.com/Dickson-Pinheiro/prova-pdf/packages/go/provapdf"
 )
 
 func main() {

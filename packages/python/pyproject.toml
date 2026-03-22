@@ -7,10 +7,23 @@ name = "prova-pdf"
 version = "0.1.0"
 description = "Exam PDF generator powered by WebAssembly"
 requires-python = ">=3.10"
-dependencies = ["wasmtime>=25"]
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Dickson Pinheiro" }]
+dependencies = ["wasmtime>=25,<27"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Text Processing :: General",
+]
+
+[project.urls]
+Homepage = "https://github.com/Dickson-Pinheiro/prova-pdf"
+Repository = "https://github.com/Dickson-Pinheiro/prova-pdf"
 
 [tool.setuptools.packages.find]
 include = ["prova_pdf*"]
 
 [tool.setuptools.package-data]
-prova_pdf = ["*.wasm"]
+prova_pdf = ["*.wasm", "py.typed"]

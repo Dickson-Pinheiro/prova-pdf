@@ -5,6 +5,8 @@
 /wasm/
 /pkg/
 *.wasm
+# Exception: Go package embeds the WASI binary via //go:embed
+!packages/go/provapdf/prova_pdf.wasm
 
 # Go compiled binary
 packages/go/generate
