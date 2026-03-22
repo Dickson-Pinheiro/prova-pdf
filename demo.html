@@ -131,6 +131,7 @@ textarea{resize:vertical;min-height:56px;font-family:inherit;line-height:1.5}
     <option value="4">4 · Prova Completa (todos os tipos)</option>
     <option value="5">5 · Gabarito Econômico (2 colunas)</option>
     <option value="6">6 · Matemática (LaTeX)</option>
+    <option value="7">7 · Simulado ENEM (20 questões + Redação)</option>
   </select>
   <div class="tb-sep"></div>
   <span id="status">Carregando WASM…</span>
@@ -220,6 +221,7 @@ textarea{resize:vertical;min-height:56px;font-family:inherit;line-height:1.5}
         <label class="checkbox-row"><input type="checkbox" id="cfg-economy"><span>Modo economia (remove espaços de resposta)</span></label>
         <label class="checkbox-row"><input type="checkbox" id="cfg-hideNum"><span>Ocultar numeração das questões</span></label>
         <label class="checkbox-row"><input type="checkbox" id="cfg-showScore"><span>Exibir pontuação</span></label>
+        <label class="checkbox-row"><input type="checkbox" id="cfg-grayscale"><span>Imagens em preto e branco</span></label>
         <label class="checkbox-row"><input type="checkbox" id="cfg-allBlack"><span>Forçar preto total (sem cores)</span></label>
         <label class="checkbox-row"><input type="checkbox" id="cfg-breakAll"><span>Quebra de página antes de cada questão</span></label>
       </div>
@@ -468,6 +470,7 @@ function buildConfig() {
     economyMode:         chk('cfg-economy'),
     hideNumbering:       chk('cfg-hideNum'),
     showScore:           chk('cfg-showScore'),
+    imageGrayscale:      chk('cfg-grayscale'),
     allBlack:            chk('cfg-allBlack'),
     breakAllQuestions:   chk('cfg-breakAll'),
     headerFull:          true,
@@ -547,6 +550,7 @@ function buildQuestions(secEl) {
 
     // Use stored rich stem (with inline styles) if available, otherwise plain text
     const stemData = card._richStem || (stemText ? [{ type: 'text', value: stemText }] : [{ type: 'text', value: '(enunciado)' }]);
+    const pointsVal = parseFloat(card.querySelector('.q-points')?.value);
     const q = {
       kind:      type,
       stem:      stemData,
@@ -554,6 +558,7 @@ function buildQuestions(secEl) {
       showNumber: true,
     };
     if (fw) q.fullWidth = true;
+    if (!isNaN(pointsVal) && pointsVal > 0) q.points = pointsVal;
     qs.push(q);
   });
   return qs;
@@ -720,10 +725,16 @@ window.addQuestion = function(listEl, data = {}) {
     <div class="q-body">
       <div class="q-field-label">Enunciado</div>
       <textarea class="q-stem" placeholder="Digite o enunciado da questão…" oninput="this.closest('.q-card')._richStem=null;this.closest('.q-card')._richAnswer=null">${esc(stem)}</textarea>
-      <label class="checkbox-row" style="margin-bottom:8px">
-        <input type="checkbox" class="q-full-width" ${data.fullWidth ? 'checked' : ''}>
-        <span>Ocupar largura total (full width)</span>
-      </label>
+      <div class="row" style="margin-bottom:8px">
+        <label class="checkbox-row" style="margin-bottom:0">
+          <input type="checkbox" class="q-full-width" ${data.fullWidth ? 'checked' : ''}>
+          <span>Ocupar largura total (full width)</span>
+        </label>
+        <div class="field-group" style="margin-bottom:0;margin-left:auto;flex:0 0 auto">
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px">Pontuação (pt)</label>
+          <input type="number" class="q-points" placeholder="—" min="0" step="0.5" style="width:80px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px" value="${data.points != null ? data.points : ''}">
+        </div>
+      </div>
       <div class="type-fields"></div>
     </div>`;
   listEl.appendChild(card);
@@ -868,6 +879,7 @@ function applySpec(spec) {
   setchk('cfg-economy',  cfg.economyMode);
   setchk('cfg-hideNum',  cfg.hideNumbering);
   setchk('cfg-showScore',cfg.showScore);
+  setchk('cfg-grayscale',cfg.imageGrayscale);
   setchk('cfg-allBlack', cfg.allBlack);
   setchk('cfg-breakAll', cfg.breakAllQuestions);
 
@@ -1105,7 +1117,7 @@ const EXAMPLES = {
         title: 'Língua Portuguesa',
         instructions: [{ type: 'text', value: 'Leia os textos com atenção e responda às questões.' }],
         questions: [
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Na oração "Os alunos, que estudaram bastante, foram aprovados", as vírgulas isolam uma oração:' }],
             answer: { type: 'choice', layout: 'vertical', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'subordinada adjetiva restritiva' }] },
@@ -1114,7 +1126,7 @@ const EXAMPLES = {
               { label: 'D', content: [{ type: 'text', value: 'subordinada substantiva objetiva direta' }] },
               { label: 'E', content: [{ type: 'text', value: 'subordinada adverbial causal' }] },
             ]}},
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Assinale a alternativa em que a concordância verbal está correta:' }],
             answer: { type: 'choice', layout: 'vertical', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'Fazem dois anos que não viajo.' }] },
@@ -1123,7 +1135,7 @@ const EXAMPLES = {
               { label: 'D', content: [{ type: 'text', value: 'Aluga-se apartamentos neste prédio.' }] },
               { label: 'E', content: [{ type: 'text', value: 'Haviam chegado cedo ao local.' }] },
             ]}},
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Na frase "Ela me disse que viria amanhã", o verbo "viria" está conjugado no:' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'futuro do presente' }] },
@@ -1131,7 +1143,7 @@ const EXAMPLES = {
               { label: 'C', content: [{ type: 'text', value: 'pretérito imperfeito' }] },
               { label: 'D', content: [{ type: 'text', value: 'presente do subjuntivo' }] },
             ]}},
-          { kind: 'textual',
+          { kind: 'textual', points: 2.5,
             stem: [{ type: 'text', value: 'Reescreva o período abaixo, passando-o da voz ativa para a voz passiva: "O professor corrigiu todas as provas antes do prazo."' }],
             answer: { type: 'textual', lineCount: 3 } },
         ]
@@ -1141,7 +1153,7 @@ const EXAMPLES = {
         title: 'Matemática',
         instructions: [{ type: 'text', value: 'Resolva as questões, apresentando os cálculos quando solicitado.' }],
         questions: [
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Uma loja oferece 20% de desconto em um produto que custa R$ 150,00. Qual é o valor final do produto?' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'R$ 110,00' }] },
@@ -1150,7 +1162,7 @@ const EXAMPLES = {
               { label: 'D', content: [{ type: 'text', value: 'R$ 130,00' }] },
               { label: 'E', content: [{ type: 'text', value: 'R$ 135,00' }] },
             ]}},
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Qual é a solução da equação 3x − 7 = 2x + 5?' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'x = 10' }] },
@@ -1159,7 +1171,7 @@ const EXAMPLES = {
               { label: 'D', content: [{ type: 'text', value: 'x = −2' }] },
               { label: 'E', content: [{ type: 'text', value: 'x = 7' }] },
             ]}},
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Um triângulo retângulo tem catetos medindo 6 cm e 8 cm. Qual é a medida da hipotenusa?' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: '9 cm' }] },
@@ -1168,7 +1180,7 @@ const EXAMPLES = {
               { label: 'D', content: [{ type: 'text', value: '14 cm' }] },
               { label: 'E', content: [{ type: 'text', value: '7 cm' }] },
             ]}},
-          { kind: 'textual',
+          { kind: 'textual', points: 2.5,
             stem: [{ type: 'text', value: 'Calcule a área de um trapézio com bases medindo 8 cm e 12 cm, e altura de 5 cm. Apresente o cálculo completo.' }],
             answer: { type: 'textual', lineCount: 4 } },
         ]
@@ -1178,7 +1190,7 @@ const EXAMPLES = {
         title: 'Ciências',
         instructions: [{ type: 'text', value: 'Responda com base nos conhecimentos de Biologia, Química e Física.' }],
         questions: [
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Qual organela celular é responsável pela produção de energia na forma de ATP?' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'Ribossomo' }] },
@@ -1187,7 +1199,7 @@ const EXAMPLES = {
               { label: 'D', content: [{ type: 'text', value: 'Complexo de Golgi' }] },
               { label: 'E', content: [{ type: 'text', value: 'Retículo endoplasmático' }] },
             ]}},
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Na tabela periódica, os elementos são organizados em ordem crescente de:' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'massa atômica' }] },
@@ -1195,7 +1207,7 @@ const EXAMPLES = {
               { label: 'C', content: [{ type: 'text', value: 'eletronegatividade' }] },
               { label: 'D', content: [{ type: 'text', value: 'raio atômico' }] },
             ]}},
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Um corpo percorre 200 metros em 10 segundos com velocidade constante. Qual é a velocidade do corpo?' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: '10 m/s' }] },
@@ -1203,7 +1215,7 @@ const EXAMPLES = {
               { label: 'C', content: [{ type: 'text', value: '15 m/s' }] },
               { label: 'D', content: [{ type: 'text', value: '25 m/s' }] },
             ]}},
-          { kind: 'textual',
+          { kind: 'textual', points: 2.5,
             stem: [{ type: 'text', value: 'Explique o que é fotossíntese e qual a sua importância para os seres vivos.' }],
             answer: { type: 'textual', lineCount: 5 } },
         ]
@@ -1212,7 +1224,7 @@ const EXAMPLES = {
       {
         title: 'História',
         questions: [
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'A Proclamação da República no Brasil ocorreu em:' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: '7 de setembro de 1822' }] },
@@ -1221,7 +1233,7 @@ const EXAMPLES = {
               { label: 'D', content: [{ type: 'text', value: '22 de abril de 1500' }] },
               { label: 'E', content: [{ type: 'text', value: '1 de janeiro de 1891' }] },
             ]}},
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'A Revolução Industrial teve início no século XVIII em qual país?' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'França' }] },
@@ -1229,7 +1241,7 @@ const EXAMPLES = {
               { label: 'C', content: [{ type: 'text', value: 'Inglaterra' }] },
               { label: 'D', content: [{ type: 'text', value: 'Estados Unidos' }] },
             ]}},
-          { kind: 'textual',
+          { kind: 'textual', points: 2.5,
             stem: [{ type: 'text', value: 'Descreva duas consequências da Segunda Guerra Mundial para a organização política mundial.' }],
             answer: { type: 'textual', lineCount: 5 } },
         ]
@@ -1238,7 +1250,7 @@ const EXAMPLES = {
       {
         title: 'Geografia',
         questions: [
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'Qual é o bioma brasileiro que ocupa a maior extensão territorial?' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'Cerrado' }] },
@@ -1247,7 +1259,7 @@ const EXAMPLES = {
               { label: 'D', content: [{ type: 'text', value: 'Mata Atlântica' }] },
               { label: 'E', content: [{ type: 'text', value: 'Pantanal' }] },
             ]}},
-          { kind: 'choice',
+          { kind: 'choice', points: 1.5,
             stem: [{ type: 'text', value: 'O fenômeno do aquecimento global está diretamente relacionado ao aumento da concentração de:' }],
             answer: { type: 'choice', layout: 'horizontal', alternatives: [
               { label: 'A', content: [{ type: 'text', value: 'oxigênio' }] },
@@ -1255,7 +1267,7 @@ const EXAMPLES = {
               { label: 'C', content: [{ type: 'text', value: 'gases de efeito estufa' }] },
               { label: 'D', content: [{ type: 'text', value: 'hélio' }] },
             ]}},
-          { kind: 'cloze',
+          { kind: 'cloze', points: 1.5,
             stem: [
               { type: 'text', value: 'O Brasil possui ' }, { type: 'blank' },
               { type: 'text', value: ' estados e um ' }, { type: 'blank' },
@@ -1272,7 +1284,7 @@ const EXAMPLES = {
         title: 'Redação',
         instructions: [{ type: 'text', value: 'Elabore um texto dissertativo-argumentativo sobre o tema proposto. Mínimo de 20 linhas.' }],
         questions: [
-          { kind: 'essay', fullWidth: true,
+          { kind: 'essay', fullWidth: true, points: 10,
             stem: [{ type: 'text', value: 'TEMA: A importância da leitura na formação do cidadão crítico. Com base em seus conhecimentos e experiências, produza um texto dissertativo-argumentativo apresentando sua tese e argumentos que a sustentem. Utilize a norma-padrão da língua portuguesa.' }],
             answer: { type: 'essay', lineCount: 30 } },
         ]
@@ -1388,6 +1400,280 @@ const EXAMPLES = {
           answer: { type: 'textual', lineCount: 5 }},
       ]
     }]
+  },
+
+  // ── PRESET 7: Simulado ENEM ──────────────────────────────────────────────────
+  '7': {
+    config: {
+      pageSize: 'A4', columns: 1,
+      fontSize: 12, lineSpacing: 'normal',
+      showScore: true, imageGrayscale: true,
+      discursiveSpaceType: 'lines', discursiveLineHeight: 0.85,
+      alternativeSpacingCm: 0.35,
+      margins: { top: 1.0, bottom: 1.0, left: 2.0, right: 1.5 },
+    },
+    header: {
+      institution: 'ENEM — Exame Nacional do Ensino Médio',
+      title: 'Simulado — 1º Dia',
+      subtitle: 'Linguagens · Ciências Humanas · Ciências da Natureza · Matemática · Redação',
+      instructions: [{ type: 'text', value: 'Este caderno contém 20 questões objetivas e 1 proposta de Redação. Você dispõe de 5h30min para responder às questões e elaborar a Redação. Marque, para cada questão, a alternativa correta com um X. Não é permitido o uso de calculadora.' }],
+      studentFields: [
+        { label: 'NOME COMPLETO' },
+        { label: 'Nº DE INSCRIÇÃO', widthCm: 7 },
+        { label: 'DATA DE NASCIMENTO', widthCm: 5 },
+        { label: 'MUNICÍPIO', widthCm: 9 },
+        { label: 'UF', widthCm: 2 },
+        { label: 'LOCAL DE PROVA' },
+        { label: 'SALA', widthCm: 3 },
+        { label: 'DATA', widthCm: 5 },
+      ],
+      runningHeader: { left: 'ENEM — Simulado', right: 'Página {page} de {pages}' },
+      runningFooter: { center: 'Este simulado é de uso exclusivo para fins educacionais.' },
+    },
+    sections: [
+      // ── Área 1: Linguagens, Códigos e suas Tecnologias ──────────────────────
+      {
+        title: 'LINGUAGENS, CÓDIGOS E SUAS TECNOLOGIAS',
+        instructions: [{ type: 'text', value: 'Questões 01 a 05. Cada questão vale 4 pontos.' }],
+        questions: [
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'Leia o trecho: "A cidade, que antes dormia cedo, agora vibrava até o amanhecer — era o progresso chegando como uma onda que ninguém pediu, mas todos abraçaram." A linguagem utilizada nesse trecho é predominantemente:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'denotativa, pois descreve objetivamente o processo de urbanização.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'conotativa, fazendo uso de metáfora e personificação para criar efeito poético.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'técnica, empregando terminologia específica das ciências sociais.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'jornalística, com objetividade e imparcialidade na descrição dos fatos.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'científica, baseada em dados estatísticos sobre crescimento urbano.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'A variação linguística é um fenômeno natural e inerente a todas as línguas vivas. Sobre as variedades do português brasileiro, é CORRETO afirmar que:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'apenas a norma culta deve ser aceita em todas as situações de comunicação.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'as variedades regionais e populares representam desvios que devem ser corrigidos.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'a variação linguística reflete aspectos culturais, sociais e regionais de seus falantes, sendo igualmente válidas.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'a língua falada no Brasil é uniforme, sem distinções regionais significativas.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'o preconceito linguístico é justificado, pois certas variedades comprometem a comunicação eficaz.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'O Romantismo brasileiro foi marcado por características que refletiam o contexto histórico e cultural do século XIX. Qual das opções abaixo NÃO corresponde a uma característica desse movimento literário?' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'Idealização da natureza e exaltação do elemento indígena como símbolo nacional.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'Valorização dos sentimentos individuais e do "eu" lírico exacerbado.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'Objetividade e impessoalidade na abordagem dos temas sociais e políticos.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'Fuga da realidade por meio do saudosismo e da evasão para tempos medievais.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'Engajamento político-patriótico ligado ao contexto da independência do Brasil.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'Identifique a figura de linguagem presente no verso: "Minha alma é uma orquestra sem maestro — cada pensamento toca seu instrumento sem combinação."' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'Hipérbole' }] },
+              { label: 'B', content: [{ type: 'text', value: 'Antítese' }] },
+              { label: 'C', content: [{ type: 'text', value: 'Metáfora' }] },
+              { label: 'D', content: [{ type: 'text', value: 'Eufemismo' }] },
+              { label: 'E', content: [{ type: 'text', value: 'Ironia' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'Read the sentence: "Despite the heavy rain, the concert went on as scheduled, and the audience cheered enthusiastically." The word "despite" indicates a relationship of:' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'cause' }] },
+              { label: 'B', content: [{ type: 'text', value: 'consequence' }] },
+              { label: 'C', content: [{ type: 'text', value: 'concession' }] },
+              { label: 'D', content: [{ type: 'text', value: 'condition' }] },
+              { label: 'E', content: [{ type: 'text', value: 'addition' }] },
+            ]}},
+        ]
+      },
+      // ── Área 2: Ciências Humanas e suas Tecnologias ─────────────────────────
+      {
+        title: 'CIÊNCIAS HUMANAS E SUAS TECNOLOGIAS',
+        instructions: [{ type: 'text', value: 'Questões 06 a 10. Cada questão vale 4 pontos.' }],
+        questions: [
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'A Proclamação da Independência do Brasil em 1822 representou uma ruptura política com Portugal, mas manteve estruturas sociais e econômicas coloniais. Qual aspecto evidencia essa continuidade?' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'A abolição imediata da escravidão como condição para o reconhecimento internacional da independência.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'A manutenção da escravidão e da grande propriedade fundiária como bases da economia.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'A instauração de uma república democrática com participação popular ampla.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'A redistribuição das terras entre as populações indígena e africana.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'A substituição completa da elite portuguesa por lideranças nativas.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'A globalização é um processo multidimensional que intensifica as interações econômicas, culturais e políticas entre países. Uma consequência direta desse processo é:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'o fortalecimento das soberanias nacionais e a redução da interdependência entre os países.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'a homogeneização completa das culturas locais em favor de uma cultura global única.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'a distribuição equitativa dos benefícios econômicos entre países desenvolvidos e em desenvolvimento.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'o aumento da interdependência econômica e cultural, com impactos desiguais sobre diferentes regiões.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'a eliminação das desigualdades sociais por meio da livre circulação de capitais.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'O Iluminismo foi um movimento intelectual do século XVIII que defendia a razão como base do conhecimento e da organização social. Qual filósofo iluminista elaborou a teoria da separação dos poderes, influenciando a organização do Estado moderno?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'Jean-Jacques Rousseau' }] },
+              { label: 'B', content: [{ type: 'text', value: 'John Locke' }] },
+              { label: 'C', content: [{ type: 'text', value: 'Montesquieu' }] },
+              { label: 'D', content: [{ type: 'text', value: 'Voltaire' }] },
+              { label: 'E', content: [{ type: 'text', value: 'Denis Diderot' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'O processo de urbanização brasileiro se intensificou a partir da segunda metade do século XX, principalmente em decorrência da industrialização. Esse fenômeno gerou, entre outros problemas:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'crescimento equilibrado das cidades médias em detrimento das metrópoles.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'melhoria generalizada das condições habitacionais para a população migrante.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'formação de periferias precárias, déficit habitacional e sobrecarga dos serviços públicos.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'redução das migrações internas devido ao desenvolvimento equilibrado regional.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'expansão igualitária da infraestrutura urbana para todas as camadas sociais.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'A Constituição Federal de 1988, conhecida como "Constituição Cidadã", representou um marco na redemocratização do Brasil. Um de seus princípios fundamentais é:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'a concentração do poder nas mãos do Executivo federal, limitando os demais poderes.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'a garantia dos direitos individuais e sociais, com ênfase na dignidade da pessoa humana.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'a restrição do direito de voto a cidadãos com ensino médio completo.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'a exclusão dos direitos trabalhistas do texto constitucional.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'a centralização administrativa, reduzindo a autonomia dos estados e municípios.' }] },
+            ]}},
+        ]
+      },
+      // ── Área 3: Ciências da Natureza e suas Tecnologias ─────────────────────
+      {
+        title: 'CIÊNCIAS DA NATUREZA E SUAS TECNOLOGIAS',
+        instructions: [{ type: 'text', value: 'Questões 11 a 15. Cada questão vale 4 pontos.' }],
+        questions: [
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'Em um ecossistema aquático, a cadeia alimentar é iniciada pelo fitoplâncton (produtor) e inclui zooplâncton, peixes pequenos, peixes grandes e aves marinhas. Se ocorrer uma redução drástica na população de peixes pequenos, é CORRETO prever que:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'a população de zooplâncton diminuirá e a de peixes grandes aumentará.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'a população de zooplâncton aumentará e a de peixes grandes diminuirá.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'o fitoplâncton será diretamente consumido pelas aves marinhas.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'não haverá qualquer impacto nos demais níveis tróficos da cadeia.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'as aves marinhas passarão a se alimentar exclusivamente de zooplâncton.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'As ligações químicas resultam da interação entre átomos para atingir maior estabilidade. Sobre os tipos de ligações, é CORRETO afirmar:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'A ligação iônica ocorre entre dois átomos de não-metais com diferença de eletronegatividade baixa.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'A ligação covalente envolve a transferência completa de elétrons de um átomo para outro.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'Na ligação metálica, os elétrons de valência são compartilhados coletivamente entre todos os átomos.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'A ligação iônica ocorre exclusivamente entre metais, formando redes cristalinas.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'A ligação covalente resulta sempre na formação de compostos com alto ponto de fusão.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'Um astronauta em uma estação espacial, em órbita ao redor da Terra, está em queda livre constante. Com base nas Leis de Newton, essa situação demonstra que:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'na órbita, a força gravitacional é nula, por isso o astronauta flutua.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'a força gravitacional age sobre a estação e o astronauta, fornecendo a força centrípeta que mantém a órbita.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'a inércia do astronauta é nula em ambiente de microgravidade.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'a Terceira Lei de Newton não se aplica em ambientes de microgravidade.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'a velocidade orbital compensa completamente a massa do astronauta.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'A fotossíntese e a respiração celular são processos metabólicos complementares fundamentais para os seres vivos. Qual afirmação relaciona corretamente esses dois processos?' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'A fotossíntese produz CO₂ e consome O₂, enquanto a respiração consome CO₂ e produz O₂.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'Ambos os processos ocorrem exclusivamente nas mitocôndrias das células vegetais.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'A fotossíntese converte energia luminosa em energia química (glicose), que é depois oxidada na respiração celular para gerar ATP.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'A respiração celular é exclusiva dos animais; plantas realizam apenas fotossíntese.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'Os produtos finais da fotossíntese são os reagentes da respiração celular e vice-versa, sem qualquer relação energética.' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'Na tabela periódica, os elementos são organizados em períodos (linhas horizontais) e grupos (colunas verticais). Sobre essa organização, é CORRETO afirmar que:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'elementos do mesmo período possuem o mesmo número de elétrons na camada de valência.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'elementos do mesmo grupo apresentam propriedades químicas semelhantes por possuírem igual número de elétrons na camada de valência.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'o número do período indica o número de prótons no núcleo do átomo.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'metais alcalinos e halogênios pertencem ao mesmo grupo da tabela periódica.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'a eletronegatividade dos elementos aumenta da direita para a esquerda em um mesmo período.' }] },
+            ]}},
+        ]
+      },
+      // ── Área 4: Matemática e suas Tecnologias ───────────────────────────────
+      {
+        title: 'MATEMÁTICA E SUAS TECNOLOGIAS',
+        instructions: [{ type: 'text', value: 'Questões 16 a 20. Cada questão vale 4 pontos.' }],
+        questions: [
+          { kind: 'choice', points: 4,
+            stem: [
+              { type: 'text', value: 'Uma função quadrática é definida por ' },
+              { type: 'math', latex: 'f(x) = x^2 - 6x + 8' },
+              { type: 'text', value: '. O vértice dessa parábola e o conjunto de valores de x para os quais ' },
+              { type: 'math', latex: 'f(x) < 0' },
+              { type: 'text', value: ' são, respectivamente:' },
+            ],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'vértice (3, −1) e x ∈ (2, 4)' }] },
+              { label: 'B', content: [{ type: 'text', value: 'vértice (3, −1) e x ∈ (−∞, 2) ∪ (4, +∞)' }] },
+              { label: 'C', content: [{ type: 'text', value: 'vértice (−3, −1) e x ∈ (2, 4)' }] },
+              { label: 'D', content: [{ type: 'text', value: 'vértice (3, 1) e x ∈ (2, 4)' }] },
+              { label: 'E', content: [{ type: 'text', value: 'vértice (3, −1) e x ∈ [2, 4]' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'Uma urna contém 5 bolas vermelhas, 3 bolas azuis e 2 bolas verdes. Retirando-se uma bola ao acaso, qual é a probabilidade de se obter uma bola que NÃO seja vermelha?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'math', latex: '\\frac{1}{2}' }] },
+              { label: 'B', content: [{ type: 'math', latex: '\\frac{1}{5}' }] },
+              { label: 'C', content: [{ type: 'math', latex: '\\frac{3}{10}' }] },
+              { label: 'D', content: [{ type: 'math', latex: '\\frac{2}{5}' }] },
+              { label: 'E', content: [{ type: 'math', latex: '\\frac{3}{5}' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [
+              { type: 'text', value: 'Em uma progressão geométrica (P.G.) com razão ' },
+              { type: 'math', latex: 'q = 2' },
+              { type: 'text', value: ', o primeiro termo é ' },
+              { type: 'math', latex: 'a_1 = 3' },
+              { type: 'text', value: '. Qual é a soma dos 5 primeiros termos dessa P.G.?' },
+            ],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: '93' }] },
+              { label: 'B', content: [{ type: 'text', value: '95' }] },
+              { label: 'C', content: [{ type: 'text', value: '96' }] },
+              { label: 'D', content: [{ type: 'text', value: '63' }] },
+              { label: 'E', content: [{ type: 'text', value: '48' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [{ type: 'text', value: 'Em uma turma de 30 alunos, as notas obtidas em uma avaliação foram organizadas na tabela a seguir: 10 alunos tiraram nota 6,0; 8 alunos tiraram nota 7,0; 7 alunos tiraram nota 8,0; e 5 alunos tiraram nota 9,0. A média aritmética ponderada das notas dessa turma, considerando o número de alunos como peso, é:' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: '6,9' }] },
+              { label: 'B', content: [{ type: 'text', value: '7,0' }] },
+              { label: 'C', content: [{ type: 'text', value: '7,1' }] },
+              { label: 'D', content: [{ type: 'text', value: '7,2' }] },
+              { label: 'E', content: [{ type: 'text', value: '7,5' }] },
+            ]}},
+          { kind: 'choice', points: 4,
+            stem: [
+              { type: 'text', value: 'Um terreno retangular tem perímetro de 60 m e área de 200 m². Sabendo que um dos lados mede ' },
+              { type: 'math', latex: 'x' },
+              { type: 'text', value: ' metros, a equação que modela esse problema é ' },
+              { type: 'math', latex: 'x^2 - 30x + 200 = 0' },
+              { type: 'text', value: '. As dimensões desse terreno são:' },
+            ],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: '10 m e 20 m' }] },
+              { label: 'B', content: [{ type: 'text', value: '12 m e 18 m' }] },
+              { label: 'C', content: [{ type: 'text', value: '15 m e 15 m' }] },
+              { label: 'D', content: [{ type: 'text', value: '8 m e 25 m' }] },
+              { label: 'E', content: [{ type: 'text', value: '5 m e 40 m' }] },
+            ]}},
+        ]
+      },
+      // ── Redação ─────────────────────────────────────────────────────────────
+      {
+        title: 'REDAÇÃO',
+        instructions: [{ type: 'text', value: 'A proposta de Redação vale 20 pontos. Elabore um texto dissertativo-argumentativo, em modalidade escrita formal da língua portuguesa, sobre o tema proposto. Apresente proposta de intervenção que respeite os direitos humanos. Selecione, organize e relacione argumentos e fatos para defender sua tese. O texto deve ter entre 7 e 30 linhas manuscritas.' }],
+        questions: [
+          { kind: 'essay', fullWidth: true, points: 20,
+            stem: [
+              { type: 'text', value: 'TEMA: ', style: { fontWeight: 'bold' } },
+              { type: 'text', value: 'A desinformação nas redes sociais e seus impactos na democracia brasileira.\n\n', style: { fontWeight: 'bold' } },
+              { type: 'text', value: 'TEXTOS MOTIVADORES\n\n', style: { fontWeight: 'bold' } },
+              { type: 'text', value: 'Texto I: "Fake news e desinformação não são fenômenos novos, mas as redes sociais amplificaram sua velocidade de disseminação a níveis sem precedentes. Um estudo do MIT revelou que notícias falsas se espalham seis vezes mais rápido que notícias verdadeiras no ambiente digital."\n\n' },
+              { type: 'text', value: 'Texto II: "A desinformação corrói a confiança nas instituições democráticas, manipula o comportamento eleitoral e dificulta a tomada de decisões coletivas baseadas em fatos. Combatê-la exige educação midiática, regulação responsável e engajamento cívico." ' },
+            ],
+            answer: { type: 'essay', lineCount: 30 } },
+        ]
+      },
+    ]
   },
 };
 

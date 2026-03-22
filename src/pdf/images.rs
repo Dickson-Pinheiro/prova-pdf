@@ -80,10 +80,14 @@ pub fn is_jpeg(data: &[u8]) -> bool {
 ///
 /// Keys are sorted alphabetically so the ref numbering is deterministic.
 /// Returns an [`ImageMap`] with the metadata for every embedded image.
+///
+/// When `grayscale` is `true` every image is converted to grayscale using
+/// Rec. 709 luminance before being written into the PDF.
 pub fn embed_images(
-    chunk:    &mut Chunk,
-    images:   &HashMap<String, Vec<u8>>,
-    base_ref: i32,
+    chunk:     &mut Chunk,
+    images:    &HashMap<String, Vec<u8>>,
+    base_ref:  i32,
+    grayscale: bool,
 ) -> Result<ImageMap, PipelineError> {
     // Sort keys for reproducible output.
     let mut sorted: Vec<(&String, &Vec<u8>)> = images.iter().collect();
@@ -94,7 +98,7 @@ pub fn embed_images(
         let img_ref       = Ref::new(base_ref + idx as i32);
         let resource_name = format!("Im{idx}");
 
-        let (w, h) = embed_one(chunk, data, img_ref)
+        let (w, h) = embed_one(chunk, data, img_ref, grayscale)
             .map_err(|e| PipelineError::EmissionError(
                 format!("image '{}': {e}", key)))?;
 
@@ -115,75 +119,104 @@ pub fn embed_images(
 
 /// Embed a single image, returning `(width, height)` on success.
 ///
-/// With `features = ["images"]`: JPEG → DCTDecode, else → FlateDecode.
+/// With `features = ["images"]`: JPEG → DCTDecode (or gray FlateDecode),
+/// PNG → FlateDecode.
 /// Without `images` feature: always returns an error.
 #[cfg(feature = "images")]
-fn embed_one(chunk: &mut Chunk, data: &[u8], ref_id: Ref) -> Result<(u32, u32), String> {
+fn embed_one(chunk: &mut Chunk, data: &[u8], ref_id: Ref, grayscale: bool) -> Result<(u32, u32), String> {
     if is_jpeg(data) {
-        embed_jpeg(chunk, data, ref_id)
+        embed_jpeg(chunk, data, ref_id, grayscale)
     } else {
-        embed_png(chunk, data, ref_id)
+        embed_png(chunk, data, ref_id, grayscale)
     }
 }
 
 #[cfg(not(feature = "images"))]
 fn embed_one(
-    _chunk:  &mut Chunk,
-    _data:   &[u8],
-    _ref_id: Ref,
+    _chunk:     &mut Chunk,
+    _data:      &[u8],
+    _ref_id:    Ref,
+    _grayscale: bool,
 ) -> Result<(u32, u32), String> {
     Err("images feature not enabled".into())
 }
 
-/// Embed a JPEG image by keeping its raw compressed bytes (DCTDecode).
+/// Embed a JPEG image.
 ///
-/// Uses `image::io::Reader` to read dimensions and color type from
-/// headers without decoding pixels — much faster for large images.
+/// - Normal: keep raw compressed bytes (DCTDecode, DeviceRGB).
+/// - Grayscale: decode to pixels, apply Rec. 709 luminance, embed with
+///   FlateDecode + DeviceGray.
 #[cfg(feature = "images")]
-fn embed_jpeg(chunk: &mut Chunk, data: &[u8], ref_id: Ref) -> Result<(u32, u32), String> {
-    use std::io::Cursor;
-    use image::ImageReader;
-
-    let reader = ImageReader::with_format(Cursor::new(data), image::ImageFormat::Jpeg);
-    let (w, h) = reader.into_dimensions()
-        .map_err(|e| format!("JPEG dimensions failed: {e}"))?;
-
-    // JPEG in PDF: default to DeviceRGB. Grayscale JPEGs are uncommon
-    // in exam context and DCTDecode handles both transparently.
-    chunk.image_xobject(ref_id, data)
-        .width(w as i32)
-        .height(h as i32)
-        .color_space_name(Name(b"DeviceRGB"))
-        .bits_per_component(8)
-        .filter(Filter::DctDecode);
-
-    Ok((w, h))
+fn embed_jpeg(chunk: &mut Chunk, data: &[u8], ref_id: Ref, grayscale: bool) -> Result<(u32, u32), String> {
+    if grayscale {
+        // Decode → convert to luma → embed as raw gray pixels.
+        let img = image::load_from_memory_with_format(data, image::ImageFormat::Jpeg)
+            .map_err(|e| format!("JPEG decode failed: {e}"))?;
+        let luma = img.into_luma8();
+        let (w, h) = luma.dimensions();
+        let raw = luma.into_raw();
+        let compressed = miniz_oxide::deflate::compress_to_vec_zlib(&raw, 1);
+        chunk.image_xobject(ref_id, &compressed)
+            .width(w as i32)
+            .height(h as i32)
+            .color_space_name(Name(b"DeviceGray"))
+            .bits_per_component(8)
+            .filter(Filter::FlateDecode);
+        Ok((w, h))
+    } else {
+        use std::io::Cursor;
+        use image::ImageReader;
+        let reader = ImageReader::with_format(Cursor::new(data), image::ImageFormat::Jpeg);
+        let (w, h) = reader.into_dimensions()
+            .map_err(|e| format!("JPEG dimensions failed: {e}"))?;
+        // JPEG in PDF: passthrough raw bytes with DCTDecode (DeviceRGB).
+        chunk.image_xobject(ref_id, data)
+            .width(w as i32)
+            .height(h as i32)
+            .color_space_name(Name(b"DeviceRGB"))
+            .bits_per_component(8)
+            .filter(Filter::DctDecode);
+        Ok((w, h))
+    }
 }
 
-/// Decode a PNG to raw RGB8 pixels and recompress with DEFLATE (FlateDecode).
+/// Decode a PNG to raw pixels and recompress with DEFLATE (FlateDecode).
+///
+/// When `grayscale` is `true`, converts RGB pixels to grayscale using
+/// Rec. 709 luminance and embeds with `DeviceGray`.
 #[cfg(feature = "images")]
-fn embed_png(chunk: &mut Chunk, data: &[u8], ref_id: Ref) -> Result<(u32, u32), String> {
+fn embed_png(chunk: &mut Chunk, data: &[u8], ref_id: Ref, grayscale: bool) -> Result<(u32, u32), String> {
     let img = image::load_from_memory(data)
         .map_err(|e| format!("PNG load failed: {e}"))?;
 
-    // Convert to RGB8 (drop alpha channel if present).
-    let img = img.into_rgb8();
-    let (w, h) = img.dimensions();
-    let raw = img.into_raw();
-
-    // Compress raw pixels using DEFLATE with zlib wrapper.
-    // Level 1 (fastest) — PDF viewers decompress at render time anyway,
-    // so high compression just slows down generation without benefit.
-    let compressed = miniz_oxide::deflate::compress_to_vec_zlib(&raw, 1);
-
-    chunk.image_xobject(ref_id, &compressed)
-        .width(w as i32)
-        .height(h as i32)
-        .color_space_name(Name(b"DeviceRGB"))
-        .bits_per_component(8)
-        .filter(Filter::FlateDecode);
-
-    Ok((w, h))
+    if grayscale {
+        let luma = img.into_luma8();
+        let (w, h) = luma.dimensions();
+        let raw = luma.into_raw();
+        let compressed = miniz_oxide::deflate::compress_to_vec_zlib(&raw, 1);
+        chunk.image_xobject(ref_id, &compressed)
+            .width(w as i32)
+            .height(h as i32)
+            .color_space_name(Name(b"DeviceGray"))
+            .bits_per_component(8)
+            .filter(Filter::FlateDecode);
+        Ok((w, h))
+    } else {
+        // Convert to RGB8 (drop alpha channel if present).
+        let img = img.into_rgb8();
+        let (w, h) = img.dimensions();
+        let raw = img.into_raw();
+        // Compress raw pixels using DEFLATE with zlib wrapper.
+        // Level 1 (fastest) — PDF viewers decompress at render time anyway.
+        let compressed = miniz_oxide::deflate::compress_to_vec_zlib(&raw, 1);
+        chunk.image_xobject(ref_id, &compressed)
+            .width(w as i32)
+            .height(h as i32)
+            .color_space_name(Name(b"DeviceRGB"))
+            .bits_per_component(8)
+            .filter(Filter::FlateDecode);
+        Ok((w, h))
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -282,7 +315,7 @@ mod tests {
     #[test]
     fn embed_empty_image_store_gives_empty_map() {
         let mut chunk = Chunk::new();
-        let map = embed_images(&mut chunk, &HashMap::new(), 100).unwrap();
+        let map = embed_images(&mut chunk, &HashMap::new(), 100, false).unwrap();
         assert!(map.is_empty());
         assert!(chunk.as_bytes().is_empty());
     }
@@ -369,7 +402,7 @@ mod tests {
             let mut images = HashMap::new();
             images.insert("photo".into(), jpeg);
             let mut chunk = Chunk::new();
-            let map = embed_images(&mut chunk, &images, 10).unwrap();
+            let map = embed_images(&mut chunk, &images, 10, false).unwrap();
             assert_eq!(map.images.len(), 1);
             let info = &map.images[0].1;
             assert_eq!(info.xobject_ref, Ref::new(10));
@@ -387,7 +420,7 @@ mod tests {
             let mut images = HashMap::new();
             images.insert("chart".into(), png);
             let mut chunk = Chunk::new();
-            let map = embed_images(&mut chunk, &images, 20).unwrap();
+            let map = embed_images(&mut chunk, &images, 20, false).unwrap();
             assert_eq!(map.images.len(), 1);
             let info = &map.images[0].1;
             assert_eq!(info.xobject_ref, Ref::new(20));
@@ -401,7 +434,7 @@ mod tests {
             let mut images = HashMap::new();
             images.insert("img".into(), jpeg);
             let mut chunk = Chunk::new();
-            let map = embed_images(&mut chunk, &images, 1).unwrap();
+            let map = embed_images(&mut chunk, &images, 1, false).unwrap();
             let info = &map.images[0].1;
             assert_eq!(info.width, 8);
             assert_eq!(info.height, 4);
@@ -413,7 +446,7 @@ mod tests {
             let mut images = HashMap::new();
             images.insert("img".into(), png);
             let mut chunk = Chunk::new();
-            let map = embed_images(&mut chunk, &images, 1).unwrap();
+            let map = embed_images(&mut chunk, &images, 1, false).unwrap();
             let info = &map.images[0].1;
             assert_eq!(info.width, 16);
             assert_eq!(info.height, 8);
@@ -425,7 +458,7 @@ mod tests {
             images.insert("a".into(), make_jpeg(2, 2));
             images.insert("b".into(), make_png(2, 2));
             let mut chunk = Chunk::new();
-            let map = embed_images(&mut chunk, &images, 50).unwrap();
+            let map = embed_images(&mut chunk, &images, 50, false).unwrap();
             assert_eq!(map.images.len(), 2);
             // Keys are sorted: "a" → Im0 → ref 50, "b" → Im1 → ref 51.
             let refs: Vec<i32> = map.images.iter().map(|(_, i)| i.xobject_ref.get()).collect();
@@ -446,7 +479,7 @@ mod tests {
             images.insert("logo".into(), jpeg);
 
             let reg = FontRegistry::new();
-            let emitter = PdfEmitter::new(&reg, &images);
+            let emitter = PdfEmitter::new(&reg, &images, false);
             let frag = Fragment {
                 x: 10.0, y: 20.0, width: 80.0, height: 40.0,
                 kind: FragmentKind::Image(ImageFragment { key: "logo".into() }),

@@ -46,17 +46,19 @@ use crate::pipeline::PipelineError;
 /// Text (TASK-028) and shapes (TASK-029) extend the content streams; font
 /// embedding and subsetting is added in TASK-027.
 pub struct PdfEmitter<'a> {
-    pub registry: &'a FontRegistry,
-    pub images:   &'a HashMap<String, Vec<u8>>,
+    pub registry:  &'a FontRegistry,
+    pub images:    &'a HashMap<String, Vec<u8>>,
+    pub grayscale: bool,
 }
 
 impl PdfEmitter<'_> {
     /// Create a new `PdfEmitter`.
     pub fn new<'a>(
-        registry: &'a FontRegistry,
-        images:   &'a HashMap<String, Vec<u8>>,
+        registry:  &'a FontRegistry,
+        images:    &'a HashMap<String, Vec<u8>>,
+        grayscale: bool,
     ) -> PdfEmitter<'a> {
-        PdfEmitter { registry, images }
+        PdfEmitter { registry, images, grayscale }
     }
 
     /// Emit all pages as a complete PDF document.
@@ -101,7 +103,7 @@ impl PdfEmitter<'_> {
         let font_map = embed_fonts(&mut *pdf, self.registry, &glyph_sets, font_base_ref)?;
 
         // Embed images into the PDF (writes ImageXObject streams).
-        let image_map = embed_images(&mut *pdf, self.images, image_base_ref)?;
+        let image_map = embed_images(&mut *pdf, self.images, image_base_ref, self.grayscale)?;
 
         // Catalog → Pages tree.
         pdf.catalog(catalog_ref).pages(pages_ref);
@@ -328,7 +330,7 @@ mod tests {
     #[test]
     fn output_starts_with_pdf_header() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let bytes = emitter.emit(vec![vec![]], &default_geometry()).unwrap();
         assert!(bytes.starts_with(b"%PDF-"), "output must start with %PDF-");
     }
@@ -336,7 +338,7 @@ mod tests {
     #[test]
     fn output_ends_with_eof_marker() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let bytes = emitter.emit(vec![vec![]], &default_geometry()).unwrap();
         let tail = &bytes[bytes.len().saturating_sub(10)..];
         assert!(tail.windows(5).any(|w| w == b"%%EOF"),
@@ -346,7 +348,7 @@ mod tests {
     #[test]
     fn output_is_non_empty() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let bytes = emitter.emit(vec![vec![]], &default_geometry()).unwrap();
         assert!(!bytes.is_empty());
     }
@@ -356,7 +358,7 @@ mod tests {
     #[test]
     fn single_page_produces_valid_pdf() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let bytes = emitter.emit(vec![vec![spacer_frag(0.0, 0.0, 10.0)]], &default_geometry()).unwrap();
         assert!(bytes.starts_with(b"%PDF-"));
         // Page count recorded as "/Count 1"
@@ -366,7 +368,7 @@ mod tests {
     #[test]
     fn three_pages_recorded_in_pages_tree() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let pages = vec![vec![], vec![], vec![]];
         let bytes = emitter.emit(pages, &default_geometry()).unwrap();
         assert!(contains_bytes(&bytes, b"/Count 3"), "should record /Count 3");
@@ -375,7 +377,7 @@ mod tests {
     #[test]
     fn five_pages_recorded_in_pages_tree() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let pages: Vec<Vec<Fragment>> = (0..5).map(|_| vec![]).collect();
         let bytes = emitter.emit(pages, &default_geometry()).unwrap();
         assert!(contains_bytes(&bytes, b"/Count 5"), "should record /Count 5");
@@ -384,7 +386,7 @@ mod tests {
     #[test]
     fn empty_pages_input_produces_single_blank_page() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let bytes = emitter.emit(vec![], &default_geometry()).unwrap();
         assert!(bytes.starts_with(b"%PDF-"));
         assert!(contains_bytes(&bytes, b"/Count 1"), "empty input → 1 blank page");
@@ -395,7 +397,7 @@ mod tests {
     #[test]
     fn a4_mediabox_present_in_output() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let geom  = PageGeometry::from_config(&PrintConfig { page_size: PageSize::A4, ..PrintConfig::default() });
         let bytes = emitter.emit(vec![vec![]], &geom).unwrap();
         // MediaBox contains the page dimensions — we just verify /MediaBox appears.
@@ -405,7 +407,7 @@ mod tests {
     #[test]
     fn different_page_sizes_produce_different_outputs() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
 
         let geom_a4  = PageGeometry::from_config(&PrintConfig { page_size: PageSize::A4,  ..PrintConfig::default() });
         let geom_ata = PageGeometry::from_config(&PrintConfig { page_size: PageSize::Ata, ..PrintConfig::default() });
@@ -431,7 +433,7 @@ mod tests {
     #[test]
     fn fragments_on_page_do_not_cause_panic() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         use crate::layout::fragment::{GlyphRun, HRule, FilledRect, StrokedRect};
         let frags = vec![
             Fragment { x: 10.0, y: 20.0, width: 100.0, height: 12.0,
@@ -489,7 +491,7 @@ mod tests {
     #[test]
     fn glyph_run_produces_bt_et_operators() {
         let (reg, images) = make_emitter_with_font();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         // DejaVu Sans: glyph 68 = 'a', 69 = 'b', 70 = 'c'
         let frag = glyph_run_frag("body", 0, vec![68, 69, 70], vec![1228, 1228, 1228], 10.0, 20.0, 12.0);
         let bytes = emitter.emit(vec![vec![frag]], &default_geometry()).unwrap();
@@ -503,7 +505,7 @@ mod tests {
     #[test]
     fn glyph_run_tf_operator_uses_resource_name() {
         let (reg, images) = make_emitter_with_font();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let frag = glyph_run_frag("body", 0, vec![68], vec![1228], 0.0, 0.0, 12.0);
         let bytes = emitter.emit(vec![vec![frag]], &default_geometry()).unwrap();
         // Tf operator: /F0 12 Tf
@@ -514,7 +516,7 @@ mod tests {
     #[test]
     fn glyph_run_tm_operator_present() {
         let (reg, images) = make_emitter_with_font();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let frag = glyph_run_frag("body", 0, vec![68], vec![1228], 50.0, 100.0, 12.0);
         let bytes = emitter.emit(vec![vec![frag]], &default_geometry()).unwrap();
         assert!(contains_bytes(&bytes, b"Tm"), "content stream must contain Tm");
@@ -523,7 +525,7 @@ mod tests {
     #[test]
     fn glyph_run_tj_operator_present() {
         let (reg, images) = make_emitter_with_font();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let frag = glyph_run_frag("body", 0, vec![68, 69], vec![1228, 1228], 0.0, 0.0, 12.0);
         let bytes = emitter.emit(vec![vec![frag]], &default_geometry()).unwrap();
         assert!(contains_bytes(&bytes, b"TJ"), "content stream must contain TJ");
@@ -533,7 +535,7 @@ mod tests {
     fn empty_glyph_run_produces_no_bt() {
         // A GlyphRun with no glyphs should produce no BT/ET block.
         let (reg, images) = make_emitter_with_font();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let frag = glyph_run_frag("body", 0, vec![], vec![], 0.0, 0.0, 12.0);
         let bytes = emitter.emit(vec![vec![frag]], &default_geometry()).unwrap();
         assert!(!contains_bytes(&bytes, b"BT"), "empty GlyphRun must not emit BT");
@@ -542,7 +544,7 @@ mod tests {
     #[test]
     fn two_glyph_runs_produce_two_bt_blocks() {
         let (reg, images) = make_emitter_with_font();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         let f1 = glyph_run_frag("body", 0, vec![68], vec![1228], 0.0, 0.0, 12.0);
         let f2 = glyph_run_frag("body", 0, vec![69], vec![1228], 50.0, 0.0, 12.0);
         let bytes = emitter.emit(vec![vec![f1, f2]], &default_geometry()).unwrap();
@@ -553,7 +555,7 @@ mod tests {
     #[test]
     fn glyph_run_red_color_emitted() {
         let (reg, images) = make_emitter_with_font();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         use crate::layout::fragment::GlyphRun;
         let frag = Fragment {
             x: 0.0, y: 0.0, width: 100.0, height: 12.0,
@@ -578,7 +580,7 @@ mod tests {
     fn glyph_run_with_kerning_produces_adjustments() {
         // A run with x_offsets produces TJ adjustments in the content stream.
         let (reg, images) = make_emitter_with_font();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         use crate::layout::fragment::GlyphRun;
         let frag = Fragment {
             x: 0.0, y: 0.0, width: 200.0, height: 12.0,
@@ -603,7 +605,7 @@ mod tests {
     #[test]
     fn hrule_in_page_produces_stroke_operator() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         use crate::layout::fragment::HRule;
         let frag = Fragment {
             x: 0.0, y: 50.0, width: 400.0, height: 0.5,
@@ -618,7 +620,7 @@ mod tests {
     #[test]
     fn filled_rect_in_page_produces_fill_operator() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         use crate::layout::fragment::FilledRect;
         let frag = Fragment {
             x: 10.0, y: 20.0, width: 200.0, height: 50.0,
@@ -636,7 +638,7 @@ mod tests {
     #[test]
     fn stroked_rect_solid_no_dash_operator() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         use crate::layout::fragment::StrokedRect;
         let frag = Fragment {
             x: 10.0, y: 20.0, width: 200.0, height: 50.0,
@@ -655,7 +657,7 @@ mod tests {
     #[test]
     fn stroked_rect_dashed_emits_dash_operator() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         use crate::layout::fragment::StrokedRect;
         let frag = Fragment {
             x: 10.0, y: 20.0, width: 200.0, height: 50.0,
@@ -672,7 +674,7 @@ mod tests {
     #[test]
     fn mixed_shapes_do_not_panic() {
         let (reg, images) = make_emitter();
-        let emitter = PdfEmitter::new(&reg, &images);
+        let emitter = PdfEmitter::new(&reg, &images, false);
         use crate::layout::fragment::{HRule, FilledRect, StrokedRect};
         let frags = vec![
             Fragment { x: 0.0, y: 10.0, width: 400.0, height: 0.5,

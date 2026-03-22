@@ -90,7 +90,7 @@ pub fn render(
     let pages    = layout_exam(spec, &effective_config, &resolver, &geometry, &ctx.images)?;
 
     // ── Phase 4: Emission ─────────────────────────────────────────────────────
-    let emitter = PdfEmitter::new(&ctx.registry, &ctx.images);
+    let emitter = PdfEmitter::new(&ctx.registry, &ctx.images, effective_config.image_grayscale);
     emitter.emit(pages, &geometry)
 }
 
