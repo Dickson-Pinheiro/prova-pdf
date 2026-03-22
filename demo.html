@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prova-pdf — Demo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f5;--panel:#fff;--border:#e2e6ea;
+  --text:#212529;--muted:#6c757d;
+  --primary:#4361ee;--primary-dk:#3251d4;
+  --success:#06d6a0;--danger:#ef476f;--warn:#ffd166;
+  --toolbar:#1a1a2e;--toolbar-txt:#e0e0e0;
+  --radius:6px;--shadow:0 1px 3px rgba(0,0,0,.12);
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg)}
+
+/* ── Toolbar ── */
+#toolbar{display:flex;align-items:center;gap:12px;padding:0 16px;height:52px;background:var(--toolbar);color:var(--toolbar-txt);flex-shrink:0}
+#toolbar h1{font-size:15px;font-weight:600;letter-spacing:.5px;color:#fff;white-space:nowrap}
+#toolbar h1 span{color:var(--primary);font-size:13px;font-weight:400;margin-left:4px}
+.tb-sep{flex:1}
+#status{font-size:12px;color:var(--toolbar-txt);opacity:.8;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+select.tb-select{background:#2a2a4a;color:#fff;border:1px solid #444;border-radius:var(--radius);padding:5px 10px;font-size:13px;cursor:pointer}
+button.tb-btn{padding:7px 16px;border-radius:var(--radius);border:none;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
+#btn-generate{background:var(--primary);color:#fff}
+#btn-generate:hover{background:var(--primary-dk)}
+#btn-generate:disabled{background:#555;cursor:default}
+#btn-download{background:var(--success);color:#fff;display:none}
+#btn-download:hover{background:#05b88a}
+
+/* ── Main layout ── */
+#app{display:flex;height:calc(100vh - 52px);overflow:hidden}
+#pane-form{width:42%;min-width:320px;display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--panel);overflow:hidden}
+#pane-preview{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#525659}
+#pdf-frame{flex:1;border:none;width:100%;height:100%}
+#preview-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#aaa;gap:8px;font-size:13px;text-align:center}
+#preview-placeholder svg{opacity:.3}
+
+/* ── Tabs ── */
+#tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.tab-btn{flex:1;padding:10px 4px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tab-content{display:none;flex:1;overflow-y:auto;padding:16px}
+.tab-content.active{display:block}
+
+/* ── Form elements ── */
+.field-group{margin-bottom:14px}
+.field-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+input[type=text],input[type=number],textarea,select{width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text);background:#fff;transition:border .15s}
+input[type=text]:focus,input[type=number]:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)}
+textarea{resize:vertical;min-height:56px;font-family:inherit;line-height:1.5}
+.row{display:flex;gap:8px}
+.row .field-group{flex:1}
+.checkbox-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;cursor:pointer}
+.checkbox-row input{width:auto;cursor:pointer}
+.checkbox-row span{font-size:13px}
+
+/* ── Section-level helpers ── */
+.form-section{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.form-section-header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8f9fa;cursor:pointer;user-select:none}
+.form-section-header span{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;flex:1}
+.form-section-header .badge{font-size:11px;background:var(--primary);color:#fff;border-radius:10px;padding:1px 7px}
+.form-section-body{padding:12px;border-top:1px solid var(--border)}
+
+/* ── Question card ── */
+.q-card{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.q-card-header{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8f9fa}
+.q-num{font-size:11px;font-weight:700;color:#fff;background:var(--muted);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.q-type-select{flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:#fff}
+.q-btn-remove{background:none;border:none;cursor:pointer;color:var(--danger);font-size:16px;line-height:1;padding:2px 4px}
+.q-body{padding:10px;border-top:1px solid var(--border)}
+.q-field-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.q-stem{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;min-height:48px;font-family:inherit;margin-bottom:8px}
+.q-stem:focus{outline:none;border-color:var(--primary)}
+.type-fields{margin-top:6px}
+
+/* ── Alternatives ── */
+.alt-list{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.alt-row{display:flex;align-items:center;gap:4px}
+.alt-label{width:28px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-weight:600;text-align:center;flex-shrink:0}
+.alt-text{flex:1;padding:4px 7px;border:1px solid var(--border);border-radius:4px;font-size:12px}
+.alt-remove{background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px}
+
+/* ── Word bank / sum items ── */
+.wb-list,.sum-list{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.wb-row,.sum-row{display:flex;align-items:center;gap:4px}
+.sum-val{width:52px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;text-align:center}
+.wb-text,.sum-text{flex:1;padding:4px 7px;border:1px solid var(--border);border-radius:4px;font-size:12px}
+.item-remove{background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px}
+
+/* ── Student fields ── */
+.sf-list{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.sf-row{display:flex;align-items:center;gap:4px}
+.sf-label{flex:2;padding:4px 7px;border:1px solid var(--border);border-radius:4px;font-size:12px}
+.sf-width{width:60px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px}
+.sf-remove{background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px}
+
+/* ── Buttons ── */
+.btn-sm{padding:5px 10px;border-radius:var(--radius);border:1px solid var(--border);background:#f8f9fa;font-size:12px;cursor:pointer;font-weight:600;color:var(--text);transition:all .15s}
+.btn-sm:hover{background:#e9ecef;border-color:#ccc}
+.btn-sm.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-sm.primary:hover{background:var(--primary-dk)}
+.btn-sm.danger{color:var(--danger);border-color:var(--danger)}
+.btn-add-q{width:100%;padding:7px;margin-top:6px;border:1px dashed var(--border);border-radius:var(--radius);background:none;cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s}
+.btn-add-q:hover{border-color:var(--primary);color:var(--primary);background:#f0f4ff}
+.btn-add-section{width:100%;padding:9px;border:2px dashed var(--border);border-radius:var(--radius);background:none;cursor:pointer;font-size:13px;color:var(--muted);transition:all .15s}
+.btn-add-section:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ── Inline hint ── */
+.hint{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ── Toolbar ── -->
+<div id="toolbar">
+  <h1>prova-pdf <span>demo</span></h1>
+  <select class="tb-select" id="example-select" onchange="loadExample(this.value)">
+    <option value="">── Carregar exemplo ──</option>
+    <option value="1">1 · Múltipla Escolha</option>
+    <option value="2">2 · Avaliação Discursiva</option>
+    <option value="3">3 · Somatório + Lacunas</option>
+    <option value="4">4 · Prova Completa (todos os tipos)</option>
+    <option value="5">5 · Gabarito Econômico (2 colunas)</option>
+    <option value="6">6 · Matemática (LaTeX)</option>
+  </select>
+  <div class="tb-sep"></div>
+  <span id="status">Carregando WASM…</span>
+  <button class="tb-btn" id="btn-download" onclick="downloadPdf()">⬇ Baixar PDF</button>
+  <button class="tb-btn" id="btn-generate" onclick="generate()" disabled>▶ Gerar PDF</button>
+</div>
+
+<!-- ── App ── -->
+<div id="app">
+
+  <!-- Left: form -->
+  <div id="pane-form">
+    <div id="tabs">
+      <button class="tab-btn active" onclick="switchTab('config',this)">⚙ Config</button>
+      <button class="tab-btn" onclick="switchTab('header',this)">🏫 Cabeçalho</button>
+      <button class="tab-btn" onclick="switchTab('questions',this)">📋 Questões</button>
+    </div>
+
+    <!-- Tab: Configuração -->
+    <div id="tab-config" class="tab-content active">
+
+      <div class="field-group">
+        <label>Tamanho da página</label>
+        <select id="cfg-pageSize">
+          <option value="A4">A4 (210 × 297 mm)</option>
+          <option value="Ata">Ata SEDUC (200 × 266 mm)</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Margens (cm)</label>
+        <div class="row">
+          <div class="field-group"><label>Superior</label><input type="number" id="cfg-mt" value="0.6" min="0" max="5" step="0.1"></div>
+          <div class="field-group"><label>Inferior</label><input type="number" id="cfg-mb" value="0.6" min="0" max="5" step="0.1"></div>
+          <div class="field-group"><label>Esquerda</label><input type="number" id="cfg-ml" value="1.5" min="0" max="5" step="0.1"></div>
+          <div class="field-group"><label>Direita</label><input type="number" id="cfg-mr" value="1.5" min="0" max="5" step="0.1"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>Colunas</label>
+          <select id="cfg-columns">
+            <option value="1">1 coluna</option>
+            <option value="2">2 colunas</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Tamanho da fonte (pt)</label>
+          <input type="number" id="cfg-fontSize" value="12" min="8" max="24" step="0.5">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>Espaçamento de linha</label>
+          <select id="cfg-lineSpacing">
+            <option value="normal">Normal (1.4×)</option>
+            <option value="oneAndHalf">1,5× (redação)</option>
+            <option value="twoAndHalf">2,5× (amplo)</option>
+            <option value="threeAndHalf">3,5× (caderno)</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Espaço discursivo</label>
+          <select id="cfg-discSpace">
+            <option value="lines">Linhas</option>
+            <option value="blank">Caixa</option>
+            <option value="noBorder">Sem borda</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>Altura da linha disc. (cm)</label>
+          <input type="number" id="cfg-lineHeight" value="0.85" min="0.4" max="2" step="0.05">
+        </div>
+        <div class="field-group">
+          <label>Espaç. alternativas (cm)</label>
+          <input type="number" id="cfg-altSpacing" value="0.3" min="0" max="1.5" step="0.1">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Opções</label>
+        <label class="checkbox-row"><input type="checkbox" id="cfg-economy"><span>Modo economia (remove espaços de resposta)</span></label>
+        <label class="checkbox-row"><input type="checkbox" id="cfg-hideNum"><span>Ocultar numeração das questões</span></label>
+        <label class="checkbox-row"><input type="checkbox" id="cfg-showScore"><span>Exibir pontuação</span></label>
+        <label class="checkbox-row"><input type="checkbox" id="cfg-allBlack"><span>Forçar preto total (sem cores)</span></label>
+        <label class="checkbox-row"><input type="checkbox" id="cfg-breakAll"><span>Quebra de página antes de cada questão</span></label>
+      </div>
+
+    </div><!-- /tab-config -->
+
+    <!-- Tab: Cabeçalho -->
+    <div id="tab-header" class="tab-content">
+
+      <div class="field-group" style="flex-direction:row;align-items:center;gap:8px">
+        <input type="checkbox" id="hdr-logo">
+        <label for="hdr-logo" style="margin:0">Exibir logo (img/logo.jpg)</label>
+      </div>
+      <div class="field-group">
+        <label>Instituição</label>
+        <input type="text" id="hdr-institution" placeholder="Ex.: Colégio Estadual João XXIII">
+      </div>
+      <div class="field-group">
+        <label>Título</label>
+        <input type="text" id="hdr-title" placeholder="Ex.: Avaliação de Matemática — 3º Bimestre">
+      </div>
+      <div class="field-group">
+        <label>Subtítulo</label>
+        <input type="text" id="hdr-subtitle" placeholder="Ex.: 9º Ano do Ensino Fundamental — 2024">
+      </div>
+      <div class="field-group">
+        <label>Instruções gerais</label>
+        <textarea id="hdr-instructions" placeholder="Ex.: Leia atentamente cada questão antes de responder."></textarea>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-header" onclick="toggleSection(this)">
+          <span>Campos do estudante</span>
+          <small style="color:var(--muted);font-size:11px">Nome, Turma, Data…</small>
+          <span>▾</span>
+        </div>
+        <div class="form-section-body">
+          <div class="sf-list" id="sf-list"></div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
+            <span style="font-size:11px;color:var(--muted);flex:1">Largura vazia = preenche o espaço restante</span>
+            <button class="btn-sm" onclick="addStudentField()">+ Campo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-header" onclick="toggleSection(this)">
+          <span>Cabeçalho corrente</span>
+          <small style="color:var(--muted);font-size:11px">topo de cada página</small>
+          <span>▾</span>
+        </div>
+        <div class="form-section-body">
+          <p class="hint" style="margin-bottom:8px">Tokens: <code>{page}</code> = página atual, <code>{pages}</code> = total de páginas</p>
+          <div class="row">
+            <div class="field-group"><label>Esquerda</label><input type="text" id="rh-left" placeholder="{page}/{pages}"></div>
+            <div class="field-group"><label>Centro</label><input type="text" id="rh-center" placeholder="Instituição"></div>
+            <div class="field-group"><label>Direita</label><input type="text" id="rh-right" placeholder="Data"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-header" onclick="toggleSection(this)">
+          <span>Rodapé corrente</span>
+          <small style="color:var(--muted);font-size:11px">fundo de cada página</small>
+          <span>▾</span>
+        </div>
+        <div class="form-section-body">
+          <div class="row">
+            <div class="field-group"><label>Esquerda</label><input type="text" id="rf-left"></div>
+            <div class="field-group"><label>Centro</label><input type="text" id="rf-center" placeholder="Página {page} de {pages}"></div>
+            <div class="field-group"><label>Direita</label><input type="text" id="rf-right"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-header -->
+
+    <!-- Tab: Questões -->
+    <div id="tab-questions" class="tab-content">
+      <div id="sections-list"></div>
+      <button class="btn-add-section" onclick="addSection()">+ Adicionar Seção</button>
+    </div>
+
+  </div><!-- /pane-form -->
+
+  <!-- Right: preview -->
+  <div id="pane-preview">
+    <div id="preview-placeholder">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="4" y="2" width="16" height="20" rx="2"/>
+        <line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>
+        <line x1="8" y1="15" x2="12" y2="15"/>
+      </svg>
+      <div>Clique em <strong>▶ Gerar PDF</strong> para visualizar</div>
+      <div style="font-size:11px">ou selecione um dos exemplos acima</div>
+    </div>
+    <iframe id="pdf-frame" style="display:none"></iframe>
+  </div>
+
+</div><!-- /app -->
+
+<script type="module">
+// ──────────────────────────────────────────────────────────────────────────────
+// WASM bootstrap
+// ──────────────────────────────────────────────────────────────────────────────
+import init, { add_font, add_image, set_font_rules, generate_pdf, clear_all }
+  from './pkg/prova_pdf.js';
+
+let wasmReady = false;
+let lastPdfBlob = null;
+
+async function boot() {
+  setStatus('Inicializando WASM…');
+  await init();
+
+  setStatus('Carregando fontes…');
+  const fonts = [
+    ['body', 0, './fonts/DejaVuSans.ttf'],
+    ['body', 1, './fonts/DejaVuSans-Bold.ttf'],
+    ['body', 2, './fonts/DejaVuSans-Oblique.ttf'],
+    ['body', 3, './fonts/DejaVuSans-BoldOblique.ttf'],
+  ];
+  for (const [name, variant, url] of fonts) {
+    try {
+      const buf = await fetch(url).then(r => r.arrayBuffer());
+      add_font(name, variant, new Uint8Array(buf));
+    } catch(e) {
+      console.warn('Font load failed:', url, e);
+    }
+  }
+
+  // Pre-load demo logo image
+  try {
+    const logoBuf = await fetch('./img/logo.jpg').then(r => r.arrayBuffer());
+    add_image('logo.jpg', new Uint8Array(logoBuf));
+  } catch(e) {
+    console.warn('Logo load failed:', e);
+  }
+
+  wasmReady = true;
+  document.getElementById('btn-generate').disabled = false;
+  setStatus('Pronto. Selecione um exemplo ou configure a prova.');
+}
+
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// PDF generation
+// ──────────────────────────────────────────────────────────────────────────────
+window.generate = async function() {
+  if (!wasmReady) return;
+  const btn = document.getElementById('btn-generate');
+  btn.disabled = true;
+  setStatus('Gerando PDF…');
+
+  try {
+    clear_all();
+    // Re-register fonts after clear_all
+    const fonts = [
+      ['body', 0, './fonts/DejaVuSans.ttf'],
+      ['body', 1, './fonts/DejaVuSans-Bold.ttf'],
+      ['body', 2, './fonts/DejaVuSans-Oblique.ttf'],
+      ['body', 3, './fonts/DejaVuSans-BoldOblique.ttf'],
+    ];
+    for (const [name, variant, url] of fonts) {
+      try {
+        const buf = await fetch(url).then(r => r.arrayBuffer());
+        add_font(name, variant, new Uint8Array(buf));
+      } catch(e) { /* skip */ }
+    }
+    // Re-register logo image after clear_all
+    try {
+      const logoBuf = await fetch('./img/logo.jpg').then(r => r.arrayBuffer());
+      add_image('logo.jpg', new Uint8Array(logoBuf));
+    } catch(e) { /* skip */ }
+
+    const spec = buildSpec();
+    const bytes = generate_pdf(spec);
+
+    lastPdfBlob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(lastPdfBlob);
+
+    const frame = document.getElementById('pdf-frame');
+    const placeholder = document.getElementById('preview-placeholder');
+    frame.src = url;
+    frame.style.display = 'block';
+    placeholder.style.display = 'none';
+
+    document.getElementById('btn-download').style.display = 'inline-block';
+    const kb = (bytes.length / 1024).toFixed(1);
+    const pages = countPages(spec);
+    setStatus(`PDF gerado — ${kb} KB · ${pages} página(s)`);
+  } catch(e) {
+    setStatus('Erro: ' + e.message);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+window.downloadPdf = function() {
+  if (!lastPdfBlob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(lastPdfBlob);
+  a.download = 'prova.pdf';
+  a.click();
+};
+
+function countPages(spec) {
+  // rough estimate
+  const q = (spec.sections || []).reduce((s,sec) => s + (sec.questions||[]).length, 0);
+  return Math.max(1, Math.ceil(q / 6));
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Build ExamSpec from DOM
+// ──────────────────────────────────────────────────────────────────────────────
+function buildSpec() {
+  const spec = {
+    config: buildConfig(),
+    header: buildHeader(),
+    sections: buildSections(),
+  };
+  return spec;
+}
+
+function buildConfig() {
+  const ps = v('cfg-pageSize');
+  return {
+    pageSize: ps,
+    margins: {
+      top:    numv('cfg-mt'),
+      bottom: numv('cfg-mb'),
+      left:   numv('cfg-ml'),
+      right:  numv('cfg-mr'),
+    },
+    columns:             parseInt(v('cfg-columns')),
+    fontSize:            numv('cfg-fontSize'),
+    lineSpacing:         v('cfg-lineSpacing'),
+    discursiveSpaceType: v('cfg-discSpace'),
+    discursiveLineHeight:numv('cfg-lineHeight'),
+    alternativeSpacingCm:numv('cfg-altSpacing'),
+    economyMode:         chk('cfg-economy'),
+    hideNumbering:       chk('cfg-hideNum'),
+    showScore:           chk('cfg-showScore'),
+    allBlack:            chk('cfg-allBlack'),
+    breakAllQuestions:   chk('cfg-breakAll'),
+    headerFull:          true,
+  };
+}
+
+function buildHeader() {
+  const inst   = v('hdr-institution');
+  const title  = v('hdr-title');
+  const sub    = v('hdr-subtitle');
+  const instr  = v('hdr-instructions');
+
+  const hdr = {};
+  if (inst)  hdr.institution = inst;
+  if (title) hdr.title       = title;
+  if (sub)   hdr.subtitle    = sub;
+  if (instr) hdr.instructions = [{ type: 'text', value: instr }];
+  if (chk('hdr-logo')) hdr.logoKey = 'logo.jpg';
+
+  // Student fields
+  const sfRows = document.querySelectorAll('.sf-row');
+  if (sfRows.length) {
+    hdr.studentFields = Array.from(sfRows).map(row => {
+      const lbl = row.querySelector('.sf-label').value.trim();
+      const w   = parseFloat(row.querySelector('.sf-width').value);
+      const field = { label: lbl || 'Campo' };
+      if (!isNaN(w) && w > 0) field.widthCm = w;
+      return field;
+    });
+  }
+
+  // Running header
+  const rl = v('rh-left'), rc = v('rh-center'), rr = v('rh-right');
+  if (rl || rc || rr) {
+    hdr.runningHeader = {};
+    if (rl) hdr.runningHeader.left   = rl;
+    if (rc) hdr.runningHeader.center = rc;
+    if (rr) hdr.runningHeader.right  = rr;
+  }
+
+  // Running footer
+  const fl = v('rf-left'), fc = v('rf-center'), fr = v('rf-right');
+  if (fl || fc || fr) {
+    hdr.runningFooter = {};
+    if (fl) hdr.runningFooter.left   = fl;
+    if (fc) hdr.runningFooter.center = fc;
+    if (fr) hdr.runningFooter.right  = fr;
+  }
+
+  return hdr;
+}
+
+function buildSections() {
+  const sections = [];
+  document.querySelectorAll('.section-block').forEach(sec => {
+    const title  = sec.querySelector('.sec-title').value.trim();
+    const instr  = sec.querySelector('.sec-instr').value.trim();
+    const fpb    = sec.querySelector('.sec-fpb').checked;
+    const questions = buildQuestions(sec);
+
+    const s = { questions };
+    if (title) s.title = title;
+    if (instr) s.instructions = [{ type: 'text', value: instr }];
+    if (fpb)   s.forcePageBreak = true;
+    sections.push(s);
+  });
+  return sections;
+}
+
+function buildQuestions(secEl) {
+  const qs = [];
+  secEl.querySelectorAll('.q-card').forEach(card => {
+    const type  = card.querySelector('.q-type-select').value;
+    const stemText = card.querySelector('.q-stem').value.trim();
+    const fwEl  = card.querySelector('.q-full-width');
+    const fw    = fwEl ? fwEl.checked : false;
+
+    // Use stored rich stem (with inline styles) if available, otherwise plain text
+    const stemData = card._richStem || (stemText ? [{ type: 'text', value: stemText }] : [{ type: 'text', value: '(enunciado)' }]);
+    const q = {
+      kind:      type,
+      stem:      stemData,
+      answer:    card._richAnswer || buildAnswer(card, type),
+      showNumber: true,
+    };
+    if (fw) q.fullWidth = true;
+    qs.push(q);
+  });
+  return qs;
+}
+
+function buildAnswer(card, type) {
+  switch (type) {
+    case 'choice': {
+      const layout = card.querySelector('.q-alt-layout')?.value || 'vertical';
+      const alts = Array.from(card.querySelectorAll('.alt-row')).map(row => ({
+        label:   row.querySelector('.alt-label').value.trim() || 'A',
+        content: [{ type: 'text', value: row.querySelector('.alt-text').value.trim() || '…' }],
+      }));
+      if (!alts.length) {
+        // default 5 alts
+        return { type: 'choice', layout, alternatives: 'ABCDE'.split('').map(l => ({
+          label: l, content: [{ type: 'text', value: `Alternativa ${l}` }]
+        }))};
+      }
+      return { type: 'choice', layout, alternatives: alts };
+    }
+    case 'textual': {
+      const lc = parseInt(card.querySelector('.q-lc')?.value) || 5;
+      return { type: 'textual', lineCount: lc };
+    }
+    case 'essay': {
+      const lc = parseInt(card.querySelector('.q-essay-lc')?.value) || 10;
+      return { type: 'essay', lineCount: lc };
+    }
+    case 'cloze': {
+      const words = Array.from(card.querySelectorAll('.wb-text'))
+        .map(i => [{ type: 'text', value: i.value.trim() || '…' }]);
+      return { type: 'cloze', wordBank: words.length ? words : [[{type:'text',value:'palavra'}]] };
+    }
+    case 'sum': {
+      const items = Array.from(card.querySelectorAll('.sum-row')).map(row => ({
+        value:   parseInt(row.querySelector('.sum-val').value) || 1,
+        content: [{ type: 'text', value: row.querySelector('.sum-text').value.trim() || '…' }],
+      }));
+      return { type: 'sum', items: items.length ? items : [
+        { value: 1, content: [{ type: 'text', value: 'Item I' }] },
+        { value: 2, content: [{ type: 'text', value: 'Item II' }] },
+      ]};
+    }
+    case 'file': {
+      const lbl = card.querySelector('.q-file-label')?.value.trim();
+      return { type: 'file', label: lbl || undefined };
+    }
+    default:
+      return { type: 'textual', lineCount: 3 };
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// DOM helpers
+// ──────────────────────────────────────────────────────────────────────────────
+function v(id)    { return document.getElementById(id)?.value ?? ''; }
+function numv(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+function chk(id)  { return document.getElementById(id)?.checked ?? false; }
+function setv(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+function setchk(id, val) { const el = document.getElementById(id); if (el) el.checked = !!val; }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Tabs
+// ──────────────────────────────────────────────────────────────────────────────
+window.switchTab = function(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Collapsible sections
+// ──────────────────────────────────────────────────────────────────────────────
+window.toggleSection = function(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('span:last-child');
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  arrow.textContent = collapsed ? '▾' : '▸';
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Student fields
+// ──────────────────────────────────────────────────────────────────────────────
+window.addStudentField = function(label = '', widthCm = '') {
+  const list = document.getElementById('sf-list');
+  const row = document.createElement('div');
+  row.className = 'sf-row';
+  row.innerHTML = `
+    <input class="sf-label" type="text" placeholder="Ex.: Nome" value="${esc(label)}">
+    <input class="sf-width" type="number" placeholder="cm" value="${widthCm}" min="0" max="30" step="0.5">
+    <button class="sf-remove" onclick="this.closest('.sf-row').remove()" title="Remover">✕</button>`;
+  list.appendChild(row);
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Sections
+// ──────────────────────────────────────────────────────────────────────────────
+let sectionCount = 0;
+
+window.addSection = function(data = {}) {
+  const id = ++sectionCount;
+  const list = document.getElementById('sections-list');
+  const block = document.createElement('div');
+  block.className = 'section-block form-section';
+  block.innerHTML = `
+    <div class="form-section-header" style="cursor:default">
+      <span>Seção ${id}</span>
+      <button class="btn-sm danger" style="margin-left:auto" onclick="this.closest('.section-block').remove()">Remover</button>
+    </div>
+    <div class="form-section-body">
+      <div class="field-group"><label>Título</label>
+        <input type="text" class="sec-title" placeholder="Ex.: Questões Objetivas" value="${esc(data.title||'')}">
+      </div>
+      <div class="field-group"><label>Instruções</label>
+        <textarea class="sec-instr" placeholder="Ex.: Marque a alternativa correta.">${esc(flatInstr(data.instructions))}</textarea>
+      </div>
+      <label class="checkbox-row">
+        <input type="checkbox" class="sec-fpb" ${data.forcePageBreak?'checked':''}>
+        <span>Quebra de página antes desta seção</span>
+      </label>
+      <div style="margin-top:10px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Questões</div>
+      <div class="q-list"></div>
+      <button class="btn-add-q" onclick="addQuestion(this.previousElementSibling)">+ Adicionar Questão</button>
+    </div>`;
+  list.insertBefore(block, list.querySelector('.btn-add-section'));
+
+  // Pre-populate questions
+  const qList = block.querySelector('.q-list');
+  (data.questions || []).forEach(q => addQuestion(qList, q));
+  return block;
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Questions
+// ──────────────────────────────────────────────────────────────────────────────
+let qCount = 0;
+
+window.addQuestion = function(listEl, data = {}) {
+  const num = ++qCount;
+  const type = data.kind || 'choice';
+  const stem = flatInline(data.stem);
+
+  const card = document.createElement('div');
+  card.className = 'q-card';
+  // Preserve rich data (with inline styles, math) for buildSpec
+  if (data.stem) card._richStem = data.stem;
+  if (data.answer) card._richAnswer = data.answer;
+  card.innerHTML = `
+    <div class="q-card-header">
+      <span class="q-num">${num}</span>
+      <select class="q-type-select" onchange="changeQType(this)">
+        <option value="choice"  ${type==='choice' ?'selected':''}>Múltipla Escolha</option>
+        <option value="textual" ${type==='textual'?'selected':''}>Discursiva (linhas)</option>
+        <option value="essay"   ${type==='essay'  ?'selected':''}>Redação / Dissertativa</option>
+        <option value="cloze"   ${type==='cloze'  ?'selected':''}>Completar Lacunas</option>
+        <option value="sum"     ${type==='sum'    ?'selected':''}>Somatório</option>
+        <option value="file"    ${type==='file'   ?'selected':''}>Envio de Arquivo</option>
+      </select>
+      <button class="q-btn-remove" onclick="this.closest('.q-card').remove()" title="Remover questão">✕</button>
+    </div>
+    <div class="q-body">
+      <div class="q-field-label">Enunciado</div>
+      <textarea class="q-stem" placeholder="Digite o enunciado da questão…" oninput="this.closest('.q-card')._richStem=null;this.closest('.q-card')._richAnswer=null">${esc(stem)}</textarea>
+      <label class="checkbox-row" style="margin-bottom:8px">
+        <input type="checkbox" class="q-full-width" ${data.fullWidth ? 'checked' : ''}>
+        <span>Ocupar largura total (full width)</span>
+      </label>
+      <div class="type-fields"></div>
+    </div>`;
+  listEl.appendChild(card);
+
+  renderTypeFields(card.querySelector('.type-fields'), type, data.answer, data);
+  return card;
+};
+
+window.changeQType = function(sel) {
+  const card = sel.closest('.q-card');
+  renderTypeFields(card.querySelector('.type-fields'), sel.value);
+};
+
+function renderTypeFields(container, type, answer = {}, qdata = {}) {
+  container.innerHTML = '';
+  switch (type) {
+    case 'choice': {
+      const layout = answer?.layout || 'vertical';
+      const alts = answer?.alternatives || defaultAlts();
+      container.innerHTML = `
+        <div class="q-field-label">Layout</div>
+        <select class="q-alt-layout" style="width:auto;padding:4px 8px;margin-bottom:8px;border:1px solid var(--border);border-radius:4px;font-size:12px">
+          <option value="vertical"   ${layout==='vertical'  ?'selected':''}>Vertical</option>
+          <option value="horizontal" ${layout==='horizontal'?'selected':''}>Horizontal</option>
+        </select>
+        <div class="q-field-label">Alternativas</div>
+        <div class="alt-list"></div>
+        <button class="btn-sm" style="width:100%;margin-top:4px" onclick="addAlt(this.previousElementSibling)">+ Alternativa</button>`;
+      const altList = container.querySelector('.alt-list');
+      alts.forEach(a => addAlt(altList, a.label, flatInline(a.content)));
+      break;
+    }
+    case 'textual': {
+      const lc = answer?.lineCount ?? 5;
+      container.innerHTML = `
+        <div class="row">
+          <div class="field-group"><label>Número de linhas</label>
+            <input type="number" class="q-lc" value="${lc}" min="1" max="50"></div>
+          <div class="field-group"><label>Ou altura (cm)</label>
+            <input type="number" class="q-blank-h" placeholder="auto" min="0.5" max="30" step="0.5"></div>
+        </div>`;
+      if (answer?.blankHeightCm) container.querySelector('.q-blank-h').value = answer.blankHeightCm;
+      break;
+    }
+    case 'essay': {
+      const lc = answer?.lineCount ?? 10;
+      container.innerHTML = `
+        <div class="row">
+          <div class="field-group"><label>Linhas</label>
+            <input type="number" class="q-essay-lc" value="${lc}" min="1" max="80"></div>
+          <div class="field-group"><label>Ou altura (cm)</label>
+            <input type="number" class="q-essay-h" placeholder="auto" min="0.5" max="30" step="0.5"></div>
+        </div>`;
+      if (answer?.heightCm) container.querySelector('.q-essay-h').value = answer.heightCm;
+      break;
+    }
+    case 'cloze': {
+      const words = answer?.wordBank || [['palavra 1'], ['palavra 2']];
+      container.innerHTML = `
+        <div class="q-field-label">Banco de palavras</div>
+        <div class="wb-list"></div>
+        <button class="btn-sm" style="width:100%;margin-top:4px" onclick="addWbItem(this.previousElementSibling)">+ Palavra</button>`;
+      const wbList = container.querySelector('.wb-list');
+      words.forEach(w => addWbItem(wbList, typeof w[0]==='string' ? w[0] : (w[0]?.value||'')));
+      break;
+    }
+    case 'sum': {
+      const items = answer?.items || [{value:1,content:[{type:'text',value:'Item I'}]},{value:2,content:[{type:'text',value:'Item II'}]},{value:4,content:[{type:'text',value:'Item III'}]}];
+      container.innerHTML = `
+        <div class="q-field-label">Itens (valor + texto)</div>
+        <div class="sum-list"></div>
+        <button class="btn-sm" style="width:100%;margin-top:4px" onclick="addSumItem(this.previousElementSibling)">+ Item</button>`;
+      const sumList = container.querySelector('.sum-list');
+      items.forEach(it => addSumItem(sumList, it.value, flatInline(it.content)));
+      break;
+    }
+    case 'file': {
+      container.innerHTML = `
+        <div class="field-group"><label>Rótulo (opcional)</label>
+          <input type="text" class="q-file-label" placeholder="Ex.: Anexe a resolução em PDF"></div>`;
+      break;
+    }
+  }
+}
+
+window.addAlt = function(list, label = '', text = '') {
+  const labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const idx = list.children.length;
+  const defaultLabel = labels[idx] || String(idx + 1);
+  const row = document.createElement('div');
+  row.className = 'alt-row';
+  row.innerHTML = `
+    <input class="alt-label" type="text" value="${esc(label||defaultLabel)}" maxlength="3">
+    <input class="alt-text" type="text" placeholder="Texto da alternativa" value="${esc(text)}" oninput="let c=this.closest('.q-card');if(c)c._richAnswer=null">
+    <button class="alt-remove" onclick="this.closest('.alt-row').remove()">✕</button>`;
+  list.appendChild(row);
+};
+
+window.addWbItem = function(list, text = '') {
+  const row = document.createElement('div');
+  row.className = 'wb-row';
+  row.innerHTML = `
+    <input class="wb-text" type="text" placeholder="palavra ou expressão" value="${esc(text)}">
+    <button class="item-remove" onclick="this.closest('.wb-row').remove()">✕</button>`;
+  list.appendChild(row);
+};
+
+window.addSumItem = function(list, val = 1, text = '') {
+  const row = document.createElement('div');
+  row.className = 'sum-row';
+  row.innerHTML = `
+    <input class="sum-val" type="number" value="${val}" min="1" max="1024">
+    <input class="sum-text" type="text" placeholder="Texto do item" value="${esc(text)}">
+    <button class="item-remove" onclick="this.closest('.sum-row').remove()">✕</button>`;
+  list.appendChild(row);
+};
+
+function defaultAlts() {
+  return 'ABCDE'.split('').map(l => ({ label: l, content: [{ type: 'text', value: '' }] }));
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Spec → DOM (load example)
+// ──────────────────────────────────────────────────────────────────────────────
+function applySpec(spec) {
+  const cfg = spec.config || {};
+  const hdr = spec.header || {};
+
+  // Config
+  const ps = typeof cfg.pageSize === 'object' ? 'A4' : (cfg.pageSize || 'A4');
+  setv('cfg-pageSize', ps);
+  setv('cfg-mt', cfg.margins?.top    ?? 0.6);
+  setv('cfg-mb', cfg.margins?.bottom ?? 0.6);
+  setv('cfg-ml', cfg.margins?.left   ?? 1.5);
+  setv('cfg-mr', cfg.margins?.right  ?? 1.5);
+  setv('cfg-columns', cfg.columns ?? 1);
+  setv('cfg-fontSize', cfg.fontSize ?? 12);
+  setv('cfg-lineSpacing', cfg.lineSpacing || 'normal');
+  setv('cfg-discSpace', cfg.discursiveSpaceType || 'lines');
+  setv('cfg-lineHeight', cfg.discursiveLineHeight ?? 0.85);
+  setv('cfg-altSpacing', cfg.alternativeSpacingCm ?? 0.3);
+  setchk('cfg-economy',  cfg.economyMode);
+  setchk('cfg-hideNum',  cfg.hideNumbering);
+  setchk('cfg-showScore',cfg.showScore);
+  setchk('cfg-allBlack', cfg.allBlack);
+  setchk('cfg-breakAll', cfg.breakAllQuestions);
+
+  // Header
+  setchk('hdr-logo',      !!hdr.logoKey);
+  setv('hdr-institution', hdr.institution || '');
+  setv('hdr-title',       hdr.title       || '');
+  setv('hdr-subtitle',    hdr.subtitle    || '');
+  setv('hdr-instructions', flatInstr(hdr.instructions));
+  setv('rh-left',   hdr.runningHeader?.left   || '');
+  setv('rh-center', hdr.runningHeader?.center || '');
+  setv('rh-right',  hdr.runningHeader?.right  || '');
+  setv('rf-left',   hdr.runningFooter?.left   || '');
+  setv('rf-center', hdr.runningFooter?.center || '');
+  setv('rf-right',  hdr.runningFooter?.right  || '');
+
+  // Student fields
+  document.getElementById('sf-list').innerHTML = '';
+  (hdr.studentFields || []).forEach(f => addStudentField(f.label, f.widthCm || ''));
+
+  // Sections
+  document.getElementById('sections-list').innerHTML = '';
+  sectionCount = 0; qCount = 0;
+  (spec.sections || []).forEach(sec => addSection(sec));
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Examples
+// ──────────────────────────────────────────────────────────────────────────────
+const EXAMPLES = {
+  '1': {
+    config: {
+      pageSize: 'A4', columns: 2,
+      lineSpacing: 'normal', economyMode: false,
+    },
+    header: {
+      logoKey: 'logo.jpg',
+      institution: 'Colégio Estadual Dom Pedro II',
+      title: 'Avaliação de Matemática — 2º Bimestre',
+      subtitle: '9º Ano do Ensino Fundamental — 2024',
+      instructions: [{ type: 'text', value: 'Leia com atenção cada questão. Para as questões objetivas, marque apenas uma alternativa. Duração: 2 horas.' }],
+      studentFields: [
+        { label: 'ALUNO' },
+        { label: 'Nº', widthCm: 4 },
+        { label: 'SÉRIE', widthCm: 4 },
+        { label: 'TURMA', widthCm: 4 },
+        { label: 'TURNO', widthCm: 4 },
+        { label: 'PROFESSOR' },
+      ],
+      runningFooter: { center: 'Página {page} de {pages}' },
+    },
+    sections: [{
+      title: 'Questões Objetivas (2 pontos cada)',
+      instructions: [{ type: 'text', value: 'Marque a letra da alternativa correta.' }],
+      questions: [
+        { kind: 'choice', stem: [{ type: 'text', value: 'Qual é o resultado de 2³ + √16 ? ' }, { type: 'text', value: 'Marque a alternativa correta.', style: { fontWeight: 'bold' } }],
+          answer: { type: 'choice', layout: 'horizontal', alternatives: [
+            { label: 'A', content: [{ type: 'text', value: '10' }] },
+            { label: 'B', content: [{ type: 'text', value: '12' }] },
+            { label: 'C', content: [{ type: 'text', value: '14' }] },
+            { label: 'D', content: [{ type: 'text', value: '16' }] },
+            { label: 'E', content: [{ type: 'text', value: '20' }] },
+          ]}},
+        { kind: 'choice', stem: [{ type: 'text', value: 'Um triângulo retângulo tem catetos de 3 cm e 4 cm. Qual é a hipotenusa?' }],
+          answer: { type: 'choice', layout: 'horizontal', alternatives: [
+            { label: 'A', content: [{ type: 'text', value: '5 cm' }] },
+            { label: 'B', content: [{ type: 'text', value: '6 cm' }] },
+            { label: 'C', content: [{ type: 'text', value: '7 cm' }] },
+            { label: 'D', content: [{ type: 'text', value: '8 cm' }] },
+            { label: 'E', content: [{ type: 'text', value: '9 cm' }] },
+          ]}},
+        { kind: 'choice', stem: [{ type: 'text', value: 'Qual é o valor de x na equação 3x − 7 = 14 ?' }],
+          answer: { type: 'choice', layout: 'horizontal', alternatives: [
+            { label: 'A', content: [{ type: 'text', value: 'x = 5' }] },
+            { label: 'B', content: [{ type: 'text', value: 'x = 6' }] },
+            { label: 'C', content: [{ type: 'text', value: 'x = 7' }] },
+            { label: 'D', content: [{ type: 'text', value: 'x = 8' }] },
+            { label: 'E', content: [{ type: 'text', value: 'x = 9' }] },
+          ]}},
+        { kind: 'choice', stem: [{ type: 'text', value: 'Um comerciante comprou um produto por R$ 80,00 e vendeu com 25% de lucro. Qual foi o preço de venda?' }],
+          answer: { type: 'choice', alternatives: [
+            { label: 'A', content: [{ type: 'text', value: 'R$ 90,00' }] },
+            { label: 'B', content: [{ type: 'text', value: 'R$ 95,00' }] },
+            { label: 'C', content: [{ type: 'text', value: 'R$ 100,00' }] },
+            { label: 'D', content: [{ type: 'text', value: 'R$ 105,00' }] },
+            { label: 'E', content: [{ type: 'text', value: 'R$ 110,00' }] },
+          ]}},
+        { kind: 'choice', stem: [{ type: 'text', value: 'Quantos números inteiros existem entre −3 e 5 (exclusive)?' }],
+          answer: { type: 'choice', layout: 'horizontal', alternatives: [
+            { label: 'A', content: [{ type: 'text', value: '6' }] },
+            { label: 'B', content: [{ type: 'text', value: '7' }] },
+            { label: 'C', content: [{ type: 'text', value: '8' }] },
+            { label: 'D', content: [{ type: 'text', value: '9' }] },
+            { label: 'E', content: [{ type: 'text', value: '10' }] },
+          ]}},
+      ]
+    }]
+  },
+
+  '2': {
+    config: {
+      pageSize: 'A4', columns: 1,
+      lineSpacing: 'oneAndHalf',
+      discursiveSpaceType: 'lines',
+    },
+    header: {
+      institution: 'Instituto Federal de Educação',
+      title: 'Avaliação Discursiva — Língua Portuguesa',
+      subtitle: '1º Ano do Ensino Médio',
+      instructions: [{ type: 'text', value: 'Responda com clareza e objetividade. Use caneta azul ou preta. Rasuras não serão aceitas.' }],
+      studentFields: [
+        { label: 'ALUNO' },
+        { label: 'Nº', widthCm: 4 },
+        { label: 'SÉRIE', widthCm: 4 },
+        { label: 'TURMA', widthCm: 4 },
+        { label: 'TURNO', widthCm: 4 },
+        { label: 'PROFESSOR' },
+      ],
+      runningHeader: { right: 'Língua Portuguesa — {page}/{pages}' },
+    },
+    sections: [{
+      title: 'Questões Dissertativas',
+      questions: [
+        { kind: 'textual',
+          stem: [{ type: 'text', value: 'Explique, com suas próprias palavras, a diferença entre narrador em 1ª pessoa e narrador em 3ª pessoa. Dê um exemplo de cada.' }],
+          answer: { type: 'textual', lineCount: 6 } },
+        { kind: 'textual',
+          stem: [{ type: 'text', value: 'Leia o trecho a seguir e identifique as figuras de linguagem presentes, justificando sua resposta:\n"A vida é uma pedra que não para de rolar, enquanto os sonhos são asas que nos elevam ao céu."' }],
+          answer: { type: 'textual', lineCount: 7 } },
+        { kind: 'textual',
+          stem: [{ type: 'text', value: 'Qual é a função do conectivo "embora" na frase: "Embora chovesse muito, o time jogou bem"? Classifique-o e explique a relação que estabelece.' }],
+          answer: { type: 'textual', lineCount: 5 } },
+        { kind: 'essay', fullWidth: true,
+          stem: [{ type: 'text', value: 'Redija um texto dissertativo-argumentativo sobre o tema: "A importância da leitura na formação do cidadão crítico". Seu texto deve ter entre 20 e 30 linhas, com introdução, desenvolvimento e conclusão.' }],
+          answer: { type: 'essay', lineCount: 25 } },
+      ]
+    }]
+  },
+
+  '3': {
+    config: {
+      pageSize: 'A4', columns: 1,
+      lineSpacing: 'normal',
+    },
+    header: {
+      institution: 'Colégio Modelo',
+      title: 'Avaliação — Ciências da Natureza',
+      subtitle: '8º Ano · Bimestre 3 · 2024',
+      studentFields: [
+        { label: 'ALUNO' },
+        { label: 'Nº', widthCm: 4 }, { label: 'SÉRIE', widthCm: 4 }, { label: 'TURMA', widthCm: 4 }, { label: 'TURNO', widthCm: 4 },
+        { label: 'PROFESSOR' },
+      ],
+      runningFooter: { left: 'Ciências · 8º Ano', center: 'Pág. {page}/{pages}' },
+    },
+    sections: [
+      {
+        title: 'Somatório — Marque V (verdadeiro) ou F (falso) e some os valores',
+        instructions: [{ type: 'text', value: 'Assinale os itens corretos. Some os valores dos itens marcados e registre o resultado.' }],
+        questions: [
+          { kind: 'sum',
+            stem: [{ type: 'text', value: 'Sobre o sistema solar, é CORRETO afirmar que:' }],
+            answer: { type: 'sum', items: [
+              { value: 1,  content: [{ type: 'text', value: 'O Sol é uma estrela de tamanho médio.' }] },
+              { value: 2,  content: [{ type: 'text', value: 'Mercúrio é o planeta mais próximo do Sol.' }] },
+              { value: 4,  content: [{ type: 'text', value: 'A Lua é um planeta do sistema solar.' }] },
+              { value: 8,  content: [{ type: 'text', value: 'Saturno possui anéis compostos de gelo e rocha.' }] },
+              { value: 16, content: [{ type: 'text', value: 'A Terra é o maior planeta do sistema solar.' }] },
+            ]}},
+          { kind: 'sum',
+            stem: [{ type: 'text', value: 'Sobre as reações químicas, assinale os itens verdadeiros:' }],
+            answer: { type: 'sum', items: [
+              { value: 1,  content: [{ type: 'text', value: 'A combustão é um tipo de reação química.' }] },
+              { value: 2,  content: [{ type: 'text', value: 'Na fotossíntese, o CO₂ é produzido pela planta.' }] },
+              { value: 4,  content: [{ type: 'text', value: 'A ferrugem é resultado de uma reação de oxidação.' }] },
+              { value: 8,  content: [{ type: 'text', value: 'Toda reação química libera energia na forma de calor.' }] },
+            ]}},
+        ]
+      },
+      {
+        title: 'Complete as Lacunas',
+        instructions: [{ type: 'text', value: 'Use as palavras do banco para completar os textos corretamente.' }],
+        questions: [
+          { kind: 'cloze',
+            stem: [
+              { type: 'text', value: 'A ' }, { type: 'blank' },
+              { type: 'text', value: ' é o processo pelo qual as plantas produzem seu próprio alimento usando luz solar, ' },
+              { type: 'blank' }, { type: 'text', value: ' e água, liberando ' }, { type: 'blank' },
+              { type: 'text', value: ' como subproduto.' },
+            ],
+            answer: { type: 'cloze', wordBank: [
+              [{ type: 'text', value: 'fotossíntese' }],
+              [{ type: 'text', value: 'gás carbônico (CO₂)' }],
+              [{ type: 'text', value: 'oxigênio (O₂)' }],
+            ]}},
+          { kind: 'cloze',
+            stem: [
+              { type: 'text', value: 'Os seres vivos são classificados em cinco reinos: ' },
+              { type: 'blank' }, { type: 'text', value: ', ' }, { type: 'blank' },
+              { type: 'text', value: ', Protista, Fungi e ' }, { type: 'blank' }, { type: 'text', value: '.' },
+            ],
+            answer: { type: 'cloze', wordBank: [
+              [{ type: 'text', value: 'Monera' }],
+              [{ type: 'text', value: 'Plantae' }],
+              [{ type: 'text', value: 'Animalia' }],
+            ]}},
+        ]
+      }
+    ]
+  },
+
+  '4': {
+    config: {
+      pageSize: 'A4', columns: 2,
+      lineSpacing: 'normal', showScore: true,
+    },
+    header: {
+      logoKey: 'logo.jpg',
+      institution: 'Colégio Estadual Dom Pedro II',
+      title: 'Avaliação Multidisciplinar — 3º Bimestre',
+      subtitle: '9º Ano do Ensino Fundamental — 2024',
+      instructions: [{ type: 'text', value: 'Leia atentamente cada questão antes de responder. Use caneta azul ou preta. Não é permitido o uso de corretivo. Duração: 3 horas.' }],
+      studentFields: [
+        { label: 'ALUNO' },
+        { label: 'Nº', widthCm: 3 }, { label: 'SÉRIE', widthCm: 3 }, { label: 'TURMA', widthCm: 3 }, { label: 'TURNO', widthCm: 3 },
+        { label: 'PROFESSOR' },
+        { label: 'DATA', widthCm: 6 },
+      ],
+      runningHeader: { left: 'Avaliação Multidisciplinar — 3º Bimestre', right: 'Pág. {page} / {pages}' },
+      runningFooter: { center: 'Colégio Estadual Dom Pedro II · 9º Ano — 2024' },
+    },
+    sections: [
+      // ── LÍNGUA PORTUGUESA ──
+      {
+        title: 'Língua Portuguesa',
+        instructions: [{ type: 'text', value: 'Leia os textos com atenção e responda às questões.' }],
+        questions: [
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Na oração "Os alunos, que estudaram bastante, foram aprovados", as vírgulas isolam uma oração:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'subordinada adjetiva restritiva' }] },
+              { label: 'B', content: [{ type: 'text', value: 'subordinada adjetiva explicativa' }] },
+              { label: 'C', content: [{ type: 'text', value: 'coordenada sindética adversativa' }] },
+              { label: 'D', content: [{ type: 'text', value: 'subordinada substantiva objetiva direta' }] },
+              { label: 'E', content: [{ type: 'text', value: 'subordinada adverbial causal' }] },
+            ]}},
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Assinale a alternativa em que a concordância verbal está correta:' }],
+            answer: { type: 'choice', layout: 'vertical', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'Fazem dois anos que não viajo.' }] },
+              { label: 'B', content: [{ type: 'text', value: 'Houveram muitos problemas na reunião.' }] },
+              { label: 'C', content: [{ type: 'text', value: 'Existem várias razões para o atraso.' }] },
+              { label: 'D', content: [{ type: 'text', value: 'Aluga-se apartamentos neste prédio.' }] },
+              { label: 'E', content: [{ type: 'text', value: 'Haviam chegado cedo ao local.' }] },
+            ]}},
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Na frase "Ela me disse que viria amanhã", o verbo "viria" está conjugado no:' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'futuro do presente' }] },
+              { label: 'B', content: [{ type: 'text', value: 'futuro do pretérito' }] },
+              { label: 'C', content: [{ type: 'text', value: 'pretérito imperfeito' }] },
+              { label: 'D', content: [{ type: 'text', value: 'presente do subjuntivo' }] },
+            ]}},
+          { kind: 'textual',
+            stem: [{ type: 'text', value: 'Reescreva o período abaixo, passando-o da voz ativa para a voz passiva: "O professor corrigiu todas as provas antes do prazo."' }],
+            answer: { type: 'textual', lineCount: 3 } },
+        ]
+      },
+      // ── MATEMÁTICA ──
+      {
+        title: 'Matemática',
+        instructions: [{ type: 'text', value: 'Resolva as questões, apresentando os cálculos quando solicitado.' }],
+        questions: [
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Uma loja oferece 20% de desconto em um produto que custa R$ 150,00. Qual é o valor final do produto?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'R$ 110,00' }] },
+              { label: 'B', content: [{ type: 'text', value: 'R$ 120,00' }] },
+              { label: 'C', content: [{ type: 'text', value: 'R$ 125,00' }] },
+              { label: 'D', content: [{ type: 'text', value: 'R$ 130,00' }] },
+              { label: 'E', content: [{ type: 'text', value: 'R$ 135,00' }] },
+            ]}},
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Qual é a solução da equação 3x − 7 = 2x + 5?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'x = 10' }] },
+              { label: 'B', content: [{ type: 'text', value: 'x = 12' }] },
+              { label: 'C', content: [{ type: 'text', value: 'x = 2' }] },
+              { label: 'D', content: [{ type: 'text', value: 'x = −2' }] },
+              { label: 'E', content: [{ type: 'text', value: 'x = 7' }] },
+            ]}},
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Um triângulo retângulo tem catetos medindo 6 cm e 8 cm. Qual é a medida da hipotenusa?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: '9 cm' }] },
+              { label: 'B', content: [{ type: 'text', value: '10 cm' }] },
+              { label: 'C', content: [{ type: 'text', value: '12 cm' }] },
+              { label: 'D', content: [{ type: 'text', value: '14 cm' }] },
+              { label: 'E', content: [{ type: 'text', value: '7 cm' }] },
+            ]}},
+          { kind: 'textual',
+            stem: [{ type: 'text', value: 'Calcule a área de um trapézio com bases medindo 8 cm e 12 cm, e altura de 5 cm. Apresente o cálculo completo.' }],
+            answer: { type: 'textual', lineCount: 4 } },
+        ]
+      },
+      // ── CIÊNCIAS ──
+      {
+        title: 'Ciências',
+        instructions: [{ type: 'text', value: 'Responda com base nos conhecimentos de Biologia, Química e Física.' }],
+        questions: [
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Qual organela celular é responsável pela produção de energia na forma de ATP?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'Ribossomo' }] },
+              { label: 'B', content: [{ type: 'text', value: 'Mitocôndria' }] },
+              { label: 'C', content: [{ type: 'text', value: 'Lisossomo' }] },
+              { label: 'D', content: [{ type: 'text', value: 'Complexo de Golgi' }] },
+              { label: 'E', content: [{ type: 'text', value: 'Retículo endoplasmático' }] },
+            ]}},
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Na tabela periódica, os elementos são organizados em ordem crescente de:' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'massa atômica' }] },
+              { label: 'B', content: [{ type: 'text', value: 'número atômico' }] },
+              { label: 'C', content: [{ type: 'text', value: 'eletronegatividade' }] },
+              { label: 'D', content: [{ type: 'text', value: 'raio atômico' }] },
+            ]}},
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Um corpo percorre 200 metros em 10 segundos com velocidade constante. Qual é a velocidade do corpo?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: '10 m/s' }] },
+              { label: 'B', content: [{ type: 'text', value: '20 m/s' }] },
+              { label: 'C', content: [{ type: 'text', value: '15 m/s' }] },
+              { label: 'D', content: [{ type: 'text', value: '25 m/s' }] },
+            ]}},
+          { kind: 'textual',
+            stem: [{ type: 'text', value: 'Explique o que é fotossíntese e qual a sua importância para os seres vivos.' }],
+            answer: { type: 'textual', lineCount: 5 } },
+        ]
+      },
+      // ── HISTÓRIA ──
+      {
+        title: 'História',
+        questions: [
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'A Proclamação da República no Brasil ocorreu em:' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: '7 de setembro de 1822' }] },
+              { label: 'B', content: [{ type: 'text', value: '15 de novembro de 1889' }] },
+              { label: 'C', content: [{ type: 'text', value: '13 de maio de 1888' }] },
+              { label: 'D', content: [{ type: 'text', value: '22 de abril de 1500' }] },
+              { label: 'E', content: [{ type: 'text', value: '1 de janeiro de 1891' }] },
+            ]}},
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'A Revolução Industrial teve início no século XVIII em qual país?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'França' }] },
+              { label: 'B', content: [{ type: 'text', value: 'Alemanha' }] },
+              { label: 'C', content: [{ type: 'text', value: 'Inglaterra' }] },
+              { label: 'D', content: [{ type: 'text', value: 'Estados Unidos' }] },
+            ]}},
+          { kind: 'textual',
+            stem: [{ type: 'text', value: 'Descreva duas consequências da Segunda Guerra Mundial para a organização política mundial.' }],
+            answer: { type: 'textual', lineCount: 5 } },
+        ]
+      },
+      // ── GEOGRAFIA ──
+      {
+        title: 'Geografia',
+        questions: [
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'Qual é o bioma brasileiro que ocupa a maior extensão territorial?' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'Cerrado' }] },
+              { label: 'B', content: [{ type: 'text', value: 'Amazônia' }] },
+              { label: 'C', content: [{ type: 'text', value: 'Caatinga' }] },
+              { label: 'D', content: [{ type: 'text', value: 'Mata Atlântica' }] },
+              { label: 'E', content: [{ type: 'text', value: 'Pantanal' }] },
+            ]}},
+          { kind: 'choice',
+            stem: [{ type: 'text', value: 'O fenômeno do aquecimento global está diretamente relacionado ao aumento da concentração de:' }],
+            answer: { type: 'choice', layout: 'horizontal', alternatives: [
+              { label: 'A', content: [{ type: 'text', value: 'oxigênio' }] },
+              { label: 'B', content: [{ type: 'text', value: 'nitrogênio' }] },
+              { label: 'C', content: [{ type: 'text', value: 'gases de efeito estufa' }] },
+              { label: 'D', content: [{ type: 'text', value: 'hélio' }] },
+            ]}},
+          { kind: 'cloze',
+            stem: [
+              { type: 'text', value: 'O Brasil possui ' }, { type: 'blank' },
+              { type: 'text', value: ' estados e um ' }, { type: 'blank' },
+              { type: 'text', value: ', totalizando 27 unidades federativas.' },
+            ],
+            answer: { type: 'cloze', wordBank: [
+              [{ type: 'text', value: '26' }],
+              [{ type: 'text', value: 'Distrito Federal' }],
+            ]}},
+        ]
+      },
+      // ── REDAÇÃO ──
+      {
+        title: 'Redação',
+        instructions: [{ type: 'text', value: 'Elabore um texto dissertativo-argumentativo sobre o tema proposto. Mínimo de 20 linhas.' }],
+        questions: [
+          { kind: 'essay', fullWidth: true,
+            stem: [{ type: 'text', value: 'TEMA: A importância da leitura na formação do cidadão crítico. Com base em seus conhecimentos e experiências, produza um texto dissertativo-argumentativo apresentando sua tese e argumentos que a sustentem. Utilize a norma-padrão da língua portuguesa.' }],
+            answer: { type: 'essay', lineCount: 30 } },
+        ]
+      },
+    ]
+  },
+
+  '5': {
+    config: {
+      pageSize: 'A4', columns: 2,
+      lineSpacing: 'normal', economyMode: true,
+      hideNumbering: false,
+    },
+    header: {
+      title: 'Simulado — 50 Questões',
+      subtitle: 'Gabarito Econômico · Modo Impressão Rápida',
+      instructions: [{ type: 'text', value: 'Marque a alternativa correta com um X. Tempo: 3 horas.' }],
+      runningFooter: { center: '{page} / {pages}' },
+    },
+    sections: [{
+      title: 'Questões 01 a 10',
+      questions: Array.from({ length: 10 }, (_, i) => ({
+        kind: 'choice',
+        stem: [{ type: 'text', value: `Questão ${String(i+1).padStart(2,'0')} — Enunciado desta questão de múltipla escolha.` }],
+        answer: { type: 'choice', layout: 'horizontal', alternatives: [
+          { label: 'A', content: [{ type: 'text', value: 'Opção A' }] },
+          { label: 'B', content: [{ type: 'text', value: 'Opção B' }] },
+          { label: 'C', content: [{ type: 'text', value: 'Opção C' }] },
+          { label: 'D', content: [{ type: 'text', value: 'Opção D' }] },
+          { label: 'E', content: [{ type: 'text', value: 'Opção E' }] },
+        ]}
+      }))
+    }]
+  },
+
+  '6': {
+    config: {
+      pageSize: 'A4', columns: 1,
+      lineSpacing: 'normal', fontSize: 12,
+    },
+    header: {
+      institution: 'Escola de Matemática Aplicada',
+      title: 'Avaliação de Cálculo — LaTeX Math Demo',
+      subtitle: '1ª Série · 2024',
+      instructions: [{ type: 'text', value: 'Resolva as questões a seguir, mostrando o desenvolvimento.' }],
+      studentFields: [
+        { label: 'ALUNO' },
+        { label: 'Nº', widthCm: 4 },
+        { label: 'SÉRIE', widthCm: 4 },
+        { label: 'TURMA', widthCm: 4 },
+        { label: 'TURNO', widthCm: 4 },
+        { label: 'PROFESSOR' },
+      ],
+      runningFooter: { center: 'Página {page} de {pages}' },
+    },
+    sections: [{
+      title: 'Expressões Matemáticas',
+      questions: [
+        { kind: 'choice',
+          stem: [
+            { type: 'text', value: 'Considere a equação ' },
+            { type: 'math', latex: 'x^2 + y^2 = r^2' },
+            { type: 'text', value: '. Qual é o valor de ' },
+            { type: 'math', latex: 'r' },
+            { type: 'text', value: ' quando ' },
+            { type: 'math', latex: 'x = 3' },
+            { type: 'text', value: ' e ' },
+            { type: 'math', latex: 'y = 4' },
+            { type: 'text', value: '?' },
+          ],
+          answer: { type: 'choice', layout: 'horizontal', alternatives: [
+            { label: 'A', content: [{ type: 'math', latex: 'r = 5' }] },
+            { label: 'B', content: [{ type: 'math', latex: 'r = 7' }] },
+            { label: 'C', content: [{ type: 'math', latex: 'r = 25' }] },
+            { label: 'D', content: [{ type: 'math', latex: 'r = \\sqrt{7}' }] },
+          ]}},
+        { kind: 'choice',
+          stem: [
+            { type: 'text', value: 'Qual é a fórmula de Bhaskara para encontrar as raízes de ' },
+            { type: 'math', latex: 'ax^2 + bx + c = 0' },
+            { type: 'text', value: '?' },
+          ],
+          answer: { type: 'choice', layout: 'vertical', alternatives: [
+            { label: 'A', content: [{ type: 'math', latex: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}' }] },
+            { label: 'B', content: [{ type: 'math', latex: 'x = \\frac{b \\pm \\sqrt{b^2 + 4ac}}{2a}' }] },
+            { label: 'C', content: [{ type: 'math', latex: 'x = \\frac{-b \\pm \\sqrt{b^2 - 2ac}}{a}' }] },
+            { label: 'D', content: [{ type: 'math', latex: 'x = \\frac{b^2 - 4ac}{2a}' }] },
+          ]}},
+        { kind: 'textual',
+          stem: [
+            { type: 'text', value: 'Calcule a integral definida: ' },
+            { type: 'math', latex: '\\int_0^1 x^2 \\, dx', display: true },
+          ],
+          answer: { type: 'textual', lineCount: 8 }},
+        { kind: 'choice',
+          stem: [
+            { type: 'text', value: 'Simplifique a fração ' },
+            { type: 'math', latex: '\\frac{a^2 - b^2}{a + b}' },
+            { type: 'text', value: '.' },
+          ],
+          answer: { type: 'choice', layout: 'horizontal', alternatives: [
+            { label: 'A', content: [{ type: 'math', latex: 'a - b' }] },
+            { label: 'B', content: [{ type: 'math', latex: 'a + b' }] },
+            { label: 'C', content: [{ type: 'math', latex: '(a - b)^2' }] },
+            { label: 'D', content: [{ type: 'math', latex: '\\frac{a}{b}' }] },
+          ]}},
+        { kind: 'textual',
+          stem: [
+            { type: 'text', value: 'Determine o valor de ' },
+            { type: 'math', latex: '\\sqrt{144} + \\frac{3^2}{9}' },
+            { type: 'text', value: '.' },
+          ],
+          answer: { type: 'textual', lineCount: 5 }},
+      ]
+    }]
+  },
+};
+
+window.loadExample = function(num) {
+  if (!num) return;
+  const spec = EXAMPLES[num];
+  if (!spec) return;
+  applySpec(spec);
+  document.getElementById('example-select').value = num;
+  setStatus(`Exemplo ${num} carregado. Clique em ▶ Gerar PDF.`);
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Utility
+// ──────────────────────────────────────────────────────────────────────────────
+function flatInline(content) {
+  if (!content) return '';
+  return content.map(c => c.value || c.latex || '').join('');
+}
+function flatInstr(instructions) {
+  return flatInline(instructions);
+}
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Init
+// ──────────────────────────────────────────────────────────────────────────────
+boot().catch(e => {
+  setStatus('Erro ao inicializar: ' + e.message);
+  console.error(e);
+});
+
+// Load example 1 by default after a short delay so the form is ready
+setTimeout(() => loadExample('1'), 100);
+
+</script>
+</body>
+</html>
