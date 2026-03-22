@@ -1,0 +1,156 @@
+{
+  "sections": [
+    {
+      "title": "Conhecimentos Gerais",
+      "instructions": [
+        { "type": "text", "value": "Assinale a alternativa correta para cada questão." }
+      ],
+      "questions": [
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "Qual é o maior bioma brasileiro em extensão territorial?" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "Cerrado" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "Mata Atlântica" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "Amazônia" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "Caatinga" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "Pantanal" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "A Proclamação da República no Brasil ocorreu em que ano?" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "1822" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "1889" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "1891" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "1900" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "1888" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "Qual é a fórmula química da água?" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "CO₂" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "NaCl" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "H₂O" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "O₂" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "H₂SO₄" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "Resolva a equação: 2x + 6 = 20. O valor de x é:" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "5" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "7" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "8" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "10" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "13" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "Na oração \"Os alunos estudaram bastante para a prova\", o sujeito é classificado como:" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "Sujeito oculto" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "Sujeito indeterminado" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "Sujeito simples" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "Sujeito composto" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "Oração sem sujeito" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "Qual rio é considerado o mais extenso do mundo?" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "Rio Nilo" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "Rio Amazonas" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "Rio Mississipi" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "Rio Yangtzé" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "Rio Danúbio" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "O Tratado de Tordesilhas, assinado em 1494, dividiu as terras descobertas entre quais países?" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "Espanha e Inglaterra" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "Portugal e França" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "Portugal e Espanha" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "Inglaterra e Holanda" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "França e Espanha" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "A mitocôndria é a organela celular responsável por qual processo?" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "Fotossíntese" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "Digestão intracelular" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "Síntese de proteínas" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "Respiração celular" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "Armazenamento de água" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "A área de um triângulo de base 10 cm e altura 6 cm é igual a:" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "16 cm²" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "60 cm²" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "30 cm²" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "36 cm²" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "20 cm²" }] }
+            ]
+          }
+        },
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "Assinale a alternativa em que todas as palavras estão grafadas corretamente:" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "exceção, pretensioso, paralização" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "excessão, pretencioso, paralisação" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "exceção, pretensioso, paralisação" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "excessão, pretensioso, paralização" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "exceção, pretencioso, paralização" }] }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "config": {
+    "columns": 2,
+    "fontSize": 12
+  }
+}

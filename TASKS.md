@@ -52,7 +52,7 @@ WASI usa `prova_pdf_*` com `#[unsafe(no_mangle)]` (Rust 2024).
 
 ## Fase 1 — Geometria de página e layout básico
 
-### TASK-007 — PageGeometry a partir de PrintConfig `[ ]`
+### TASK-007 — PageGeometry a partir de PrintConfig `[x]`
 Implementar `src/layout/page.rs`:
 
 ```rust
@@ -83,7 +83,7 @@ impl PageGeometry {
 
 **Critério:** testes parametrizados para A4, ATA, Custom; content_width_pt = page − margens.
 
-### TASK-008 — PageComposer: empilhamento vertical e paginação `[ ]`
+### TASK-008 — PageComposer: empilhamento vertical e paginação `[x]`
 Implementar `PageComposer` em `src/layout/page.rs`:
 
 ```rust
@@ -109,7 +109,7 @@ pub struct PageComposer<'a> {
 
 **Critério:** testes com altura de bloco maior que página geram nova página; 2 colunas equilibram.
 
-### TASK-009 — InlineLayoutEngine: shaping + quebra de linha `[ ]`
+### TASK-009 — InlineLayoutEngine: shaping + quebra de linha `[x]`
 Implementar `src/layout/inline.rs`:
 
 ```rust
@@ -145,7 +145,7 @@ impl InlineLayoutEngine<'_> {
 
 ## Fase 2 — Cascata de estilo e validação
 
-### TASK-010 — ResolvedStyle e cascata PrintConfig → Section → Question → Inline `[ ]`
+### TASK-010 — ResolvedStyle e cascata PrintConfig → Section → Question → Inline `[x]`
 Implementar `src/spec/style.rs` (complemento) e `src/pipeline/style.rs`:
 
 ```rust
@@ -167,7 +167,7 @@ Defaults do PrintConfig: font_size=12.0, color=(0,0,0).
 
 **Critério:** testes de cascata; allBlack sobrescreve qualquer cor definida.
 
-### TASK-011 — Fase 1 do pipeline: Validação `[ ]`
+### TASK-011 — Fase 1 do pipeline: Validação `[x]`
 Implementar `src/pipeline/validate.rs`:
 
 - registry.is_ready() → PipelineError::NoFont
@@ -183,7 +183,7 @@ Implementar `src/pipeline/validate.rs`:
 
 ## Fase 3 — Renderização do cabeçalho
 
-### TASK-012 — Layout do InstitutionalHeader `[ ]`
+### TASK-012 — Layout do InstitutionalHeader `[x]`
 Implementar `src/layout/header.rs`:
 
 ```
@@ -200,7 +200,7 @@ layout_header(header, resolver, geometry, images) -> (Vec<Fragment>, f64)
 
 **Critério:** fixture `full_header.json` gera fragments com posições corretas.
 
-### TASK-013 — RunningHeader e rodapé de página `[ ]`
+### TASK-013 — RunningHeader e rodapé de página `[x]`
 Implementar renderização do `RunningHeader` como layer separado:
 
 - Chamado pelo PdfEmitter após montar cada página
@@ -215,7 +215,7 @@ Implementar renderização do `RunningHeader` como layer separado:
 
 ## Fase 4 — Renderização de questões
 
-### TASK-014 — Numeração de questões e bloco de questão `[ ]`
+### TASK-014 — Numeração de questões e bloco de questão `[x]`
 Implementar o bloco base em `src/layout/question.rs`:
 
 ```rust
@@ -503,7 +503,7 @@ Implementar `src/math/` (feature "math"):
 
 ## Fase 9 — Pacotes de distribuição
 
-### TASK-035 — Pacote npm com TypeScript types `[ ]`
+### TASK-035 — Pacote npm com TypeScript types `[x]`
 Configurar `npm/` com wasm-bindgen output:
 
 - `package.json`: nome `prova-pdf`, version, main/module/types
@@ -514,7 +514,7 @@ Configurar `npm/` com wasm-bindgen output:
 
 **Critério:** `npm pack` funciona; TypeScript sem erros em exemplo de uso.
 
-### TASK-036 — Pacote Python `[ ]`
+### TASK-036 — Pacote Python `[x]`
 Implementar `packages/python/`:
 
 - `prova_pdf/__init__.py`: wrapper sobre WASI via `wasmtime`
@@ -525,7 +525,7 @@ Implementar `packages/python/`:
 
 **Critério:** `pip install -e .` + gerar PDF de fixture em Python.
 
-### TASK-037 — Pacote Go `[ ]`
+### TASK-037 — Pacote Go `[x]`
 Implementar `packages/go/`:
 
 - `exampdf/exampdf.go`: wrapper sobre WASI via `wazero`
@@ -552,7 +552,7 @@ Criar `tests/fixtures/` com casos sintéticos cobrindo toda a superfície do sch
 - `math_formulas.json` — questões com LaTeX inline e display
 - `ata_page.json` — pageSize=Ata, 40 questões, sem header
 
-### TASK-039 — Testes cross-platform: browser == WASI `[ ]`
+### TASK-039 — Testes cross-platform: browser == WASI `[x]`
 Implementar `tests/cross-platform/`:
 
 - Para cada fixture: gerar PDF via browser (wasm-bindgen + Node) e via WASI (Go)

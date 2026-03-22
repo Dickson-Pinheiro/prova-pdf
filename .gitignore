@@ -1,9 +1,15 @@
+# Rust build output
 /target/
+
+# WASM build output
 /wasm/
 /pkg/
 *.wasm
-!packages/python/prova_pdf/prova_pdf.wasm
-!packages/go/provapdf/prova_pdf.wasm
+
+# Go compiled binary
+packages/go/generate
+
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -13,11 +19,19 @@ build/
 .venv/
 venv/
 .pytest_cache/
+
+# Node
 node_modules/
+
+# IDE / OS
 .idea/
 .vscode/
 *.swp
 .DS_Store
+
+# Env
 .env
 .env.*
+
+# Claude
 .claude/

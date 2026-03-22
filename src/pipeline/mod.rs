@@ -121,7 +121,7 @@ pub fn render(
 /// 2. For each section: section header, then each question block.
 /// 3. Appendix (starts on a new page when present).
 /// 4. Running header / footer overlays applied to every page.
-fn layout_exam(
+pub(crate) fn layout_exam(
     spec:     &ExamSpec,
     config:   &PrintConfig,
     resolver: &FontResolver<'_>,
