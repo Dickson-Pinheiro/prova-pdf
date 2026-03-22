@@ -1,0 +1,2635 @@
+{
+  "_images": {
+    "img_1": "tests/fixtures/images/matematica_vml/img_1.png",
+    "img_2": "tests/fixtures/images/matematica_vml/img_2.png",
+    "img_3": "tests/fixtures/images/matematica_vml/img_3.png",
+    "img_4": "tests/fixtures/images/matematica_vml/img_4.png",
+    "img_5": "tests/fixtures/images/matematica_vml/img_5.png",
+    "img_6": "tests/fixtures/images/matematica_vml/img_6.png",
+    "img_7": "tests/fixtures/images/matematica_vml/img_7.png",
+    "img_8": "tests/fixtures/images/matematica_vml/img_8.png",
+    "img_9": "tests/fixtures/images/matematica_vml/img_9.png",
+    "img_10": "tests/fixtures/images/matematica_vml/img_10.png",
+    "img_11": "tests/fixtures/images/matematica_vml/img_11.png",
+    "img_12": "tests/fixtures/images/matematica_vml/img_12.png",
+    "img_13": "tests/fixtures/images/matematica_vml/img_13.png",
+    "img_14": "tests/fixtures/images/matematica_vml/img_14.png",
+    "img_15": "tests/fixtures/images/matematica_vml/img_15.png",
+    "img_16": "tests/fixtures/images/matematica_vml/img_16.png",
+    "img_17": "tests/fixtures/images/matematica_vml/img_17.png",
+    "img_18": "tests/fixtures/images/matematica_vml/img_18.png",
+    "img_19": "tests/fixtures/images/matematica_vml/img_19.png",
+    "img_20": "tests/fixtures/images/matematica_vml/img_20.png",
+    "img_21": "tests/fixtures/images/matematica_vml/img_21.png",
+    "img_22": "tests/fixtures/images/matematica_vml/img_22.png",
+    "img_23": "tests/fixtures/images/matematica_vml/img_23.png",
+    "img_24": "tests/fixtures/images/matematica_vml/img_24.png",
+    "img_25": "tests/fixtures/images/matematica_vml/img_25.png",
+    "img_26": "tests/fixtures/images/matematica_vml/img_26.png",
+    "img_27": "tests/fixtures/images/matematica_vml/img_27.png",
+    "img_28": "tests/fixtures/images/matematica_vml/img_28.png",
+    "img_29": "tests/fixtures/images/matematica_vml/img_29.png",
+    "img_30": "tests/fixtures/images/matematica_vml/img_30.png"
+  },
+  "metadata": {
+    "title": "AG2_SIMULADO_MATEMÁTICA_1ª SÉRIE"
+  },
+  "config": {
+    "columns": 2,
+    "fontSize": 12,
+    "fontFamily": "body",
+    "lineSpacing": "normal",
+    "margins": {
+      "top": 0.6,
+      "bottom": 0.6,
+      "left": 0.6,
+      "right": 0.6
+    },
+    "discursiveLineHeight": 0.5,
+    "discursiveSpaceType": "lines",
+    "hideKnowledgeAreaName": true,
+    "hideQuestionsReferences": true,
+    "letterCase": "lower"
+  },
+  "header": {
+    "title": "AG2_SIMULADO_MATEMÁTICA_1ª SÉRIE",
+    "studentFields": [
+      {
+        "label": "Nome"
+      },
+      {
+        "label": "Turma",
+        "widthCm": 5
+      },
+      {
+        "label": "Data",
+        "widthCm": 4
+      },
+      {
+        "label": "Nota",
+        "widthCm": 3
+      }
+    ]
+  },
+  "sections": [
+    {
+      "questions": [
+        {
+          "kind": "choice",
+          "number": 31,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Durante um importante torneio de golfe em uma tarde ensolarada, o jogador Lucas se preparou cuidadosamente para a última tacada. Ele ajustou a postura, analisou a direção do vento e acertou a bola com precisão.\nA trajetória da bola, desde o momento em que deixou o taco até atingir o ponto mais alto, pode ser descrita pela função:\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "h(x) = -5x^2 + 20x",
+              "display": true
+            },
+            {
+              "type": "text",
+              "value": "\n\nem que "
+            },
+            {
+              "type": "math",
+              "latex": "h(x)",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " representa a altura da bola, em metros, e "
+            },
+            {
+              "type": "math",
+              "latex": "x",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " é a distância horizontal percorrida, em metros, a partir do ponto de lançamento.\n\nConsiderando que a trajetória segue fielmente essa função, determine qual foi a altura máxima que a bola atingiu durante o lançamento."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "15 m"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "18 m"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "20 m"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "22 m"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "25 m"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 32,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Em uma final de campeonato, o atacante Raphael cobrou uma falta com maestria. A bola subiu descrevendo uma trajetória parabólica até atingir o ponto mais alto e depois descer em direção ao gol.\nA altura da bola, em metros, no instante "
+            },
+            {
+              "type": "math",
+              "latex": "t",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " segundos após o chute, é dada pela função:\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "h(t) = -t^2 + t + 2",
+              "display": true
+            },
+            {
+              "type": "text",
+              "value": "\n\nSabendo disso, determine em que instante a bola atinge a altura máxima."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "0,3 s"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "0,5 s"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "1,0 s"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "3,0 s"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "5,0 s"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 33,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Uma loja de eletrônicos analisou que o lucro mensal "
+            },
+            {
+              "type": "math",
+              "latex": "L(x)",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": ", em milhares de reais, obtido com a venda de um determinado modelo de fone de ouvido pode ser estimado pela função:\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "L(x) = -2x^2 + 12x - 5",
+              "display": true
+            },
+            {
+              "type": "text",
+              "value": "\n\nem que "
+            },
+            {
+              "type": "math",
+              "latex": "x",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " representa o número de centenas de unidades vendidas.\n\nNo mês passado, a loja vendeu 4 centenas desse modelo. Qual foi o lucro, em reais, obtido com essa venda?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 8.000,00"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 9.500,00"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 10.000,00"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 11.000,00"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 12.000,00"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 34,
+          "stem": [
+            {
+              "type": "text",
+              "value": "(Enem) Um laticínio possui dois reservatórios de leite. Cada reservatório é abastecido por uma torneira acoplada a um tanque resfriado. O volume, em litros, desses reservatórios depende da quantidade inicial de leite no reservatório e do tempo t, em horas, em que as duas torneiras ficam abertas. Os volumes dos reservatórios são dados pelas funções V"
+            },
+            {
+              "type": "sub",
+              "content": [
+                {
+                  "type": "text",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": "(t) = 250t³ – 100t + 3000 e V"
+            },
+            {
+              "type": "sub",
+              "content": [
+                {
+                  "type": "text",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": "(t) = 150t³ + 69t + 3000.\n\nDepois de aberta cada torneira, o volume de leite de um reservatório é igual ao do outro no instante t = 0 e, também, no tempo t igual a"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "1,3 h."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "1,69 h."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "10,0 h."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "13,0 h."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "16,9 h."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 35,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Um aplicativo de monitoramento de temperatura usa uma função matemática para estimar o nível de conforto térmico em uma estufa de plantas.\nA função "
+            },
+            {
+              "type": "math",
+              "latex": "f(x)",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " fornece um índice de conforto (em pontos) de acordo com a variação de temperatura x, em graus Celsius, em relação a um valor ideal.\n\nEssa função é dada por:\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_1",
+              "widthCm": 6.75,
+              "heightCm": 2.62
+            },
+            {
+              "type": "text",
+              "value": "\n\nOnde:\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "x < 0",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " indica que a temperatura está "
+            },
+            {
+              "type": "text",
+              "value": "abaixo",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " do ideal;\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "x \\geq 0",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " indica que a temperatura está "
+            },
+            {
+              "type": "text",
+              "value": "no ideal ou acima",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ".\n\nSabendo disso, determine o valor de "
+            },
+            {
+              "type": "math",
+              "latex": "f(0) + f(-2)",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": "."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "9"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "10"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "11"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "12"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "13"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 36,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Um sistema de controle de produção de uma fábrica monitora a eficiência das máquinas de acordo com a temperatura interna "
+            },
+            {
+              "type": "math",
+              "latex": "x",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " (em °C).\nO índice de eficiência "
+            },
+            {
+              "type": "math",
+              "latex": "f(x)",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " é calculado por uma função que varia conforme a faixa de temperatura:\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_2",
+              "widthCm": 9.34,
+              "heightCm": 3.49
+            },
+            {
+              "type": "text",
+              "value": "\n\nDurante um teste, foram registradas as temperaturas de "
+            },
+            {
+              "type": "text",
+              "value": "-6°C",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ", "
+            },
+            {
+              "type": "text",
+              "value": "-5°C",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ", "
+            },
+            {
+              "type": "text",
+              "value": "-2°C",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " e "
+            },
+            {
+              "type": "text",
+              "value": "2°C",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " em momentos diferentes.\nO engenheiro responsável quer saber o valor de:\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "f(-6) - f(-5) + f(-2) + f(2)",
+              "display": true
+            },
+            {
+              "type": "text",
+              "value": "\n\n \nAssinale a alternativa que apresenta a solução para essa expressão."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "10"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "11"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "12"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "21"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "22"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 37,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Durante um evento esportivo na cidade, a empresa RápidoBus fez uma promoção especial para transportar torcedores até o estádio.\nO sistema de cobrança da empresa funciona em duas etapas:\n\nConversão da distância em pontos: a cada corrida, o aplicativo calcula os pontos pela função:\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "p(d) = 2d + 5",
+              "display": true
+            },
+            {
+              "type": "text",
+              "value": "\n\nonde "
+            },
+            {
+              "type": "math",
+              "latex": "d",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " é a distância percorrida, em km.\n\nCálculo do custo final: com base nos pontos obtidos, o custo da corrida (em reais) é calculado por\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "c(p) = 3p - 4",
+              "display": true
+            },
+            {
+              "type": "text",
+              "value": "\n\nSe um torcedor fez uma corrida de 7 km para chegar ao estádio, qual foi o valor pago?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 48"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 50"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 53"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": " R$ 55"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "R$ 57"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 38,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Em um laboratório de química, o pesquisador Marcos está realizando um experimento de aquecimento de um líquido. Ele sabe que a temperatura "
+            },
+            {
+              "type": "math",
+              "latex": "T",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": ", em graus Celsius, após "
+            },
+            {
+              "type": "math",
+              "latex": "t",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " minutos de aquecimento, é dada por:\n\n"
+            },
+            {
+              "type": "math",
+              "latex": "T(t) = 4t + 20",
+              "display": true
+            },
+            {
+              "type": "text",
+              "value": "\n\nDurante o processo, o equipamento de segurança precisa saber quanto tempo leva para atingir qualquer temperatura desejada, e para isso é necessário usar a função inversa de "
+            },
+            {
+              "type": "math",
+              "latex": "T",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": ".\n\nQual é a função inversa "
+            },
+            {
+              "type": "math",
+              "latex": "T^{-1}(x)",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": ", que indica o tempo (em minutos) necessário para alcançar a temperatura "
+            },
+            {
+              "type": "math",
+              "latex": "x",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": "?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "image",
+                    "key": "img_3",
+                    "widthCm": 2.88,
+                    "heightCm": 0.9
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "image",
+                    "key": "img_4",
+                    "widthCm": 2.88,
+                    "heightCm": 0.9
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "image",
+                    "key": "img_5",
+                    "widthCm": 3.1,
+                    "heightCm": 0.5
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "image",
+                    "key": "img_6",
+                    "widthCm": 2.88,
+                    "heightCm": 0.9
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "image",
+                    "key": "img_7",
+                    "widthCm": 2.67,
+                    "heightCm": 0.5
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 39,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Em um projeto de engenharia computacional, Ana está analisando o desempenho de um algoritmo que processa dados ao longo do tempo. A função "
+            },
+            {
+              "type": "math",
+              "latex": "f(x) = x^2 - 1",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": " representa a quantidade de operações (em milhares) que o algoritmo executa em relação à variável "
+            },
+            {
+              "type": "math",
+              "latex": "x",
+              "display": false
+            },
+            {
+              "type": "text",
+              "value": ", que pode representar a entrada do algoritmo.\n\nAnalise as alternativas e assinale a correta."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A função "
+                  },
+                  {
+                    "type": "math",
+                    "latex": "f(x) = x^2 - 1",
+                    "display": false
+                  },
+                  {
+                    "type": "text",
+                    "value": " é par"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A função "
+                  },
+                  {
+                    "type": "math",
+                    "latex": "f(x) = x^2 - 1",
+                    "display": false
+                  },
+                  {
+                    "type": "text",
+                    "value": " é ímpar"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A função "
+                  },
+                  {
+                    "type": "math",
+                    "latex": "f(x) = x^2 - 1",
+                    "display": false
+                  },
+                  {
+                    "type": "text",
+                    "value": " nem é par e nem ímpar"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A função "
+                  },
+                  {
+                    "type": "math",
+                    "latex": "f(x) = x^2 - 1",
+                    "display": false
+                  },
+                  {
+                    "type": "text",
+                    "value": " é constante"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A função "
+                  },
+                  {
+                    "type": "math",
+                    "latex": "f(x) = x^2 - 1",
+                    "display": false
+                  },
+                  {
+                    "type": "text",
+                    "value": " é periódica, repetindo seus valores a cada intervalo no domínio"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 40,
+          "stem": [
+            {
+              "type": "text",
+              "value": "(Enem) Ronaldo é um garoto que adora brincar com números. Numa dessas brincadeiras, empilhou caixas numeradas de acordo com a sequência conforme mostrada no esquema a seguir. Ele percebeu que a soma dos números em cada linha tinha uma propriedade e que, por meio dessa propriedade, era possível prever a soma de qualquer linha posterior às já construídas.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_8",
+              "widthCm": 14.05,
+              "heightCm": 4.26
+            },
+            {
+              "type": "text",
+              "value": "\n\nA partir dessa propriedade, qual será a soma da 9° linha da sequência de caixas empilhadas por Ronaldo?           "
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "9"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "45"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "64"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "81"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "285"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 41,
+          "stem": [
+            {
+              "type": "text",
+              "value": "(Enem)  A figura ilustra uma sequência de formas geométricas formadas por palitos, segundo uma certa regra.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_9",
+              "widthCm": 18.89,
+              "heightCm": 2.43
+            },
+            {
+              "type": "text",
+              "value": "\n\nContinuando a sequência, segundo essa mesma regra, quantos palitos serão necessários para construir o décimo termo da sequência?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "30"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "39"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "40"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "43"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "57"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 42,
+          "stem": [
+            {
+              "type": "text",
+              "value": "O matemático italiano Leonardo de Pisa (1175-1250), conhecido como Leonardo Fibbonacci (Filho de Bonacci) descobriu uma famosa sequência que hoje leva o seu nome: sequência de Fibonacci. Ele encontrou ao estudar o crescimento idealizado de uma população de coelhos, que tinha início com um único casal de coelhos recém-nascidos, sendo um deles um macho e o outro, uma fêmea, sobre a qual assumia-se o seguinte:\n\nOs coelhos atingiam a maturação sexual dentro de um período de um mês, quando se acasalavam e ao final do segundo mês a fêmea tinha como cria outro casal de coelhos;\n\nEm cada mês, a partir do segundo mês de vida, cada casal de coelhos dava origem a um novo casal de coelhos;\n\nNenhum coelho morria. A população estudada por Fibonnacci, ao final de 11 meses, tinha quantos casais de coelho?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "13"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "21"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "34"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "55"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "89"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        }
+      ],
+      "title": "Matemática e suas Tecnologias - Ensino Médio",
+      "_subject": "Matemática"
+    },
+    {
+      "questions": [
+        {
+          "kind": "choice",
+          "number": 43,
+          "stem": [
+            {
+              "type": "text",
+              "value": "A imagem abaixo exibe parte da estrutura do telhado de um galpão. A viga metálica (segmento de reta) que liga o ponto A ao B apresentou defeito e precisa ser substituída.\n"
+            },
+            {
+              "type": "image",
+              "key": "img_10",
+              "widthCm": 9.87,
+              "heightCm": 5.69
+            },
+            {
+              "type": "text",
+              "value": "\n\nConsidere que as distâncias dos pontos A e B e ao ponto 0 são, respectivamente, 5 m e 10 m e que o ângulo α é um terço de 45°.\n\nO comprimento, em metros, da viga que deve ser substituída é"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "53"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "55"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "56"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "57"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "510"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 44,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Partindo de um ponto A um avião deslocava-se, em linha reta, com velocidade v km/h. Após duas horas, quando se encontrava no ponto B, o avião desviou α graus de sua rota original, conforme indica a figura, devido às condições climáticas. Mantendo uma trajetória reta, o avião voou mais uma hora com a mesma velocidade v km/h, até atingir o ponto C.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_11",
+              "widthCm": 13.94,
+              "heightCm": 5.95
+            },
+            {
+              "type": "text",
+              "value": "\n\nA distância entre os pontos A e C em quilômetros, é igual a"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "2v"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "v5"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "v6"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "v7"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "2v2"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 45,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Uma pessoa se encontra no ponto A de uma planície, às margens de um rio e vê, do outro lado do rio, o topo do mastro de uma bandeira, ponto B. Com o objetivo de determinar a altura h do mastro, ela anda, em linha reta, 50 m para a direita do ponto em que se encontrava e marca o ponto C. Sendo D o pé do mastro, avalia que os ângulos BAC e BCD valem 30º, e o ACB vale 105º, como mostra a figura:\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_12",
+              "widthCm": 12.41,
+              "heightCm": 5.16
+            },
+            {
+              "type": "text",
+              "value": "\n\nA altura h do mastro da bandeira, em metros, é"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "12,5"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "12,52"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "25"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "252"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "35"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 46,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Ao coletar os dados para um estudo topográfico da margem de um lago a partir dos pontos A, B e T, um técnico determinou as medidas AT = 32 m; BT = 13 m e ATB = 120"
+            },
+            {
+              "type": "sup",
+              "content": [
+                {
+                  "type": "text",
+                  "value": "o"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": ", representadas no esquema a seguir.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_13",
+              "widthCm": 8.52,
+              "heightCm": 6.85
+            },
+            {
+              "type": "text",
+              "value": "\n\nQual é a distância aproximada, em metros, entre os pontos A e B, definidos pelo técnico nas margens desse lago? (Considere cos 120º = –cos 60º e sen 120º = sen 60º)"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "30"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "32"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "35"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "40"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "43"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 47,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Três cidades A, B e C precisam ser interligadas para que seus moradores possam comercializar os produtos por eles produzidos. Já existem duas estradas, em linha reta, que ligam as cidades A a B e B a C, sendo que as prefeituras das cidades A e C desejam construir uma nova estrada para ligá-las. A figura abaixo mostra um levantamento topográfico feito por uma empresa de engenharia.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_14",
+              "widthCm": 7.43,
+              "heightCm": 6.16
+            },
+            {
+              "type": "text",
+              "value": "\n\nSabendo-se que as medidas determinadas pela empresa de engenharia foram AB = 100km; m("
+            },
+            {
+              "type": "image",
+              "key": "img_15",
+              "widthCm": 0.77,
+              "heightCm": 0.5
+            },
+            {
+              "type": "text",
+              "value": ")= 60"
+            },
+            {
+              "type": "sup",
+              "content": [
+                {
+                  "type": "text",
+                  "value": "0"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " e m("
+            },
+            {
+              "type": "image",
+              "key": "img_16",
+              "widthCm": 0.77,
+              "heightCm": 0.5
+            },
+            {
+              "type": "text",
+              "value": ")= 75"
+            },
+            {
+              "type": "sup",
+              "content": [
+                {
+                  "type": "text",
+                  "value": "0"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": ", a distância entre as cidades A e C que deve ser considerada para a construção de uma estrada em linha reta, para ligar estas cidades é:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "100"
+                  },
+                  {
+                    "type": "image",
+                    "key": "img_17",
+                    "widthCm": 0.5,
+                    "heightCm": 0.5
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "100"
+                  },
+                  {
+                    "type": "image",
+                    "key": "img_18",
+                    "widthCm": 0.5,
+                    "heightCm": 0.5
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "75"
+                  },
+                  {
+                    "type": "image",
+                    "key": "img_18",
+                    "widthCm": 0.5,
+                    "heightCm": 0.5
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": " 50"
+                  },
+                  {
+                    "type": "image",
+                    "key": "img_19",
+                    "widthCm": 0.5,
+                    "heightCm": 0.5
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "50"
+                  },
+                  {
+                    "type": "image",
+                    "key": "img_20",
+                    "widthCm": 0.5,
+                    "heightCm": 0.5
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 48,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Uma ponte deve ser construída sobre um rio, unindo os pontos A e B, como ilustrado na figura a seguir. Para calcular o comprimento de AB, escolhe-se um ponto C, na mesma margem em que B está, e medem-se os ângulos "
+            },
+            {
+              "type": "image",
+              "key": "img_21",
+              "widthCm": 3.81,
+              "heightCm": 0.5
+            },
+            {
+              "type": "text",
+              "value": ". Sabendo que BC mede 30 m, indique, em metros, a distância AB. (Dado: use as aproximações "
+            },
+            {
+              "type": "image",
+              "key": "img_22",
+              "widthCm": 4.82,
+              "heightCm": 0.5
+            },
+            {
+              "type": "text",
+              "value": ").\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_23",
+              "widthCm": 13.02,
+              "heightCm": 9.63
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "25"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "27"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "29"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "31"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "33"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 49,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Paulo e Marta estão brincando de jogar dardos. O alvo é um disco circular de centro O. Paulo joga um dardo, que atinge o alvo num ponto, que vamos denotar por P; em seguida, Marta joga outro dardo, que atinge um ponto denotado por M, conforme figura.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_24",
+              "widthCm": 10.5,
+              "heightCm": 5.71
+            },
+            {
+              "type": "text",
+              "value": "\n\nSabendo-se que a distância do ponto P ao centro O do alvo é "
+            },
+            {
+              "type": "image",
+              "key": "img_25",
+              "widthCm": 0.61,
+              "heightCm": 0.53
+            },
+            {
+              "type": "text",
+              "value": "   = 10 cm, que a distância de P a M é "
+            },
+            {
+              "type": "image",
+              "key": "img_26",
+              "widthCm": 0.74,
+              "heightCm": 0.53
+            },
+            {
+              "type": "text",
+              "value": "  = 14 cm e que o ângulo PÔM mede 120°, a distância, em centímetros, do ponto M ao centro O é"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "12"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "9"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "8"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "6"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "5"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 50,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Um turista em viagem a Inglaterra resolveu visitar o famoso relógio Big Bem e fez uma fotografia do mesmo.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_27",
+              "widthCm": 8.36,
+              "heightCm": 11.11
+            },
+            {
+              "type": "text",
+              "value": "\n\nAo chegar em casa, verificou que o relógio marcava exatamente 3 horas e 34 minutos, vendo isso ele resolveu calcular o menor ângulo formado pelos ponteiros do relógio que é exatamente"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "60º"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "97º"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "100º"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "101º"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "115º"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 51,
+          "stem": [
+            {
+              "type": "text",
+              "value": "O dispositivo de segurança de um cofre tem o formato da figura abaixo, onde 12 letras A, B, ..., L estão igualmente espaçadas (o ângulo central entre as duas letras vizinhas é o mesmo) e a posição inicial da seta, quando o cofre se encontra fechado, é a indicada.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_28",
+              "widthCm": 6.3,
+              "heightCm": 6.48
+            },
+            {
+              "type": "text",
+              "value": "\n\nPara abrir o cofre, são necessárias três operações (o segredo), girando o disco menor (onde a seta está gravada), de acordo com as seguintes instruções, a partir da posição indicada:\n\n1º) 2π3 no sentido anti-horário;\n\n2º) 3π2 no sentido horário;\n\n3º) 3π4 no sentido anti-horário;\n\nPode-se, então, afirmar corretamente que o cofre será aberto quando a seta estiver:\n\n "
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "no ponto médio entre L e A."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "na posição B."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "na posição K."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "em algum ponto entre J e K."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "na posição H"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 52,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Em um jogo eletrônico, o “monstro” tem a forma de um setor circular de raio 1 cm, como mostra a figura. A parte que falta no círculo é a boca do “monstro”, e o ângulo d abertura mede 1 radiano.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_29",
+              "widthCm": 5.82,
+              "heightCm": 5.34
+            },
+            {
+              "type": "text",
+              "value": "\n\nO perímetro do “monstro”, em cm, é:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "π-1"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "π+1"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "2π-1"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "2π"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "2π+1"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 53,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Nos X-Games Brasil, em maio de 2004, o skatista brasileiro Sandro Dias, apelidado “Mineirinho”, conseguiu realizar a manobra denominada “900”, na modalidade skate vertical, tornando-se o segundo atleta no mundo a conseguir esse feito. \n\nA denominação “900” refere-se ao número de graus que o atleta gira no ar em torno de seu próprio corpo, que, no caso, corresponde a."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Uma volta completa"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Uma volta e meia"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Duas voltas completa"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Duas voltas e meia"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Cinco voltas completa"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 54,
+          "stem": [
+            {
+              "type": "text",
+              "value": "O proprietário de um parque aquático deseja construir uma piscina em suas dependências. A figura representa a vista superior dessa piscina, que é formada por três setores circulares idênticos, com ângulo central igual a 60° e raio 30 m.\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_30",
+              "widthCm": 12.51,
+              "heightCm": 6.46
+            },
+            {
+              "type": "text",
+              "value": "\n\nQual a área dessa piscina, em m²? (Use π = 3)"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "150"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "300"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "450"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "900"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "1350"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        }
+      ],
+      "title": "Matemática e suas Tecnologias - Ensino Médio",
+      "_subject": "Matemática"
+    },
+    {
+      "questions": [
+        {
+          "kind": "choice",
+          "number": 55,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Durante a pandemia de COVID-19, uma fábrica de respiradores hospitalares com 15 funcionários produzia 450.000 unidades por mês. Para aumentar a produção para 1.200.000 respiradores mensais mantendo a mesma produtividade, a fábrica precisará contratar mais"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "10 funcionários."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "15 funcionários."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "20 funcionários."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "25 funcionários."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "30 funcionários."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 56,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Em uma indústria metalúrgica, 6 equipamentos, operando 10 horas por dia durante 8 dias, produzem 6 toneladas de certo produto. O número de dias necessários para produzir 9 toneladas do mesmo produto, utilizando 8 equipamentos do mesmo tipo e operando 12 horas por dia, é:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "6 dias"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "7,5 dias"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "9 dias"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "9,5 dias "
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "10 dias"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 57,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Um robô explorador de terreno foi programado para executar os seguintes passos:\n\n(1) Ande "
+            },
+            {
+              "type": "text",
+              "value": "x",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " metros em frente, em linha reta.\n\n(2) Colha uma amostra do terreno.\n\n(3) Gire 90° para a esquerda.\n\n(4) Modifique o valor de "
+            },
+            {
+              "type": "text",
+              "value": "x",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " para "
+            },
+            {
+              "type": "text",
+              "value": "2x",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ".\n\n(5) Volte para o passo (1) e repita a sequência de passos.\n\nAntes de começar a exploração, o valor inicial de "
+            },
+            {
+              "type": "text",
+              "value": "x ",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "é ajustado para 1. O robô inicia então sua exploração e, depois de colher 5 amostras do terreno, fica sem bateria e para. A distância, em metros, do ponto de partida ao de parada do robô situa-se entre"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "21 e 22"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "19 e 20"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "15 e 16"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "17 e 18"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "14 e 15"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 58,
+          "stem": [
+            {
+              "type": "text",
+              "value": " Na igualdade abaixo, a, b e c são números inteiros positivos. Podemos considerar o valor de "
+            },
+            {
+              "type": "text",
+              "value": "a",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " sendo\n\n107=a+1b+1c"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "1"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "2"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "3"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "4"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "5"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 59,
+          "stem": [
+            {
+              "type": "text",
+              "value": "A expressão 23·34-x pode ser escrita da seguinte forma:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "6-2x12"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "2-2x12"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "3-2x4"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "3-4x6"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "3+4x4"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        },
+        {
+          "kind": "choice",
+          "number": 60,
+          "stem": [
+            {
+              "type": "text",
+              "value": "No plano cartesiano, os pontos P, Q, R e S são vértices de um retângulo, tais que P(0,0) e Q(10,0). Se a soma das medidas de todos os lados desse retângulo é igual a 52, o vértice R, que está no 1º quadrante, é:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "(10; 12)"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "(8; 16)"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "(10; 16)"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "(12; 10)"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "(16; 10)"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.333333
+        }
+      ],
+      "title": "Matemática e suas Tecnologias - Ensino Médio",
+      "_subject": "Matemática Básica"
+    }
+  ]
+}

@@ -58,7 +58,7 @@ pub(super) fn layout_cloze<'a>(
             font_size,
             line_spacing,
             blank_default_cm,
-            justify: false,
+            justify: true,
         };
         let (f, h) = engine.layout(&content, FontRole::Body, &style, 0.0, local_y);
         frags.extend(f);

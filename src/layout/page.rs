@@ -1,6 +1,33 @@
 use crate::layout::fragment::Fragment;
 use crate::spec::config::PrintConfig;
 
+/// Split a list of pre-positioned fragments at a Y threshold.
+///
+/// Fragments whose top (`y`) is strictly below the threshold go into `head`.
+/// Fragments at or beyond the threshold go into `tail`, shifted up by `threshold`
+/// so they start at y=0 relative to the next column's origin.
+///
+/// Fragments that straddle the boundary (y < threshold but y+height > threshold)
+/// are kept in `head` and may overflow slightly — acceptable for text lines since
+/// a single line is at most ~15pt which is much smaller than column height.
+fn split_fragments_at(
+    fragments: Vec<Fragment>,
+    threshold: f64,
+    total_height: f64,
+) -> (Vec<Fragment>, Vec<Fragment>, f64) {
+    let mut head = Vec::new();
+    let mut tail = Vec::new();
+    for f in fragments {
+        if f.y < threshold {
+            head.push(f);
+        } else {
+            tail.push(Fragment { y: f.y - threshold, ..f });
+        }
+    }
+    let tail_height = (total_height - threshold).max(0.0);
+    (head, tail, tail_height)
+}
+
 const CM_TO_PT: f64 = 28.3465;
 /// 35 CSS-px × 0.75 pt/px = 26.25pt (matches lize CSS `column-gap: 35px`).
 const COLUMN_GAP_PT: f64 = 26.25;
@@ -200,20 +227,42 @@ impl PageComposer {
     /// Column balancing (2-column mode): after placing a block, if cursor_y
     /// has reached the halfway point of the content height and we are still in
     /// column 0, the composer advances to column 1 automatically.
-    pub fn push_block(&mut self, height: f64, mut fragments: Vec<Fragment>) {
-        // Handle overflow: try next column before starting a new page.
-        if self.cursor_y + height > self.geometry.content_height_pt {
+    pub fn push_block(&mut self, height: f64, fragments: Vec<Fragment>) {
+        // If block doesn't fit in remaining space of the current column, try the
+        // next column first (which starts fresh at column_top_y).
+        let available = self.geometry.content_height_pt - self.cursor_y;
+        if height > available && self.cursor_y > self.column_top_y {
             self.next_column();
+        }
+
+        let available = self.geometry.content_height_pt - self.cursor_y;
+        if height > available {
+            // Block is taller than the remaining column space even starting at the
+            // top: split fragments at the column boundary and recurse for the tail.
+            let (head, tail, tail_height) = split_fragments_at(fragments, available, height);
+
+            let x_off = self.col_x_offset();
+            let y_off = self.cursor_y;
+            for mut f in head {
+                f.x += x_off;
+                f.y += y_off;
+                self.current_page.push(f);
+            }
+            self.cursor_y = self.geometry.content_height_pt;
+
+            self.next_column();
+            // Recurse: handles multi-column or multi-page tall blocks.
+            self.push_block(tail_height, tail);
+            return;
         }
 
         let x_off = self.col_x_offset();
         let y_off = self.cursor_y;
-
+        let mut fragments = fragments;
         for f in &mut fragments {
             f.x += x_off;
             f.y += y_off;
         }
-
         self.current_page.extend(fragments);
         self.cursor_y += height;
 
@@ -290,6 +339,94 @@ impl PageComposer {
     }
 
     // ── Convenience helpers for the layout pipeline ───────────────────────────
+
+    /// Append a block that can be split at semantic boundaries.
+    ///
+    /// `split_points` is a sorted list of Y positions (relative to block top)
+    /// where it is safe to break the block. When the block doesn't fit in the
+    /// current column/page, the composer tries to split at the best split point
+    /// that fits, rather than moving the entire block to the next column/page.
+    ///
+    /// This maximises space utilisation: the head (stem, heading) stays in the
+    /// current column while the tail (alternatives, answer space) flows to the
+    /// next column or page.
+    ///
+    /// Fallback: if no split point fits (e.g. even the heading is taller than
+    /// available space), the block is moved entirely — same as [`push_block`].
+    pub fn push_block_splittable(
+        &mut self,
+        height: f64,
+        fragments: Vec<Fragment>,
+        split_points: &[f64],
+    ) {
+        let available = self.geometry.content_height_pt - self.cursor_y;
+
+        // Block fits entirely — place it (same as push_block).
+        if height <= available {
+            let x_off = self.col_x_offset();
+            let y_off = self.cursor_y;
+            let mut fragments = fragments;
+            for f in &mut fragments {
+                f.x += x_off;
+                f.y += y_off;
+            }
+            self.current_page.extend(fragments);
+            self.cursor_y += height;
+
+            // Two-column balancing.
+            let balance_threshold = self.column_top_y
+                + (self.geometry.content_height_pt - self.column_top_y) * 0.7;
+            if self.geometry.columns > 1
+                && self.current_col == 0
+                && self.cursor_y >= balance_threshold
+            {
+                self.next_column();
+            }
+            return;
+        }
+
+        // Block doesn't fit. Try to find a split point within available space.
+        // Minimum useful head: at least 2 text lines worth of content.
+        let min_head = 30.0_f64;
+
+        if self.cursor_y > self.column_top_y && available >= min_head {
+            // Find the largest split point that fits in available space.
+            let best_split = split_points.iter().rev()
+                .find(|&&sp| sp <= available && sp >= min_head);
+
+            if let Some(&split_y) = best_split {
+                // Split at semantic boundary.
+                let (head, tail, tail_height) =
+                    split_fragments_at(fragments, split_y, height);
+
+                // Place head in current column.
+                let x_off = self.col_x_offset();
+                let y_off = self.cursor_y;
+                for mut f in head {
+                    f.x += x_off;
+                    f.y += y_off;
+                    self.current_page.push(f);
+                }
+                self.cursor_y += split_y;
+
+                // Advance to next column/page for the tail.
+                self.next_column();
+
+                // Adjust remaining split points for the tail.
+                let tail_splits: Vec<f64> = split_points.iter()
+                    .filter(|&&sp| sp > split_y)
+                    .map(|&sp| sp - split_y)
+                    .collect();
+
+                self.push_block_splittable(tail_height, tail, &tail_splits);
+                return;
+            }
+        }
+
+        // No useful split point fits — fall back to push_block behaviour
+        // (move entire block to next column/page).
+        self.push_block(height, fragments);
+    }
 
     /// Force a page break before the next block (used by `force_page_break`
     /// on `Question` and `break_all_questions` in `PrintConfig`).
@@ -650,5 +787,68 @@ mod tests {
         let col1_frag = pages[0].last().unwrap();
         let expected_x = col_w + gap;
         assert!((col1_frag.x - expected_x).abs() < 0.001, "col 1 fragment x should be offset by col_width + gap");
+    }
+
+    // ── push_block_splittable ─────────────────────────────────────────────────
+
+    #[test]
+    fn splittable_block_that_fits_stays_on_same_page() {
+        let mut c = composer_1col();
+        c.push_block_splittable(50.0, vec![spacer(50.0)], &[25.0]);
+        let (pages, _) = c.finalize();
+        assert_eq!(pages.len(), 1, "block that fits should stay on one page");
+    }
+
+    #[test]
+    fn splittable_splits_at_semantic_point_instead_of_moving() {
+        let mut c = composer_1col();
+        let content_h = c.geometry.content_height_pt;
+        // Fill most of the page, leaving 100pt.
+        c.push_block(content_h - 100.0, vec![spacer(content_h - 100.0)]);
+        // Push a 200pt block with two fragments: one in head region, one in tail.
+        // Split point at 80pt (fits in 100pt remaining).
+        let head_frag = Fragment { x: 0.0, y: 0.0, width: 10.0, height: 70.0,
+            kind: crate::layout::fragment::FragmentKind::Spacer };
+        let tail_frag = Fragment { x: 0.0, y: 100.0, width: 10.0, height: 100.0,
+            kind: crate::layout::fragment::FragmentKind::Spacer };
+        c.push_block_splittable(200.0, vec![head_frag, tail_frag], &[80.0]);
+        let (pages, _) = c.finalize();
+        // Should split: head (80pt, 1 frag) on page 1, tail (120pt, 1 frag) on page 2.
+        assert_eq!(pages.len(), 2, "should split into two pages");
+        // Page 1: original spacer + head fragment.
+        assert_eq!(pages[0].len(), 2, "page 1 should have original block + split head");
+        // Page 2: tail fragment.
+        assert_eq!(pages[1].len(), 1, "page 2 should have split tail");
+    }
+
+    #[test]
+    fn splittable_no_split_point_fits_falls_back_to_move() {
+        let mut c = composer_1col();
+        let content_h = c.geometry.content_height_pt;
+        // Fill most of the page, leaving only 20pt (below min_head threshold).
+        c.push_block(content_h - 20.0, vec![spacer(content_h - 20.0)]);
+        // Push a 100pt block with split at 50pt. 50 > 20 available, so no split fits.
+        c.push_block_splittable(100.0, vec![spacer(100.0)], &[50.0]);
+        let (pages, _) = c.finalize();
+        // Block moves entirely to page 2 (current push_block fallback).
+        assert_eq!(pages.len(), 2, "should create second page");
+    }
+
+    #[test]
+    fn splittable_picks_largest_split_point_that_fits() {
+        let mut c = composer_1col();
+        let content_h = c.geometry.content_height_pt;
+        // Leave 150pt of space.
+        c.push_block(content_h - 150.0, vec![spacer(content_h - 150.0)]);
+        // Block with split points at 50, 100, 200. Should pick 100 (fits in 150).
+        let frag1 = Fragment { x: 0.0, y: 0.0, width: 10.0, height: 50.0,
+            kind: crate::layout::fragment::FragmentKind::Spacer };
+        let frag2 = Fragment { x: 0.0, y: 120.0, width: 10.0, height: 50.0,
+            kind: crate::layout::fragment::FragmentKind::Spacer };
+        c.push_block_splittable(250.0, vec![frag1, frag2], &[50.0, 100.0, 200.0]);
+        let (pages, _) = c.finalize();
+        assert_eq!(pages.len(), 2, "should split into two pages");
+        // frag1 (y=0) should be on page 1, frag2 (y=120) should be on page 2.
+        assert_eq!(pages[0].len(), 2, "page 1: original spacer + head frag");
     }
 }

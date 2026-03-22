@@ -202,7 +202,21 @@ fn embed_png(chunk: &mut Chunk, data: &[u8], ref_id: Ref, grayscale: bool) -> Re
             .filter(Filter::FlateDecode);
         Ok((w, h))
     } else {
-        // Convert to RGB8 (drop alpha channel if present).
+        // Composite against white before converting to RGB8.
+        // into_rgb8() drops the alpha channel, turning transparent pixels black.
+        let img = match img {
+            image::DynamicImage::ImageRgba8(rgba) => {
+                let (w, h) = rgba.dimensions();
+                let mut out = image::ImageBuffer::new(w, h);
+                for (x, y, px) in rgba.enumerate_pixels() {
+                    let a = px[3] as f32 / 255.0;
+                    let blend = |c: u8| -> u8 { (c as f32 * a + 255.0 * (1.0 - a)) as u8 };
+                    out.put_pixel(x, y, image::Rgb([blend(px[0]), blend(px[1]), blend(px[2])]));
+                }
+                image::DynamicImage::ImageRgb8(out)
+            }
+            other => other,
+        };
         let img = img.into_rgb8();
         let (w, h) = img.dimensions();
         let raw = img.into_raw();

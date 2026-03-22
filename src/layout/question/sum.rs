@@ -94,7 +94,7 @@ pub(super) fn layout_sum<'a>(
             font_size,
             line_spacing,
             blank_default_cm,
-            justify: false,
+            justify: true,
         };
         let (content_frags, content_h) =
             engine.layout(&item.content, FontRole::Body, &style, content_indent, row_top);

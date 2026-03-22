@@ -34,6 +34,9 @@ const ALT_LABEL_FONT_SCALE: f64 = 0.75;
 // Functions
 // ─────────────────────────────────────────────────────────────────────────────
 
+/// Returns `(fragments, total_height, split_points)`.
+/// `split_points` contains Y positions between alternative rows where the
+/// block can be safely split when `break_alternatives` is enabled.
 pub(super) fn layout_choice<'a>(
     choice:          &ChoiceAnswer,
     number:          u32,
@@ -45,8 +48,9 @@ pub(super) fn layout_choice<'a>(
     origin_y:        f64,
     config:          &PrintConfig,
     spc:             f64,
-) -> (Vec<Fragment>, f64) {
+) -> (Vec<Fragment>, f64, Vec<f64>) {
     let mut frags   = Vec::new();
+    let mut alt_split_points: Vec<f64> = Vec::new();
     let mut local_y = origin_y;
 
     // ── "Alternativas da questão N" label ────────────────────────────────────
@@ -92,11 +96,15 @@ pub(super) fn layout_choice<'a>(
                         resolver,
                         available_width: geometry.column_width_pt,
                         font_size, line_spacing, blank_default_cm,
-            justify: false,
+            justify: true,
                     };
                     let (f, h) = engine.layout(&content, FontRole::Body, &style, 0.0, local_y);
                     frags.extend(f);
                     local_y += h + alt_spacing_pt;
+                    // Split point between alternatives (skip last).
+                    if idx + 1 < choice.alternatives.len() {
+                        alt_split_points.push(local_y);
+                    }
                     continue;
                 }
 
@@ -111,7 +119,7 @@ pub(super) fn layout_choice<'a>(
                     resolver,
                     available_width: text_width,
                     font_size, line_spacing, blank_default_cm,
-            justify: false,
+            justify: true,
                 };
                 let text_y = row_start + row_pad + (badge_diam - font_size * line_spacing).max(0.0) / 2.0;
                 let (text_frags, text_h) = engine.layout(&alt.content, FontRole::Body, &style, content_x, text_y);
@@ -167,6 +175,11 @@ pub(super) fn layout_choice<'a>(
                 });
 
                 local_y += row_h;
+
+                // Split point between alternatives (skip last).
+                if idx + 1 < choice.alternatives.len() {
+                    alt_split_points.push(local_y);
+                }
             }
         }
 
@@ -187,7 +200,7 @@ pub(super) fn layout_choice<'a>(
                         resolver,
                         available_width:  col_width,
                         font_size, line_spacing, blank_default_cm,
-            justify: false,
+            justify: true,
                     };
                     let (f, h) = engine.layout(&content, FontRole::Body, &style, origin_x, local_y);
                     frags.extend(f);
@@ -201,7 +214,7 @@ pub(super) fn layout_choice<'a>(
     }
 
     let total_h = local_y - origin_y;
-    (frags, total_h)
+    (frags, total_h, alt_split_points)
 }
 
 /// Build the full inline content for one alternative: `"A) "` prefix + body content.

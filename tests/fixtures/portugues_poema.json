@@ -1,0 +1,2334 @@
+{
+  "_images": {
+    "img_1": "tests/fixtures/images/portugues_poema/img_1.png",
+    "img_2": "tests/fixtures/images/portugues_poema/img_2.png",
+    "img_3": "tests/fixtures/images/portugues_poema/img_3.jpg"
+  },
+  "metadata": {
+    "title": "AVALIAÇÃO DE RECUPERAÇÃO SEMESTRAL - LÍNGUA PORTUGUESA - 6º ANO"
+  },
+  "config": {
+    "columns": 1,
+    "fontSize": 12,
+    "fontFamily": "body",
+    "lineSpacing": "oneAndHalf",
+    "margins": {
+      "top": 1.5,
+      "bottom": 1.0,
+      "left": 1.5,
+      "right": 1.0
+    },
+    "discursiveLineHeight": 1.0,
+    "discursiveSpaceType": "lines",
+    "hideKnowledgeAreaName": true,
+    "forceChoicesWithStatement": 1,
+    "letterCase": "lower"
+  },
+  "header": {
+    "title": "AVALIAÇÃO DE RECUPERAÇÃO SEMESTRAL - LÍNGUA PORTUGUESA - 6º ANO",
+    "studentFields": [
+      {
+        "label": "Nome"
+      },
+      {
+        "label": "Turma",
+        "widthCm": 5
+      },
+      {
+        "label": "Data",
+        "widthCm": 4
+      },
+      {
+        "label": "Nota",
+        "widthCm": 3
+      }
+    ]
+  },
+  "sections": [
+    {
+      "questions": [
+        {
+          "kind": "choice",
+          "number": 1,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Os advérbios são palavras que modificam verbos, adjetivos ou outros advérbios, indicando circunstâncias de modo, tempo, lugar, intensidade, entre outras. Em textos reivindicatórios, eles são frequentemente usados para reforçar a urgência, necessidade ou intensidade das reivindicações. Por exemplo, em uma frase como 'Precisamos de soluções imediatamente', o advérbio 'imediatamente' destaca a urgência da ação solicitada.\n\nEm um texto reivindicatório, qual das seguintes frases usa um advérbio para enfatizar a necessidade de maneira mais urgente?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Precisamos de soluções rápidas."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Solicitamos melhoras futuramente."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Queremos mudanças amanhã."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Exigimos ação imediatamente."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 2,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Os advérbios são importantes na interpretação de textos porque podem mudar completamente o significado de uma frase. \nSabendo disso, leia a frase abaixo e analise o papel do advérbio na interpretação do texto: \"Maria canta suavemente durante o concerto\"\n\nQual é a função do advérbio 'suavemente' na frase?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Indicar o volume da voz de Maria."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Descrever a frequência com que Maria canta."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Modificar o verbo, indicando a maneira como Maria canta."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Mostrar a duração do concerto."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 3,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Os advérbios podem indicar circunstâncias de modo, tempo, lugar, intensidade, entre outras. Saber identificar o tipo de modificação que um advérbio faz é importante para compreender melhor as frases.\n\nQual dos advérbios abaixo está corretamente relacionado com o modo que ele pode modificar outros termos da oração?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Rapidamente - modo"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Amanhã - lugar"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Muito - tempo"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Fora - intensidade"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 4,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Leia:\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_1",
+              "widthCm": 22.78,
+              "heightCm": 6.22
+            },
+            {
+              "type": "text",
+              "value": "\n\nCom base na tirinha acima, assinale a alternativa correta:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A frase \"Ele pode ter relação com a realidade ou não\" é um exemplo de uma frase nominal e uma oração."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O trecho \"Pois o medo de lagartixas não tem fundamento se você não é um mosquito, claro!\" possui uma única oração, pois há apenas um verbo."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O período \"Pois o medo de lagartixas não tem fundamento se você não é um mosquito, claro!\" é composto, pois possui mais de um verbo e, portanto, mais de uma oração."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O trecho \"Ele pode ter relação com a realidade ou não\" não é uma oração, pois não tem sujeito."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 5,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Na língua portuguesa, é importante diferenciar os conceitos de frase, oração e período. Embora sejam termos relacionados, cada um possui características específicas que os distinguem. A frase é qualquer enunciado de sentido completo, podendo ou não conter um verbo. A oração é um enunciado que gira em torno de um verbo ou locução verbal. Já o período é a frase composta por uma ou mais orações.\n\nCom base nos conceitos apresentados, qual das alternativas abaixo apresenta corretamente a diferença entre frase, oração e período?"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A frase é um conjunto de períodos, a oração é um conjunto de frases, e o período é um conjunto de palavras."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A frase pode ter sentido completo sem verbo, a oração é centrada em torno de um verbo, e o período é formado por uma ou mais orações."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A frase é sempre uma oração com verbo, a oração não precisa de verbo, e o período é uma frase com múltiplos verbos."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A frase é sempre uma oração completa, a oração é uma frase incompleta, e o período é uma frase sem orações."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852,
+          "forcePageBreak": true
+        },
+        {
+          "kind": "choice",
+          "number": 6,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Associe corretamente as frases às classificações quanto ao sentido que expressam:\n\nI. Frase optativa\nII. Frase imperativa\nIII. Frase declarativa\nIV. Frase interrogativa\n\n( ) Vá com Deus!\n( ) Essa lenda é muito interessante.\n( ) Queria saber quem te contou essa lenda.\n( ) Não tenha medo da lenda do Quibungo!"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "III, I, IV, II"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "I, III, IV, II"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "II, III, I, IV"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "III, II, IV, I"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 7,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Evento acontece no Pacaembu no feriado de Corpus Christi, de 7 a 11 de junho. "
+            },
+            {
+              "type": "text",
+              "value": "No Espaço Folhinha, as crianças participarão de atividades com Marcelo Duarte, Kiusam de Oliveira e outros artistas",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ".\n\n"
+            },
+            {
+              "type": "sup",
+              "content": [
+                {
+                  "type": "text",
+                  "value": "ESPAÇO Folhinha recebe autores, palhaço, show e contação de histórias na Feira do Livro. Folha de S.Paulo, 2 jun. 2023.Disponível em: https://www1.folha.uol.com.br/. Acesso em: 6 jun. 2023.",
+                  "style": {
+                    "textAlign": "right"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": "\n\nO sujeito da oração destacada é"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "elíptico, pois não aparece na oração."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "simples, pois possui apenas um núcleo: "
+                  },
+                  {
+                    "type": "text",
+                    "value": "crianças",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "composto, pois "
+                  },
+                  {
+                    "type": "text",
+                    "value": "crianças",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": " indica mais de um núcleo."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "indeterminado, pois a quantidade de crianças é vaga."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 8,
+          "stem": [
+            {
+              "type": "text",
+              "value": "A Apple "
+            },
+            {
+              "type": "text",
+              "value": "revelou na segunda-feira (5) seus mais novos óculos de realidade mista, chamados de Vision Pro",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ". O "
+            },
+            {
+              "type": "text",
+              "value": "design",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " do dispositivo logo chamou a atenção de quem acompanhava a apresentação, gerando vários memes nas redes sociais.\n\n"
+            },
+            {
+              "type": "sup",
+              "content": [
+                {
+                  "type": "text",
+                  "value": "NOVOS óculos da Apple de R$ 17 mil viram meme nas redes sociais: 'para os olhos da Turma da Mônica'. G1, 6 jun. 2023.Disponível em: https://g1.globo.com. Acesso em: 6 jun. 2023.",
+                  "style": {
+                    "textAlign": "right"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": "\n\nO predicado em destaque tem como núcleo um"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "nome, portanto é um predicado nominal."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "verbo de ação é um nome, por isso é verbo-nominal."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "verbo que expressa ação, logo é um predicado verbal."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "verbo que indica estado, assim é um predicado nominal."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 9,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Analise as orações.\n\nArtur ganhou uma mesa enorme do pai de Guinevere.\n\nFinalmente, Gauchelot ganhou uma armadura, portanto será um verdadeiro cavaleiro.\n\nAcerca das orações, é correto afirmar que "
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "I e II são períodos simples."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "II é formado por três orações."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "I e II são períodos compostos."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "I é um período simples e II é composto."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "file",
+          "number": 10,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Considere a seguinte oração:\n\n“Os exercícios físicos nunca dá resultados imediatos.”\n\nConsiderando que o verbo do predicado concorda com o núcleo do sujeito, o período está correto ou incorreto? "
+            },
+            {
+              "type": "text",
+              "value": "Explique sua resposta.",
+              "style": {
+                "bold": true
+              }
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 11,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Observe a tirinha e responda:\n\nNa oração “O recheio é de morango!”"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "“de morango” é o predicado."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "o núcleo do sujeito composto é “recheio”."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "o predicado é composto."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "temos um predicativo do sujeito e um verbo de ligação em \"é de morango\"."
+                  }
+                ]
+              }
+            ]
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "image",
+                  "key": "img_2",
+                  "widthCm": 18.18,
+                  "heightCm": 5.32
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "TIRINHA I"
+            }
+          ],
+          "points": 1.851852
+        },
+        {
+          "kind": "file",
+          "number": 12,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Qual é "
+            },
+            {
+              "type": "text",
+              "value": "predicado",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " da oração “Você devia comer frutas no café da manhã!”\n\nO "
+            },
+            {
+              "type": "text",
+              "value": "sujeito",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " da oração “Você devia comer frutas no café da manhã” é"
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "file",
+          "number": 13,
+          "stem": [
+            {
+              "type": "text",
+              "value": "O "
+            },
+            {
+              "type": "text",
+              "value": "sujeito",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " da oração “Você devia comer frutas no café da manhã” é"
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "points": 1.785714
+        },
+        {
+          "kind": "file",
+          "number": 14,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Identifique "
+            },
+            {
+              "type": "text",
+              "value": "quantas orações",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " há no primeiro parágrafo do texto. \n\n1. Escreva a quantidade de orações que encontrou.\n\n2. reescreva separadamente cada oração.\n\n3. Anote o verbo de cada oração."
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Um nome diferente onde nasce o rio Amazonas e nos locais em que passa",
+                  "style": {
+                    "bold": true,
+                    "fontSize": 14.0,
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": " ",
+                  "style": {
+                    "fontSize": 14.0
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n"
+                },
+                {
+                  "type": "text",
+                  "value": " Em cada região, o rio recebe um nome. No local onde nasce o rio Amazonas, ele recebe o nome de Vilcanota. ",
+                  "style": {
+                    "fontSize": 14.0,
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "             Em território peruano, ele atravessa uma região belíssima, conhecida como Vale Sagrado dos Incas. Antes de chegar ao Brasil, o rio é chamado de Uicaiali, Urubamba e Marañón. Ao sair do Peru, ele ainda passa pela Colômbia, finalmente chegando ao Brasil.",
+                  "style": {
+                    "fontSize": 14.0
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "            Em terras brasileiras, o rio é batizado de Solimões e, após seu deslumbrante encontro com o rio Negro, finalmente se torna o rio Amazonas. Sua enorme foz é conhecida como Delta do Amazonas e deságua no Oceano Atlântico, entre os estados brasileiros do Pará e Amapá.",
+                  "style": {
+                    "fontSize": 14.0
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Disponível em: https://www.adventureclub.com.br/blog/descubra-onde-nasce-",
+                  "style": {
+                    "fontSize": 14.0,
+                    "textAlign": "right"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "o-rio-amazonas/ (adaptado).",
+                  "style": {
+                    "fontSize": 11.0,
+                    "textAlign": "right"
+                  }
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "TEXTO - RIO AMAZONAS"
+            }
+          ],
+          "points": 1.851852
+        },
+        {
+          "kind": "file",
+          "number": 15,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Escreva "
+            },
+            {
+              "type": "text",
+              "value": "PS",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " se no trecho houver "
+            },
+            {
+              "type": "text",
+              "value": "período",
+              "style": {
+                "bold": true,
+                "underline": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " simples",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " e "
+            },
+            {
+              "type": "text",
+              "value": "PC",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ", se houver "
+            },
+            {
+              "type": "text",
+              "value": "período",
+              "style": {
+                "bold": true,
+                "underline": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " composto",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ".\n\n(        ) Em cada região, o rio recebe um nome.\n\n(        ) Ao sair do Peru, ele ainda passa pela Colômbia. \n\n(        ) Antes de chegar ao Brasil, o rio é chamado de Uicaiali, Urubamba e Marañón.\n\n(        ) Em território peruano, ele atravessa uma região belíssima."
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 16,
+          "stem": [
+            {
+              "type": "text",
+              "value": "As frases apresentadas na lenda têm em comum o fato de possuírem o"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "sujeito não especificado, pois o assunto não está claro."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "mesmo sujeito, pois se referem à personagem Girafa."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "mesmo predicado, pois a Girafa realiza as mesmas ações."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "predicado composto apenas por fenômenos da natureza."
+                  }
+                ]
+              }
+            ]
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Lenda da Girafa",
+                  "style": {
+                    "bold": true,
+                    "color": "#462F1E",
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "     Há muito, muito tempo, a girafa era um animal igual aos outros, com um pescoço de tamanho normal.",
+                  "style": {
+                    "color": "#462F1E"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "     [...]",
+                  "style": {
+                    "color": "#462F1E"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "     Um dia, a Girafa encontrou o seu amigo Rinoceronte. [...]",
+                  "style": {
+                    "color": "#462F1E"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "     No dia seguinte, só a Girafa chegou à cabana na hora marcada.",
+                  "style": {
+                    "color": "#462F1E"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "     [...]",
+                  "style": {
+                    "color": "#462F1E"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "     A Girafa comeu sozinha uma dose preparada para dois. [...]",
+                  "style": {
+                    "color": "#462F1E"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "     A Girafa deu dois passos e comeu as suas primeiras folhas.",
+                  "style": {
+                    "color": "#462F1E"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "     [...]",
+                  "style": {
+                    "color": "#462F1E"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Disponível em: www.criandocomapego.com/lenda-da-girafa-e-sobre-como-seu-pescoco-ficou-longo. Acesso em: 13 jun. 2020.",
+                  "style": {
+                    "color": "#462F1E",
+                    "fontSize": 11.0,
+                    "textAlign": "right"
+                  }
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "TEXTO - LENDA"
+            }
+          ],
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 17,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Marque somente as afirmações "
+            },
+            {
+              "type": "text",
+              "value": "CORRETAS:",
+              "style": {
+                "bold": true
+              }
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "“Fiz minha parte do acordo.” nota-se que o sujeito é indeterminado, pois não se pode afirmar quem ele é."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Em “Desejo que tire boas notas!” temos um sujeito oculto."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Em “Os alunos do 6º ano são excelentes em Português.” o núcleo do sujeito é “6º ano”."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O predicado da oração anterior é “são excelentes em Português.”."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "No período composto “A avaliação de Português estava difícil, mas os alunos estudaram bastante, por isso, todos tiraram excelentes notas.” temos 3 sujeitos simples."
+                  }
+                ]
+              },
+              {
+                "label": "F",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Na oração “Camilly e Sofia são muito dedicadas.” temos um sujeito composto."
+                  }
+                ]
+              },
+              {
+                "label": "G",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Na oração \"Disseram que vai chover.\" nota-se que o sujeito é elíptico, pois não se pode afirmar quem ele é."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 18,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Complete as frases a seguir com os tempos do modo "
+            },
+            {
+              "type": "text",
+              "value": "subjuntivo",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ".\n\nSe você "
+            },
+            {
+              "type": "text",
+              "value": "                                 ",
+              "style": {
+                "underline": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " mais da fauna, teríamos mais espécies. (cuidar)\n\nQuando tu "
+            },
+            {
+              "type": "text",
+              "value": "                            ",
+              "style": {
+                "underline": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " mais da fauna, teremos mais espécies. (cuidar)\n\nQue nós "
+            },
+            {
+              "type": "text",
+              "value": "                                ",
+              "style": {
+                "underline": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " mais da fauna, para termos mais espécies. (cuidar)\n\n \nA forma correta dos verbos é, consecutivamente,"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "cuidasse, cuidares, cuidemos."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "cuidar, cuidaste, cuidamos."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "cuidasse, cuidarás, cuidarmos."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "cuida, cuidares, cuida."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 19,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Releia os versos “Me "
+            },
+            {
+              "type": "text",
+              "value": "bate",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " uma vontade” e “E eu "
+            },
+            {
+              "type": "text",
+              "value": "choro",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "”\n\nOs verbos destacados nos trechos estão no"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "futuro do pretérito."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "presente do indicativo."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "futuro do presente."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "pretérito imperfeito."
+                  }
+                ]
+              }
+            ]
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Meus brinquedos",
+                  "style": {
+                    "bold": true,
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n \n"
+                },
+                {
+                  "type": "text",
+                  "value": "De repente",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Ao lembrar dos brinquedos queridos",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Que ficaram esquecidos",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Dentro do armário",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Me bate uma saudade",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Me bate uma vontade",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "De voltar no tempo",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "De voltar ao passado",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Mas nada acontece",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Nada parece acontecer",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "E eu choro",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Choro como o bebê que fui",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "E a criança que quero voltar a ser",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Não quero crescer!",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Clarice Pacheco",
+                  "style": {
+                    "fontSize": 12.0
+                  }
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "Meus brinquedos"
+            }
+          ],
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 20,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Releia os versos “Me "
+            },
+            {
+              "type": "text",
+              "value": "bate",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " uma vontade” e “E eu "
+            },
+            {
+              "type": "text",
+              "value": "choro",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "”\n\nOs verbos destacados nos versos indicam"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "certeza."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "dúvida."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "ordem."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "conselho."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 21,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Veja o anúncio e responda:\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_3",
+              "widthCm": 12.04,
+              "heightCm": 7.46
+            },
+            {
+              "type": "text",
+              "value": "\n\nNo trecho “Se eu fosse um livro”, a forma verbal “fosse” está no"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "subjuntivo."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "indicativo."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "imperativo"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Infinitivo"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 22,
+          "stem": [
+            {
+              "type": "text",
+              "value": "[...]\n\nMas fica a alegria\n\nde que houve um dia\n\nem que um passarinho\n\nme "
+            },
+            {
+              "type": "text",
+              "value": "pousou",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " na mão.\n\n"
+            },
+            {
+              "type": "text",
+              "value": "Ferreira Gullar",
+              "style": {
+                "textAlign": "right"
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\nObserve o verbo “pousou” em destaque no trecho. Esse verbo mostra uma ação que"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "foi realizada no passado."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "ocorrerá uma vez no futuro."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "continua ocorrendo no presente."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "ocorreu muitas vezes no passado."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 23,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Indique o tempo e o modo verbal usado da seguinte frase:\n\n"
+            },
+            {
+              "type": "text",
+              "value": "Fazia panquecas todos os sábados.",
+              "style": {
+                "bold": true,
+                "textAlign": "center"
+              }
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": " tempo: pretérito mais-que-perfeito, modo: indicativo"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "tempo: presente, modo: subjuntivo"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "tempo: futuro do pretérito, modo: indicativo"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "tempo: pretérito imperfeito, modo: indicativo"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 24,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Considerando as frases abaixo, indique quais delas possuem o verbo no modo "
+            },
+            {
+              "type": "text",
+              "value": "subjuntivo",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ":\n\nI. Não voltem aqui!\n\nII. Se vocês voltarem…\n\nIII. Que eles voltem."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "I e II"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "I e III"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "III"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "II e III"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 25,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Escolha a opção em que os verbos completam corretamente a frase.\n\n"
+            },
+            {
+              "type": "text",
+              "value": "Sempre que eu ____________________, ele não ____________________.",
+              "style": {
+                "bold": true,
+                "textAlign": "center"
+              }
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "telefonava (pretérito imperfeito do indicativo), atenderá (futuro do presente)"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "telefono e atende (presente do indicativo)"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "telefono (presente do indicativo) e atendia (pretérito imperfeito do indicativo)"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "telefono (presente do indicativo) e atenderia (futuro do pretérito)"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 26,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Circule os verbos presentes na oração, em seguida, indique o modo verbal presente na primeira oração:\n\n"
+            },
+            {
+              "type": "text",
+              "value": "\"",
+              "style": {
+                "textAlign": "center"
+              }
+            },
+            {
+              "type": "text",
+              "value": "Se ele bebesse água",
+              "style": {
+                "bold": true,
+                "textAlign": "center"
+              }
+            },
+            {
+              "type": "text",
+              "value": ", não estaria desidratado.\"",
+              "style": {
+                "textAlign": "center"
+              }
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "infinitivo"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "imperativo"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "indicativo"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "subjuntivo"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "textual",
+          "number": 27,
+          "stem": [
+            {
+              "type": "text",
+              "value": "A frase abaixo indica a possibilidade de algo acontecer. Em que tempo e modo verbal o verbo "
+            },
+            {
+              "type": "text",
+              "value": "faltasse",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": " está conjugado?\n\n"
+            },
+            {
+              "type": "text",
+              "value": "O que você faria se faltasse luz na tua festa?",
+              "style": {
+                "textAlign": "center"
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\n_________________________________________________________________________________________"
+            }
+          ],
+          "answer": {
+            "type": "textual",
+            "lineCount": 3
+          },
+          "points": 1.0
+        },
+        {
+          "kind": "choice",
+          "number": 28,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Indique as frases cujos verbos estão no pretérito perfeito.\n\nI. Andava todos os dias.\n\nII. Andaria se pudesse.\n\nIII. Andei o dia todo.\n\nIV. Tenho andado todos os dias.\n\nV. Andarei.\n\nVI. Andara ontem.\n\nVII. Andou até sentir dor nos pés."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "I, II e III"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "III e VII"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "III e IV"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "I e VI"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "VI e VII"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        },
+        {
+          "kind": "choice",
+          "number": 29,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Marque a alternativa que apresenta a maneira em que "
+            },
+            {
+              "type": "text",
+              "value": "o modo e o tempo ficam de acordo com as frases.",
+              "style": {
+                "underline": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\n"
+            },
+            {
+              "type": "text",
+              "value": "Talvez eu passe de ano.",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\nmodo indicativo\n\nexprime certeza\n\n"
+            },
+            {
+              "type": "text",
+              "value": "Passe de ano.",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\nmodo imperativo\n\nexprime hipótese\n\n"
+            },
+            {
+              "type": "text",
+              "value": "Passarei de ano.",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\nmodo subjuntivo\n\nexprime ordem"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Talvez eu passe de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo subjuntivo\n\nexprime certeza\n\n"
+                  },
+                  {
+                    "type": "text",
+                    "value": "Passe de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo indicativo\n\nexprime hipótese\n\n"
+                  },
+                  {
+                    "type": "text",
+                    "value": "Passarei de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo imperativo\n\nexprime ordem\n\n "
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Talvez eu passe de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo indicativo\n\nexprime dúvida\n\n"
+                  },
+                  {
+                    "type": "text",
+                    "value": "Passe de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo imperativo\n\nexprime certeza\n\n"
+                  },
+                  {
+                    "type": "text",
+                    "value": "Passarei de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo subjuntivo\n\nexprime condição\n\n "
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Talvez eu passe de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo subjuntivo\n\nexprime dúvida\n\n"
+                  },
+                  {
+                    "type": "text",
+                    "value": "Passe de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo imperativo\n\nexprime ordem\n\n"
+                  },
+                  {
+                    "type": "text",
+                    "value": "Passarei de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo indicativo\n\nexprime certeza\n\n "
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Talvez eu passe de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo indicativo\n\nexprime certeza\n\n"
+                  },
+                  {
+                    "type": "text",
+                    "value": "Passe de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo imperativo\n\nexprime hipótese\n\n"
+                  },
+                  {
+                    "type": "text",
+                    "value": "Passarei de ano.",
+                    "style": {
+                      "bold": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "\n\nmodo subjuntivo\n\nexprime dúvida\n\n "
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.851852
+        }
+      ],
+      "title": "Linguagens - Ensino Fundamental",
+      "_subject": "Língua Portuguesa"
+    }
+  ]
+}

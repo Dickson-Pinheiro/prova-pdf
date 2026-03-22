@@ -123,7 +123,7 @@ pub fn layout_section_header<'a>(
             font_size,
             line_spacing,
             blank_default_cm: blank_default,
-            justify: false,
+            justify: true,
         };
         let (f, h) = engine.layout(&section.instructions, FontRole::Body, &italic_style, 0.0, local_y);
         frags.extend(f);

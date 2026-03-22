@@ -48,20 +48,20 @@ use crate::spec::style::{FontStyle, FontWeight, ResolvedStyle};
 /// Stroke width of the separator rule rendered below the question number heading.
 const QUESTION_RULE_STROKE_PT: f64 = 0.7;
 /// Vertical gap below the question separator rule before the stem.
-/// Matches lize CSS: hr margin-bottom ≈ 6pt (tightened from 1rem for space efficiency).
-const QUESTION_RULE_GAP_PT: f64 = 4.0;
+/// Matches lize CSS: hr.mb-3 = 1rem = 12pt at 12pt font.
+const QUESTION_RULE_GAP_PT: f64 = 8.0;
 /// Vertical margin inserted below the stem before the answer space.
 const STEM_BOTTOM_MARGIN_PT: f64 = 3.0;
-/// Vertical margin above and below each base-text block.
-const BASE_TEXT_V_MARGIN_PT: f64 = 3.0;
+/// Vertical margin after each BeforeQuestion base-text block.
+/// Matches lize CSS: col-12.mb-3 (1rem=12pt) + question-number-header.mt-2 (0.5rem=6pt) = 18pt.
+const BASE_TEXT_V_MARGIN_PT: f64 = 18.0;
 /// Scale factor applied to all spacings in economy mode.
 /// Reduces vertical gaps for tighter layout when economy_mode is enabled.
 const ECONOMY_FACTOR: f64 = 0.7;
 /// Horizontal gap between the question number and the start of the stem text.
 const NUMBER_STEM_GAP_PT: f64 = 4.0;
-/// Top margin before each question block (matches lize CSS `.question.mt-3` ≈ 8pt).
-/// Tightened from 12pt to reduce inter-question waste.
-const QUESTION_TOP_MARGIN_PT: f64 = 8.0;
+/// Top margin before each question block (matches lize CSS `.question.mt-3` = 1rem = 12pt at 12pt font).
+const QUESTION_TOP_MARGIN_PT: f64 = 12.0;
 /// Scale factor for the alternative letter badge size (badge side = font_size × scale).
 const ALT_BADGE_SCALE: f64 = 1.5;
 /// Gap between the right edge of the alternative badge and the content start.
@@ -94,7 +94,10 @@ impl ColumnGeometry {
 
 /// Lay out a single question block into a flat list of [`Fragment`]s.
 ///
-/// Returns `(fragments, total_height_pt)` in column-relative coordinates.
+/// Returns `(fragments, total_height_pt, split_points)` in column-relative
+/// coordinates. `split_points` is a sorted list of Y positions where the
+/// question block can be safely split across pages/columns. The `PageComposer`
+/// uses these to break questions at semantic boundaries instead of mid-content.
 ///
 /// # Parameters
 /// - `q`        — the question to render.
@@ -108,8 +111,9 @@ pub fn layout_question<'a>(
     resolver: &'a FontResolver<'a>,
     geometry: &ColumnGeometry,
     config:   &PrintConfig,
-) -> (Vec<Fragment>, f64) {
+) -> (Vec<Fragment>, f64, Vec<f64>) {
     let mut fragments: Vec<Fragment> = Vec::new();
+    let mut split_points: Vec<f64> = Vec::new();
 
     let font_size        = config.font_size;
     let line_spacing     = config.line_spacing.multiplier();
@@ -126,13 +130,14 @@ pub fn layout_question<'a>(
         cursor_y += h + BASE_TEXT_V_MARGIN_PT * spc;
     }
 
-    // ── Question heading: "Questão N" bold text + HRule ─────────────────────
-    // Matches lize HTML: <h5> heading + <hr> below.
+    // ── Question heading: "Questão N" bold text + optional score + HRule ───────
+    // Matches lize HTML: <h5> heading + score badge (right-aligned, same row) + <hr>.
     // Fixed 9pt size — always smaller than question content.
     // Uses fixed 1.2 line spacing so config.line_spacing doesn't push it away from the rule.
     let show_number = q.show_number && !config.hide_numbering;
     if show_number {
         let heading_size = 9.0;
+        let heading_y    = cursor_y;  // saved for score badge alignment
         let heading_text = format!("Questão {}", number);
         let fd     = resolver.resolve(FontRole::Question, FontWeight::Bold, FontStyle::Normal, None);
         let glyphs = shape_text(fd, &heading_text);
@@ -143,13 +148,37 @@ pub fn layout_question<'a>(
         // "Questão N" text — bold, black, left-aligned, smaller than content
         fragments.push(Fragment {
             x:      0.0,
-            y:      cursor_y,
+            y:      heading_y,
             width:  text_w,
             height: heading_size,
             kind:   FragmentKind::GlyphRun(GlyphRun::from_shaped(
                 &glyphs, heading_size, family, 1, Rc::from("#000000"), ascent,
             )),
         });
+
+        // Score badge — right-aligned on the same row as "Questão N".
+        // Matches lize HTML: score chip floated right in the heading row.
+        if config.show_score {
+            if let Some(pts) = q.points {
+                let score_text  = format_points(pts);
+                let fd_body     = resolver.resolve(FontRole::Body, FontWeight::Normal, FontStyle::Normal, None);
+                let score_glyph = shape_text(fd_body, &score_text);
+                let score_w     = shaped_text_width(&score_glyph, heading_size, fd_body.units_per_em);
+                let score_asc   = fd_body.ascender as f64 / fd_body.units_per_em as f64 * heading_size;
+                let score_fam   = Rc::from(resolver.resolve_family_name(FontRole::Body, None));
+                let score_x     = (geometry.column_width_pt - score_w).max(0.0);
+                fragments.push(Fragment {
+                    x:      score_x,
+                    y:      heading_y,
+                    width:  score_w,
+                    height: heading_size,
+                    kind:   FragmentKind::GlyphRun(GlyphRun::from_shaped(
+                        &score_glyph, heading_size, score_fam, 0, Rc::from("#000000"), score_asc,
+                    )),
+                });
+            }
+        }
+
         cursor_y += heading_size * 1.2;  // fixed spacing, independent of config.line_spacing
 
         // Full-width HRule below the heading
@@ -164,29 +193,6 @@ pub fn layout_question<'a>(
             }),
         });
         cursor_y += QUESTION_RULE_STROKE_PT + QUESTION_RULE_GAP_PT * spc;
-    }
-
-    // ── Points badge (right-aligned, same row as number) ─────────────────────
-    if config.show_score {
-        if let Some(pts) = q.points {
-            let text   = format_points(pts);
-            let fd     = resolver.resolve(FontRole::Body, FontWeight::Normal, FontStyle::Normal, None);
-            let glyphs = shape_text(fd, &text);
-            let w      = shaped_text_width(&glyphs, font_size, fd.units_per_em);
-            let ascent = fd.ascender as f64 / fd.units_per_em as f64 * font_size;
-            let family = Rc::from(resolver.resolve_family_name(FontRole::Body, None));
-            let x      = (geometry.column_width_pt - w).max(0.0);
-
-            fragments.push(Fragment {
-                x,
-                y:      cursor_y,
-                width:  w,
-                height: font_size,
-                kind:   FragmentKind::GlyphRun(GlyphRun::from_shaped(
-                    &glyphs, font_size, family, 0, Rc::from("#000000"), ascent,
-                )),
-            });
-        }
     }
 
     // ── Stem ─────────────────────────────────────────────────────────────────
@@ -212,11 +218,22 @@ pub fn layout_question<'a>(
     // Margin below stem before answer space.
     cursor_y += STEM_BOTTOM_MARGIN_PT * spc;
 
+    // Split point: after stem, before answer space.
+    // Unless force_choices_with_statement is set, this is the primary split point
+    // that allows the stem to stay on one page while alternatives go to the next.
+    if config.force_choices_with_statement == 0 {
+        split_points.push(cursor_y);
+    }
+
     // ── Answer space — TASK-015 … TASK-020 ───────────────────────────────────
     match (&q.kind, &q.answer) {
         (QuestionKind::Choice, AnswerSpace::Choice(choice_data)) => {
-            let (f, h) = choice::layout_choice(choice_data, number, resolver, geometry, font_size, line_spacing, blank_default_cm, cursor_y, config, spc);
+            let (f, h, alt_splits) = choice::layout_choice(choice_data, number, resolver, geometry, font_size, line_spacing, blank_default_cm, cursor_y, config, spc);
             fragments.extend(f);
+            // If break_alternatives is enabled, add split points between alternatives.
+            if config.break_alternatives {
+                split_points.extend(alt_splits);
+            }
             cursor_y += h;
         }
         (QuestionKind::Textual, AnswerSpace::Textual(textual_data)) => {
@@ -261,7 +278,7 @@ pub fn layout_question<'a>(
         cursor_y += h + BASE_TEXT_V_MARGIN_PT * spc;
     }
 
-    (fragments, cursor_y)
+    (fragments, cursor_y, split_points)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -315,7 +332,7 @@ fn layout_base_text<'a>(
             font_size,
             line_spacing,
             blank_default_cm,
-            justify: false,
+            justify: true,
         };
         let (f, h) = engine.layout(&bt.content, FontRole::Body, &body_style, 0.0, local_y);
         frags.extend(f);
@@ -418,7 +435,8 @@ mod tests {
         resolver: &'a FontResolver<'a>,
         width_pt: f64,
     ) -> (Vec<Fragment>, f64) {
-        layout_question(q, number, resolver, &col_geom(width_pt), &default_config())
+        let (frags, h, _) = layout_question(q, number, resolver, &col_geom(width_pt), &default_config());
+        (frags, h)
     }
 
     fn glyph_runs(frags: &[Fragment]) -> Vec<&Fragment> {
@@ -502,8 +520,8 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         let q    = simple_question("Stem.", true); // show_number = true
         let cfg  = PrintConfig { hide_numbering: true, ..PrintConfig::default() };
-        let (frags_hidden, h_hidden) = layout_question(&q, 5, &res, &col_geom(400.0), &cfg);
-        let (frags_shown,  h_shown)  = layout_question(&q, 5, &res, &col_geom(400.0), &PrintConfig::default());
+        let (frags_hidden, h_hidden, _) = layout_question(&q, 5, &res, &col_geom(400.0), &cfg);
+        let (frags_shown,  h_shown, _)  = layout_question(&q, 5, &res, &col_geom(400.0), &PrintConfig::default());
         // With numbering hidden, the stem starts at x=0
         let min_x_hidden = frags_hidden.iter().filter(|f| matches!(f.kind, FragmentKind::GlyphRun(_))).map(|f| f.x).fold(f64::INFINITY, f64::min);
         let min_x_shown  = frags_shown.iter().filter(|f| matches!(f.kind, FragmentKind::GlyphRun(_))).map(|f| f.x).fold(f64::INFINITY, f64::min);
@@ -559,8 +577,8 @@ mod tests {
         let q    = simple_question("Stem.", true);
         let geom = col_geom(400.0);
 
-        let (_, h_normal)  = layout_question(&q, 1, &res, &geom, &PrintConfig::default());
-        let (_, h_economy) = layout_question(&q, 1, &res, &geom, &PrintConfig { economy_mode: true, ..PrintConfig::default() });
+        let (_, h_normal, _)  = layout_question(&q, 1, &res, &geom, &PrintConfig::default());
+        let (_, h_economy, _) = layout_question(&q, 1, &res, &geom, &PrintConfig { economy_mode: true, ..PrintConfig::default() });
 
         assert!(h_economy < h_normal,
             "economy mode ({h_economy:.2}) should be shorter than normal ({h_normal:.2})");
@@ -577,8 +595,8 @@ mod tests {
         let cfg   = PrintConfig { show_score: true, ..PrintConfig::default() };
         let geom  = col_geom(400.0);
 
-        let (frags_with,    _) = layout_question(&q, 1, &res, &geom, &cfg);
-        let (frags_without, _) = layout_question(&q, 1, &res, &geom, &PrintConfig::default());
+        let (frags_with,    _, _) = layout_question(&q, 1, &res, &geom, &cfg);
+        let (frags_without, _, _) = layout_question(&q, 1, &res, &geom, &PrintConfig::default());
 
         assert!(glyph_runs(&frags_with).len() > glyph_runs(&frags_without).len(),
             "show_score=true should produce more GlyphRuns than without");
@@ -592,7 +610,7 @@ mod tests {
         q.points  = Some(2.0);
         let width = 400.0_f64;
         let cfg   = PrintConfig { show_score: true, ..PrintConfig::default() };
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(width), &cfg);
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(width), &cfg);
 
         // The points badge has the largest right edge (x + width).
         let max_right = frags.iter()
@@ -710,7 +728,7 @@ mod tests {
             &[("A","alfa"),("B","beta"),("C","gama"),("D","delta"),("E","épsilon")],
             AlternativeLayout::Vertical,
         );
-        let (frags, h) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, h, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
         assert!(h > 0.0, "height should be positive, got {h}");
         assert!(!frags.is_empty(), "should have fragments");
     }
@@ -720,13 +738,13 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let stem = simple_question("Qual a alternativa correta?", false);
-        let (_, h_stem) = layout_question(&stem, 1, &res, &col_geom(400.0), &default_config());
+        let (_, h_stem, _) = layout_question(&stem, 1, &res, &col_geom(400.0), &default_config());
 
         let choice = make_choice_question(
             &[("A","alfa"),("B","beta"),("C","gama"),("D","delta"),("E","épsilon")],
             AlternativeLayout::Vertical,
         );
-        let (_, h_choice) = layout_question(&choice, 1, &res, &col_geom(400.0), &default_config());
+        let (_, h_choice, _) = layout_question(&choice, 1, &res, &col_geom(400.0), &default_config());
         assert!(h_choice > h_stem,
             "choice question ({h_choice:.2}) should be taller than stem only ({h_stem:.2})");
     }
@@ -741,7 +759,7 @@ mod tests {
             &[("A","alfa"),("B","beta"),("C","gama"),("D","delta"),("E","épsilon")],
             AlternativeLayout::Horizontal,
         );
-        let (frags, h) = layout_question(&q, 1, &res, &col_geom(width), &default_config());
+        let (frags, h, _) = layout_question(&q, 1, &res, &col_geom(width), &default_config());
 
         assert!(h > 0.0, "height should be positive");
 
@@ -805,7 +823,7 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         let cfg  = PrintConfig { discursive_space_type: crate::spec::config::DiscursiveSpaceType::Lines, ..PrintConfig::default() };
         let q    = make_textual_question(Some(5), None);
-        let (frags, h) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
+        let (frags, h, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
 
         let hrules: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::HRule(_))).collect();
         assert_eq!(hrules.len(), 5, "should have exactly 5 HRules");
@@ -818,11 +836,11 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         let cfg  = PrintConfig { discursive_space_type: crate::spec::config::DiscursiveSpaceType::Lines, ..PrintConfig::default() };
 
-        let (_, h_small) = layout_question(
+        let (_, h_small, _) = layout_question(
             &make_textual_question(Some(5), Some(0.5)),
             1, &res, &col_geom(400.0), &cfg,
         );
-        let (_, h_large) = layout_question(
+        let (_, h_large, _) = layout_question(
             &make_textual_question(Some(5), Some(1.2)),
             1, &res, &col_geom(400.0), &cfg,
         );
@@ -837,7 +855,7 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         let cfg  = PrintConfig { discursive_space_type: crate::spec::config::DiscursiveSpaceType::NoBorder, ..PrintConfig::default() };
         let q    = make_textual_question(Some(5), None);
-        let (frags, h) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
+        let (frags, h, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
 
         let has_rules_or_rects = frags.iter().any(|f| matches!(
             f.kind,
@@ -853,7 +871,7 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         let cfg  = PrintConfig { discursive_space_type: crate::spec::config::DiscursiveSpaceType::Blank, ..PrintConfig::default() };
         let q    = make_textual_question(Some(5), None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
 
         let rects: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::StrokedRect(_))).collect();
         let hrules: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::HRule(_))).collect();
@@ -868,7 +886,7 @@ mod tests {
         let cfg  = PrintConfig { discursive_space_type: crate::spec::config::DiscursiveSpaceType::Lines, ..PrintConfig::default() };
         // line_count = None → should fall back to DEFAULT_LINE_COUNT (5)
         let q = make_textual_question(None, None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
         let hrules: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::HRule(_))).collect();
         assert_eq!(hrules.len(), DEFAULT_LINE_COUNT as usize,
             "missing line_count should default to {DEFAULT_LINE_COUNT}");
@@ -907,7 +925,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_cloze_question(vec![]);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let blanks: Vec<_> = frags.iter()
             .filter(|f| matches!(f.kind, FragmentKind::FilledRect(_)))
@@ -920,7 +938,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_cloze_question(vec![]);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let blank_widths: Vec<f64> = frags.iter()
             .filter(|f| matches!(f.kind, FragmentKind::FilledRect(_)))
@@ -938,7 +956,7 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_cloze_question(vec![]);
         let cfg  = PrintConfig { economy_mode: true, ..PrintConfig::default() };
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
 
         let blank_widths: Vec<f64> = frags.iter()
             .filter(|f| matches!(f.kind, FragmentKind::FilledRect(_)))
@@ -955,7 +973,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
 
-        let (_, h_no_bank) = layout_question(
+        let (_, h_no_bank, _) = layout_question(
             &make_cloze_question(vec![]),
             1, &res, &col_geom(400.0), &default_config(),
         );
@@ -964,7 +982,7 @@ mod tests {
             vec![text_inline("outra")],
             vec![text_inline("terceira")],
         ];
-        let (_, h_with_bank) = layout_question(
+        let (_, h_with_bank, _) = layout_question(
             &make_cloze_question(bank),
             1, &res, &col_geom(400.0), &default_config(),
         );
@@ -978,7 +996,7 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         // Empty word bank → no additional answer-space fragments
         let q    = make_cloze_question(vec![]);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
         // Only stem fragments (GlyphRun + FilledRect) — no numbered word-bank glyph runs
         // A crude check: no fragment with y significantly below the stem area
         let max_y = frags.iter().map(|f| f.y).fold(0.0_f64, f64::max);
@@ -997,8 +1015,8 @@ mod tests {
             AlternativeLayout::Vertical,
         );
         let geom = col_geom(400.0);
-        let (_, h_normal)  = layout_question(&q, 1, &res, &geom, &PrintConfig::default());
-        let (_, h_economy) = layout_question(&q, 1, &res, &geom,
+        let (_, h_normal, _)  = layout_question(&q, 1, &res, &geom, &PrintConfig::default());
+        let (_, h_economy, _) = layout_question(&q, 1, &res, &geom,
             &PrintConfig { economy_mode: true, ..PrintConfig::default() });
         assert!(h_economy < h_normal,
             "economy mode ({h_economy:.2}) should be shorter than normal ({h_normal:.2})");
@@ -1035,7 +1053,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_sum_question(&[1, 2, 4, 8, 16], true);
-        let (frags, h) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, h, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         assert!(h > 0.0, "height should be positive, got {h}");
         assert!(!frags.is_empty(), "should have fragments");
@@ -1046,7 +1064,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_sum_question(&[1, 2, 4, 8, 16], false);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let rects: Vec<_> = frags.iter()
             .filter(|f| matches!(f.kind, FragmentKind::StrokedRect(_)))
@@ -1062,8 +1080,8 @@ mod tests {
         let q_with    = make_sum_question(&[1, 2, 4, 8, 16], true);
         let q_without = make_sum_question(&[1, 2, 4, 8, 16], false);
 
-        let (frags_with, h_with)       = layout_question(&q_with,    1, &res, &col_geom(400.0), &default_config());
-        let (frags_without, h_without) = layout_question(&q_without, 1, &res, &col_geom(400.0), &default_config());
+        let (frags_with, h_with, _)       = layout_question(&q_with,    1, &res, &col_geom(400.0), &default_config());
+        let (frags_without, h_without, _) = layout_question(&q_without, 1, &res, &col_geom(400.0), &default_config());
 
         let rects_with    = frags_with.iter().filter(|f| matches!(f.kind, FragmentKind::StrokedRect(_))).count();
         let rects_without = frags_without.iter().filter(|f| matches!(f.kind, FragmentKind::StrokedRect(_))).count();
@@ -1078,7 +1096,7 @@ mod tests {
         let res   = FontResolver::new(&reg, &rules);
         let width = 400.0_f64;
         let q     = make_sum_question(&[1, 2, 4, 8, 16], false);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(width), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(width), &default_config());
 
         // The rightmost GlyphRun right-edges are the value labels.
         let max_right = frags.iter()
@@ -1107,10 +1125,10 @@ mod tests {
             }),
             ..simple_question(stem_text, false)
         };
-        let (_, h_stem) = layout_question(&stem_only, 1, &res, &col_geom(400.0), &default_config());
+        let (_, h_stem, _) = layout_question(&stem_only, 1, &res, &col_geom(400.0), &default_config());
 
         let sum = make_sum_question(&[1, 2, 4, 8, 16], true);
-        let (_, h_sum) = layout_question(&sum, 1, &res, &col_geom(400.0), &default_config());
+        let (_, h_sum, _) = layout_question(&sum, 1, &res, &col_geom(400.0), &default_config());
 
         assert!(h_sum > h_stem, "sum question ({h_sum:.2}) should be taller than stem alone ({h_stem:.2})");
     }
@@ -1142,7 +1160,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_essay_question(Some(5), None);
-        let (frags, h) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, h, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let hrules: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::HRule(_))).collect();
         assert_eq!(hrules.len(), 5, "should have exactly 5 HRules, got {}", hrules.len());
@@ -1156,7 +1174,7 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         let height_cm = 5.0_f64;
         let q    = make_essay_question(None, Some(height_cm));
-        let (frags, h) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, h, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let rects: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::StrokedRect(_))).collect();
         assert_eq!(rects.len(), 1, "height_cm should produce exactly 1 StrokedRect");
@@ -1175,7 +1193,7 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         // Both set — height_cm wins
         let q    = make_essay_question(Some(10), Some(3.0));
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let hrules = frags.iter().filter(|f| matches!(f.kind, FragmentKind::HRule(_))).count();
         let rects  = frags.iter().filter(|f| matches!(f.kind, FragmentKind::StrokedRect(_))).count();
@@ -1188,7 +1206,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_essay_question(None, None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let hrules = frags.iter().filter(|f| matches!(f.kind, FragmentKind::HRule(_))).count();
         assert_eq!(hrules, DEFAULT_LINE_COUNT as usize,
@@ -1199,8 +1217,8 @@ mod tests {
     fn essay_height_cm_taller_than_line_count() {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
-        let (_, h_lines) = layout_question(&make_essay_question(Some(5), None),    1, &res, &col_geom(400.0), &default_config());
-        let (_, h_box)   = layout_question(&make_essay_question(None, Some(10.0)), 1, &res, &col_geom(400.0), &default_config());
+        let (_, h_lines, _) = layout_question(&make_essay_question(Some(5), None),    1, &res, &col_geom(400.0), &default_config());
+        let (_, h_box, _)   = layout_question(&make_essay_question(None, Some(10.0)), 1, &res, &col_geom(400.0), &default_config());
         assert!(h_box > h_lines,
             "10cm box ({h_box:.2}) should be taller than 5-line essay ({h_lines:.2})");
     }
@@ -1231,7 +1249,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_draft_question(3, None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let gray_hrules: Vec<_> = frags.iter().filter(|f| {
             matches!(&f.kind, FragmentKind::HRule(r) if r.color == "#AAAAAA")
@@ -1244,7 +1262,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_draft_question(3, None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         // The "Rascunho" label is a GlyphRun at 8pt.
         let label_runs: Vec<_> = frags.iter().filter(|f| {
@@ -1259,8 +1277,8 @@ mod tests {
         let res  = FontResolver::new(&reg, &rules);
         let no_draft = make_draft_question(0, None);
         let with_draft = make_draft_question(3, None);
-        let (_, h_no)   = layout_question(&no_draft,   1, &res, &col_geom(400.0), &default_config());
-        let (_, h_with) = layout_question(&with_draft, 1, &res, &col_geom(400.0), &default_config());
+        let (_, h_no, _)   = layout_question(&no_draft,   1, &res, &col_geom(400.0), &default_config());
+        let (_, h_with, _) = layout_question(&with_draft, 1, &res, &col_geom(400.0), &default_config());
         assert!(h_with > h_no, "draft lines should increase total height");
     }
 
@@ -1269,7 +1287,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_draft_question(0, None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let gray_hrules = frags.iter().filter(|f| {
             matches!(&f.kind, FragmentKind::HRule(r) if r.color == "#AAAAAA")
@@ -1281,8 +1299,8 @@ mod tests {
     fn draft_line_height_affects_block_height() {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
-        let (_, h_small) = layout_question(&make_draft_question(3, Some(0.5)), 1, &res, &col_geom(400.0), &default_config());
-        let (_, h_large) = layout_question(&make_draft_question(3, Some(1.5)), 1, &res, &col_geom(400.0), &default_config());
+        let (_, h_small, _) = layout_question(&make_draft_question(3, Some(0.5)), 1, &res, &col_geom(400.0), &default_config());
+        let (_, h_large, _) = layout_question(&make_draft_question(3, Some(1.5)), 1, &res, &col_geom(400.0), &default_config());
         assert!(h_large > h_small, "larger draft_line_height should produce taller block");
     }
 
@@ -1298,7 +1316,7 @@ mod tests {
         // Give it 5 textual answer lines so the answer space has a known max y.
         q.answer = AnswerSpace::Textual(TextualAnswer { line_count: Some(5), blank_height_cm: None, line_height_cm: None });
 
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
 
         let answer_hrules: Vec<f64> = frags.iter()
             .filter(|f| matches!(&f.kind, FragmentKind::HRule(r) if r.color == "#000000"))
@@ -1342,7 +1360,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_file_question(None);
-        let (frags, h) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, h, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let dashed: Vec<_> = frags.iter().filter(|f| {
             matches!(&f.kind, FragmentKind::StrokedRect(r) if r.dash.is_some())
@@ -1357,7 +1375,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_file_question(None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let runs: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::GlyphRun(_))).collect();
         assert!(!runs.is_empty(), "should have at least one GlyphRun for the label");
@@ -1368,7 +1386,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_file_question(Some("Faça o upload do PDF"));
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let runs: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::GlyphRun(_))).collect();
         assert!(!runs.is_empty(), "custom label should produce a GlyphRun");
@@ -1379,7 +1397,7 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
         let q    = make_file_question(None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
 
         let icons: Vec<_> = frags.iter().filter(|f| matches!(f.kind, FragmentKind::FilledRect(_))).collect();
         assert_eq!(icons.len(), 1, "should have exactly 1 FilledRect icon placeholder");
@@ -1391,12 +1409,85 @@ mod tests {
         let res   = FontResolver::new(&reg, &rules);
         let width = 400.0_f64;
         let q     = make_file_question(None);
-        let (frags, _) = layout_question(&q, 1, &res, &col_geom(width), &default_config());
+        let (frags, _, _) = layout_question(&q, 1, &res, &col_geom(width), &default_config());
 
         let border = frags.iter().find(|f| {
             matches!(&f.kind, FragmentKind::StrokedRect(r) if r.dash.is_some())
         }).expect("dashed border fragment");
         assert!((border.width - width).abs() < 0.5,
             "border width {:.2} should equal column width {width:.2}", border.width);
+    }
+
+    // ── Split points ──────────────────────────────────────────────────────────
+
+    #[test]
+    fn choice_question_has_split_point_after_stem() {
+        use crate::spec::answer::{Alternative, ChoiceAnswer};
+        let (reg, rules) = make_resolver_and_rules();
+        let res = FontResolver::new(&reg, &rules);
+        let q = Question {
+            kind: QuestionKind::Choice,
+            stem: vec![text_inline("Stem text here.")],
+            answer: AnswerSpace::Choice(ChoiceAnswer {
+                alternatives: vec![
+                    Alternative { label: String::new(), content: vec![text_inline("Alt A")] },
+                    Alternative { label: String::new(), content: vec![text_inline("Alt B")] },
+                ],
+                layout: crate::spec::answer::AlternativeLayout::Vertical,
+            }),
+            ..simple_question("", true)
+        };
+        let (_, _, split_points) = layout_question(&q, 1, &res, &col_geom(400.0), &default_config());
+        assert!(!split_points.is_empty(), "choice question should have at least one split point");
+        // The split point should be after heading + stem, before alternatives.
+        assert!(split_points[0] > 20.0, "split point should be after heading+stem (got {:.1})", split_points[0]);
+    }
+
+    #[test]
+    fn force_choices_with_statement_removes_stem_split_point() {
+        use crate::spec::answer::{Alternative, ChoiceAnswer};
+        let (reg, rules) = make_resolver_and_rules();
+        let res = FontResolver::new(&reg, &rules);
+        let q = Question {
+            kind: QuestionKind::Choice,
+            stem: vec![text_inline("Stem text.")],
+            answer: AnswerSpace::Choice(ChoiceAnswer {
+                alternatives: vec![
+                    Alternative { label: String::new(), content: vec![text_inline("Alt A")] },
+                ],
+                layout: crate::spec::answer::AlternativeLayout::Vertical,
+            }),
+            ..simple_question("", true)
+        };
+        let cfg = PrintConfig { force_choices_with_statement: 1, ..default_config() };
+        let (_, _, split_points) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
+        // With force_choices_with_statement, no split point between stem and alternatives.
+        assert!(split_points.is_empty(),
+            "force_choices_with_statement should suppress the stem-alternatives split point");
+    }
+
+    #[test]
+    fn break_alternatives_adds_per_alternative_split_points() {
+        use crate::spec::answer::{Alternative, ChoiceAnswer};
+        let (reg, rules) = make_resolver_and_rules();
+        let res = FontResolver::new(&reg, &rules);
+        let q = Question {
+            kind: QuestionKind::Choice,
+            stem: vec![text_inline("Stem.")],
+            answer: AnswerSpace::Choice(ChoiceAnswer {
+                alternatives: vec![
+                    Alternative { label: String::new(), content: vec![text_inline("A")] },
+                    Alternative { label: String::new(), content: vec![text_inline("B")] },
+                    Alternative { label: String::new(), content: vec![text_inline("C")] },
+                ],
+                layout: crate::spec::answer::AlternativeLayout::Vertical,
+            }),
+            ..simple_question("", true)
+        };
+        let cfg = PrintConfig { break_alternatives: true, ..default_config() };
+        let (_, _, split_points) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
+        // Should have: 1 stem split + 2 alternative splits (between A-B and B-C).
+        assert!(split_points.len() >= 3,
+            "break_alternatives should produce split points between alternatives, got {}", split_points.len());
     }
 }

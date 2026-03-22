@@ -27,9 +27,11 @@ use crate::spec::style::ResolvedStyle;
 // Layout constants
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Scale factor applied to the title/attribution relative to body font size.
+/// Scale factor applied to the attribution line relative to body font size.
 const SMALL_FACTOR: f64 = 0.9;
-/// Vertical gap between stacked base-text sub-blocks (title → content → attribution).
+/// Vertical gap between the title and the content body (matches lize h6 block spacing).
+const TITLE_CONTENT_GAP_PT: f64 = 6.0;
+/// Vertical gap between the content body and the attribution line.
 const INNER_V_GAP_PT: f64 = 2.0;
 /// Horizontal gap between the two columns in a side-by-side layout.
 const SIDE_GAP_PT: f64 = 8.0;
@@ -62,29 +64,37 @@ pub fn render_base_text<'a>(
     let mut frags   = Vec::new();
     let mut local_y = origin_y;
 
-    let small_size  = font_size * SMALL_FACTOR;
-    let small_style = ResolvedStyle {
+    let small_size   = font_size * SMALL_FACTOR;
+    let small_style  = ResolvedStyle {
         font_size:  small_size,
         font_style: crate::spec::style::FontStyle::Italic,
         line_spacing,
         ..ResolvedStyle::default()
     };
-    let body_style = ResolvedStyle { font_size, line_spacing, ..ResolvedStyle::default() };
+    let body_style   = ResolvedStyle { font_size, line_spacing, ..ResolvedStyle::default() };
+    // Title style: bold, same font size, uppercase — matches lize h6.text-uppercase.font-weight-bold.
+    let title_style  = ResolvedStyle {
+        font_size,
+        font_weight: crate::spec::style::FontWeight::Bold,
+        line_spacing,
+        ..ResolvedStyle::default()
+    };
 
     // ── Optional title ───────────────────────────────────────────────────────
     if let Some(ref title) = bt.title {
         let engine = InlineLayoutEngine {
             resolver,
             available_width:  width_pt,
-            font_size:        small_size,
+            font_size,
             line_spacing,
             blank_default_cm,
             justify: false,
         };
-        let content = vec![InlineContent::Text(InlineText { value: title.clone(), style: None })];
-        let (f, h) = engine.layout(&content, FontRole::Body, &small_style, origin_x, local_y);
+        let title_upper = title.to_uppercase();
+        let content = vec![InlineContent::Text(InlineText { value: title_upper, style: None })];
+        let (f, h) = engine.layout(&content, FontRole::Body, &title_style, origin_x, local_y);
         frags.extend(f);
-        local_y += h + INNER_V_GAP_PT;
+        local_y += h + TITLE_CONTENT_GAP_PT;
     }
 
     // ── Content ──────────────────────────────────────────────────────────────
@@ -95,7 +105,7 @@ pub fn render_base_text<'a>(
             font_size,
             line_spacing,
             blank_default_cm,
-            justify: false,
+            justify: true,
         };
         let (f, h) = engine.layout(&bt.content, FontRole::Body, &body_style, origin_x, local_y);
         frags.extend(f);
@@ -165,7 +175,7 @@ pub fn layout_side_by_side<'a>(
 
     // ── Render question in its half ──────────────────────────────────────────
     let q_col = ColumnGeometry { column_width_pt: half_w };
-    let (q_frags, q_height) = layout_question(question, number, resolver, &q_col, config);
+    let (q_frags, q_height, _split_points) = layout_question(question, number, resolver, &q_col, config);
 
     // ── Determine x offsets for each half ───────────────────────────────────
     let (bt_x, q_x) = match position {

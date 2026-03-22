@@ -85,7 +85,23 @@ pub fn render(
     } else {
         spec.config.clone()
     };
-    let resolver = FontResolver::new(&ctx.registry, &ctx.rules);
+    // When PrintConfig.font_family is something other than the sentinel "body",
+    // propagate it to all text roles so every layout engine picks the right
+    // family without needing explicit style overrides at each call site.
+    let effective_rules;
+    let rules_ref = if effective_config.font_family != "body" {
+        effective_rules = {
+            let mut r = ctx.rules.clone();
+            r.body     = effective_config.font_family.clone();
+            r.heading  = effective_config.font_family.clone();
+            r.question = effective_config.font_family.clone();
+            r
+        };
+        &effective_rules
+    } else {
+        &ctx.rules
+    };
+    let resolver = FontResolver::new(&ctx.registry, rules_ref);
     let geometry = PageGeometry::from_config(&effective_config);
     let pages    = layout_exam(spec, &effective_config, &resolver, &geometry, &ctx.images)?;
 
@@ -153,12 +169,12 @@ fn layout_exam(
             // Essay questions always span full width (redação ocupa a folha inteira).
             let fw = question.full_width || question.kind == QuestionKind::Essay;
             let col_geom = composer.column_geom_for(fw);
-            let (frags, height) = layout_question(question, q_number, resolver, &col_geom, config);
+            let (frags, height, split_points) = layout_question(question, q_number, resolver, &col_geom, config);
 
             if fw {
                 composer.push_block_full_width(height, frags);
             } else {
-                composer.push_block(height, frags);
+                composer.push_block_splittable(height, frags, &split_points);
             }
 
             q_number += 1;

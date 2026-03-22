@@ -45,6 +45,7 @@ struct InlineAtom {
     soft_break: bool,
     /// Must start a new line after this atom (e.g., mandatory break from \n).
     hard_break: bool,
+    text_align: crate::spec::style::TextAlign,
     kind: AtomKind,
 }
 
@@ -62,8 +63,9 @@ enum AtomKind {
         color:    String,
     },
     Image {
-        key:       String,
-        height_pt: f64,
+        key:        String,
+        height_pt:  f64,
+        padding_pt: f64,
     },
     /// Pre-laid-out sub/superscript block (coordinates relative to origin (0,0)).
     SubSup {
@@ -156,16 +158,23 @@ impl<'a> InlineLayoutEngine<'a> {
         // ── Render lines ──────────────────────────────────────────────────────
         let mut all_frags = Vec::new();
         let total_lines = lines.len();
+        // Each line height is at least line_height_pt, but expands when a line
+        // contains a tall element (e.g. an image taller than the normal line height).
+        let mut cursor_y = origin_y;
 
         for (line_idx, indices) in lines.iter().enumerate() {
             if indices.is_empty() {
                 continue;
             }
 
-            let line_y      = origin_y + line_idx as f64 * line_height_pt;
+            let line_y      = cursor_y;
             let line_ascent = indices.iter()
                 .map(|&i| atoms[i].ascent_pt)
                 .fold(0.0_f64, f64::max);
+            let line_descent = indices.iter()
+                .map(|&i| atoms[i].descent_pt)
+                .fold(0.0_f64, f64::max);
+            let this_line_height = line_height_pt.max(line_ascent + line_descent);
             let baseline_y  = line_y + line_ascent;
             let mut cursor_x = origin_x;
 
@@ -191,19 +200,61 @@ impl<'a> InlineLayoutEngine<'a> {
                 0.0
             };
 
+            // Center a line that contains only a single image atom.
+            // Zero-width atoms (hard-break newlines) are ignored — they land on
+            // the same line as the image when the image is the first or last atom
+            // in the content, but carry no visual width and must not block centering.
+            let image_on_line: Vec<usize> = indices.iter()
+                .copied()
+                .filter(|&i| matches!(atoms[i].kind, AtomKind::Image { .. }))
+                .collect();
+            let sole_image = image_on_line.len() == 1
+                && indices.iter().all(|&i| {
+                    matches!(atoms[i].kind, AtomKind::Image { .. })
+                        || atoms[i].width_pt == 0.0
+                });
+            if sole_image {
+                let img_w = atoms[image_on_line[0]].width_pt;
+                cursor_x = origin_x + ((self.available_width - img_w) / 2.0).max(0.0);
+            }
+
+            // Line text alignment: use the text_align of the first visible (non-zero-width) atom.
+            // This supports center and right alignment for poem verses, attributions, etc.
+            use crate::spec::style::TextAlign;
+            let line_text_align = indices.iter()
+                .find(|&&i| atoms[i].width_pt > 0.0 && !atoms[i].hard_break)
+                .map(|&i| atoms[i].text_align)
+                .unwrap_or(TextAlign::Left);
+
+            if !sole_image {
+                match line_text_align {
+                    TextAlign::Center => {
+                        let line_width: f64 = indices.iter().map(|&i| atoms[i].width_pt).sum();
+                        cursor_x = origin_x + ((self.available_width - line_width) / 2.0).max(0.0);
+                    }
+                    TextAlign::Right => {
+                        let line_width: f64 = indices.iter().map(|&i| atoms[i].width_pt).sum();
+                        cursor_x = origin_x + (self.available_width - line_width).max(0.0);
+                    }
+                    _ => {} // Left and Justified use existing logic
+                }
+            }
+
             for &i in indices {
                 let atom = &atoms[i];
                 // Add justify gap before soft-break atoms (word starts).
-                if atom.soft_break && extra_per_gap > 0.0 {
+                if atom.soft_break && extra_per_gap > 0.0 && !sole_image {
                     cursor_x += extra_per_gap;
                 }
                 let frags = self.render_atom(atom, cursor_x, line_y, line_ascent, baseline_y);
                 all_frags.extend(frags);
                 cursor_x += atom.width_pt;
             }
+
+            cursor_y += this_line_height;
         }
 
-        let total_height = lines.len() as f64 * line_height_pt;
+        let total_height = cursor_y - origin_y;
         (all_frags, total_height)
     }
 
@@ -237,11 +288,17 @@ impl<'a> InlineLayoutEngine<'a> {
                     let color: Rc<str>   = Rc::from(color_to_css(merged.color));
                     let font_size = merged.font_size.unwrap_or(self.font_size);
 
+                    let before = atoms.len();
                     self.text_to_atoms(
                         &t.value, font_data, family, variant,
                         font_size, color,
                         &mut atoms, &mut is_first,
                     );
+                    // Apply text_align to all newly created atoms
+                    let ta = merged.text_align;
+                    for atom in &mut atoms[before..] {
+                        atom.text_align = ta;
+                    }
                 }
 
                 InlineContent::Blank(b) => {
@@ -254,6 +311,7 @@ impl<'a> InlineLayoutEngine<'a> {
                         descent_pt: font_size * 0.2,
                         soft_break: !is_first,
                         hard_break: false,
+                        text_align: crate::spec::style::TextAlign::Left,
                         kind: AtomKind::Blank { width_pt, color },
                     });
                     is_first = false;
@@ -271,6 +329,7 @@ impl<'a> InlineLayoutEngine<'a> {
                         descent_pt: sub_ascent + delta,
                         soft_break: false, // sub/sup sticks to the preceding run
                         hard_break: false,
+                        text_align: crate::spec::style::TextAlign::Left,
                         kind: AtomKind::SubSup {
                             frags, width_pt: w,
                             baseline_delta_pt: delta,
@@ -294,6 +353,7 @@ impl<'a> InlineLayoutEngine<'a> {
                         descent_pt: self.font_size * 0.2,
                         soft_break: false,
                         hard_break: false,
+                        text_align: crate::spec::style::TextAlign::Left,
                         kind: AtomKind::SubSup {
                             frags, width_pt: w,
                             baseline_delta_pt: delta,
@@ -304,17 +364,26 @@ impl<'a> InlineLayoutEngine<'a> {
                 }
 
                 InlineContent::Image(img) => {
-                    let height_pt = img.height_cm.unwrap_or(2.0) * CM_TO_PT;
-                    let width_pt  = img.width_cm
+                    let raw_h = img.height_cm.unwrap_or(2.0) * CM_TO_PT;
+                    let raw_w = img.width_cm
                         .map(|w| w * CM_TO_PT)
-                        .unwrap_or(height_pt);
+                        .unwrap_or(raw_h);
+                    // Clamp to available column width, scaling height proportionally.
+                    let (width_pt, height_pt) = if raw_w > self.available_width {
+                        let scale = self.available_width / raw_w;
+                        (self.available_width, raw_h * scale)
+                    } else {
+                        (raw_w, raw_h)
+                    };
+                    let padding_pt = 0.15 * CM_TO_PT; // ~4pt vertical breathing room
                     atoms.push(InlineAtom {
                         width_pt,
-                        ascent_pt:  height_pt,
-                        descent_pt: 0.0,
+                        ascent_pt:  height_pt + padding_pt,
+                        descent_pt: padding_pt,
                         soft_break: !is_first,
                         hard_break: false,
-                        kind: AtomKind::Image { key: img.key.clone(), height_pt },
+                        text_align: crate::spec::style::TextAlign::Left,
+                        kind: AtomKind::Image { key: img.key.clone(), height_pt, padding_pt },
                     });
                     is_first = false;
                 }
@@ -337,6 +406,7 @@ impl<'a> InlineLayoutEngine<'a> {
                             descent_pt: d,
                             soft_break: !is_first,
                             hard_break: false,
+                            text_align: crate::spec::style::TextAlign::Left,
                             kind: AtomKind::Math { result, font_family, display: m.display },
                         });
                         is_first = false;
@@ -369,6 +439,9 @@ impl<'a> InlineLayoutEngine<'a> {
         let ascent_pt  = font_data.ascender  as f64 / font_data.units_per_em as f64 * font_size;
         let descent_pt = (-font_data.descender as f64) / font_data.units_per_em as f64 * font_size;
         let upm        = font_data.units_per_em;
+        // Pre-compute once: used inside the hot segment loop.
+        let text_len         = text.len();
+        let text_ends_newline = text.ends_with('\n');
         let mut seg_start  = 0usize;
         let mut first_seg  = true;
 
@@ -376,28 +449,51 @@ impl<'a> InlineLayoutEngine<'a> {
             if pos <= seg_start {
                 continue;
             }
-            let seg    = &text[seg_start..pos];
+            let seg_raw = &text[seg_start..pos];
+            // Treat as a hard break when:
+            //   (a) the break is caused by a \n *inside* the string (pos < len), OR
+            //   (b) the entire text node ends with \n — this covers standalone "\n"
+            //       nodes and text values like "Texto I\n" that TinyMCE emits as
+            //       separate inline-content items. Without (b), those nodes would
+            //       produce no line break and adjacent text would run together.
+            let is_hard = matches!(opp, BreakOpportunity::Mandatory)
+                && (pos < text_len || text_ends_newline);
+            // Strip trailing newlines before shaping: U+000A has no font glyph
+            // and would render as a missing-glyph box (□).
+            let seg = seg_raw.trim_end_matches('\n');
             let glyphs = shape_text(font_data, seg);
             let w      = shaped_text_width(&glyphs, font_size, upm);
+            let soft   = !(*is_first && first_seg);
 
-            atoms.push(InlineAtom {
-                width_pt:   w,
-                ascent_pt,
-                descent_pt,
-                soft_break: !(*is_first && first_seg),
-                // unicode-linebreak always emits Mandatory at pos == text.len()
-                // (end-of-string). Only treat as hard_break when the break is
-                // caused by an embedded newline character *inside* the text.
-                hard_break: matches!(opp, BreakOpportunity::Mandatory) && pos < text.len(),
-                kind: AtomKind::Text {
-                    glyphs,
-                    font_family: font_family.clone(),
-                    variant,
-                    font_size,
-                    units_per_em: upm,
-                    color: color.clone(),
-                },
-            });
+            if w > self.available_width && !seg.is_empty() {
+                // Word wider than one full line — hyphenate it.
+                self.push_hyphenated(
+                    seg, glyphs, font_data,
+                    font_family.clone(), variant, font_size, color.clone(),
+                    ascent_pt, descent_pt,
+                    is_hard,   // trailing_hard_break
+                    soft,      // first_piece_soft
+                    crate::spec::style::TextAlign::Left,
+                    atoms,
+                );
+            } else {
+                atoms.push(InlineAtom {
+                    width_pt:   w,
+                    ascent_pt,
+                    descent_pt,
+                    soft_break: soft,
+                    hard_break: is_hard,
+                    text_align: crate::spec::style::TextAlign::Left,
+                    kind: AtomKind::Text {
+                        glyphs,
+                        font_family: font_family.clone(),
+                        variant,
+                        font_size,
+                        units_per_em: upm,
+                        color: color.clone(),
+                    },
+                });
+            }
 
             first_seg = false;
             seg_start = pos;
@@ -408,25 +504,157 @@ impl<'a> InlineLayoutEngine<'a> {
             let seg    = &text[seg_start..];
             let glyphs = shape_text(font_data, seg);
             let w      = shaped_text_width(&glyphs, font_size, upm);
-            atoms.push(InlineAtom {
-                width_pt:   w,
-                ascent_pt,
-                descent_pt,
-                soft_break: !(*is_first && first_seg),
-                hard_break: false,
-                kind: AtomKind::Text {
-                    glyphs,
-                    font_family,
-                    variant,
-                    font_size,
-                    units_per_em: upm,
-                    color,
-                },
-            });
+            let soft   = !(*is_first && first_seg);
+
+            if w > self.available_width && !seg.is_empty() {
+                self.push_hyphenated(
+                    seg, glyphs, font_data,
+                    font_family, variant, font_size, color,
+                    ascent_pt, descent_pt,
+                    false,  // trailing_hard_break
+                    soft,
+                    crate::spec::style::TextAlign::Left,
+                    atoms,
+                );
+            } else {
+                atoms.push(InlineAtom {
+                    width_pt:   w,
+                    ascent_pt,
+                    descent_pt,
+                    soft_break: soft,
+                    hard_break: false,
+                    text_align: crate::spec::style::TextAlign::Left,
+                    kind: AtomKind::Text {
+                        glyphs,
+                        font_family,
+                        variant,
+                        font_size,
+                        units_per_em: upm,
+                        color,
+                    },
+                });
+            }
         }
 
         if !first_seg {
             *is_first = false;
+        }
+    }
+
+    // ── Hyphenation helper ────────────────────────────────────────────────────
+
+    /// Emit atoms for a text segment that is wider than `available_width`.
+    ///
+    /// Splits the segment greedily into pieces that fit on a single line,
+    /// appending a "-" glyph at each break point.  The last piece carries the
+    /// original `trailing_hard_break` flag; all intermediate pieces receive
+    /// `hard_break = true` so the line-fill algorithm closes the line after the
+    /// hyphenated prefix and opens a fresh one for the continuation.
+    #[allow(clippy::too_many_arguments)]
+    fn push_hyphenated(
+        &self,
+        seg:                 &str,
+        glyphs:              Vec<ShapedGlyph>,
+        font_data:           &FontData,
+        font_family:         Rc<str>,
+        variant:             u8,
+        font_size:           f64,
+        color:               Rc<str>,
+        ascent_pt:           f64,
+        descent_pt:          f64,
+        trailing_hard_break: bool,
+        first_piece_soft:    bool,
+        text_align:          crate::spec::style::TextAlign,
+        atoms:               &mut Vec<InlineAtom>,
+    ) {
+        let upm = font_data.units_per_em;
+        // Shape the hyphen character once.
+        let hyphen_glyphs = shape_text(font_data, "-");
+        let hyphen_w = shaped_text_width(&hyphen_glyphs, font_size, upm);
+
+        let mut remaining: &str = seg;
+        let mut rem_glyphs: Vec<ShapedGlyph> = glyphs;
+        let mut is_first_piece = true;
+
+        loop {
+            let rem_w = shaped_text_width(&rem_glyphs, font_size, upm);
+
+            if rem_w <= self.available_width {
+                // Remainder fits — emit as final atom.
+                atoms.push(InlineAtom {
+                    width_pt:   rem_w,
+                    ascent_pt,
+                    descent_pt,
+                    soft_break: if is_first_piece { first_piece_soft } else { false },
+                    hard_break: trailing_hard_break,
+                    text_align,
+                    kind: AtomKind::Text {
+                        glyphs:      rem_glyphs,
+                        font_family: font_family.clone(),
+                        variant,
+                        font_size,
+                        units_per_em: upm,
+                        color:       color.clone(),
+                    },
+                });
+                return;
+            }
+
+            // Find byte position where prefix + "-" fits within available_width.
+            let budget = self.available_width - hyphen_w;
+            let split  = hyphen_split_byte(remaining, &rem_glyphs, budget, font_size, upm);
+
+            if split == 0 || split >= remaining.len() {
+                // Cannot split further or whole segment fits — emit as-is.
+                atoms.push(InlineAtom {
+                    width_pt:   rem_w,
+                    ascent_pt,
+                    descent_pt,
+                    soft_break: if is_first_piece { first_piece_soft } else { false },
+                    hard_break: trailing_hard_break,
+                    text_align,
+                    kind: AtomKind::Text {
+                        glyphs:      rem_glyphs,
+                        font_family: font_family.clone(),
+                        variant,
+                        font_size,
+                        units_per_em: upm,
+                        color:       color.clone(),
+                    },
+                });
+                return;
+            }
+
+            // Emit prefix + "-".
+            let prefix = &remaining[..split];
+            let prefix_with_hyphen = {
+                let mut s = prefix.to_owned();
+                s.push('-');
+                s
+            };
+            let prefix_glyphs = shape_text(font_data, &prefix_with_hyphen);
+            let prefix_w      = shaped_text_width(&prefix_glyphs, font_size, upm);
+
+            atoms.push(InlineAtom {
+                width_pt:   prefix_w,
+                ascent_pt,
+                descent_pt,
+                soft_break: if is_first_piece { first_piece_soft } else { false },
+                hard_break: true,   // force line break after the hyphenated prefix
+                text_align,
+                kind: AtomKind::Text {
+                    glyphs:      prefix_glyphs,
+                    font_family: font_family.clone(),
+                    variant,
+                    font_size,
+                    units_per_em: upm,
+                    color:       color.clone(),
+                },
+            });
+
+            remaining  = &remaining[split..];
+            rem_glyphs = shape_text(font_data, remaining);
+            is_first_piece = false;
         }
     }
 
@@ -475,9 +703,9 @@ impl<'a> InlineLayoutEngine<'a> {
                 }]
             }
 
-            AtomKind::Image { key, height_pt } => {
+            AtomKind::Image { key, height_pt, padding_pt } => {
                 vec![Fragment {
-                    x, y: line_y,
+                    x, y: line_y + padding_pt,
                     width:  atom.width_pt,
                     height: *height_pt,
                     kind:   FragmentKind::Image(ImageFragment { key: key.clone() }),
@@ -557,12 +785,71 @@ pub fn color_to_css(color: (f32, f32, f32)) -> String {
 
 /// A partially-merged style: carries the ResolvedStyle fields with an optional
 /// font_size override (Some = inline override, None = use engine font_size).
+// ─────────────────────────────────────────────────────────────────────────────
+// Hyphenation utilities
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Find the byte position at which to split `text` so that
+/// `text[..split] + "-"` fits within `budget_pt`.
+///
+/// Uses the HarfBuzz `cluster` field (byte offset of each glyph's source
+/// character) to map from glyph index back to a valid UTF-8 boundary.
+///
+/// Returns `0` if not even one character fits (caller should emit at least
+/// one character anyway to make progress), or `text.len()` if everything fits.
+fn hyphen_split_byte(
+    text:         &str,
+    glyphs:       &[ShapedGlyph],
+    budget_pt:    f64,
+    font_size:    f64,
+    units_per_em: u16,
+) -> usize {
+    if text.is_empty() || glyphs.is_empty() {
+        return 0;
+    }
+    let scale = font_size / units_per_em as f64;
+    let mut cum       = 0.0_f64;
+    let mut split     = 0usize;   // byte offset after last fitting character cluster
+
+    for (gi, g) in glyphs.iter().enumerate() {
+        let gw = g.x_advance as f64 * scale;
+        if cum + gw > budget_pt {
+            if split == 0 {
+                // Not even one glyph fits — force at least one character.
+                split = glyph_cluster_end(glyphs, gi, text);
+            }
+            return split;
+        }
+        cum  += gw;
+        split = glyph_cluster_end(glyphs, gi, text);
+    }
+    // All glyphs fit within budget.
+    text.len()
+}
+
+/// Return the byte offset of the character *after* the cluster that glyph `gi`
+/// belongs to.  For LTR text with no ligatures this is simply the start of the
+/// next distinct cluster; for ligatures it skips all glyphs sharing the same
+/// cluster byte.
+fn glyph_cluster_end(glyphs: &[ShapedGlyph], gi: usize, text: &str) -> usize {
+    let cur = glyphs[gi].cluster as usize;
+    // Advance past all glyphs in the same cluster.
+    for g in &glyphs[gi + 1..] {
+        if g.cluster as usize != cur {
+            return g.cluster as usize;
+        }
+    }
+    // Last cluster — its end is the end of the text.
+    text.len()
+}
+
 struct MergedStyle {
     font_size:   Option<f64>,
     font_weight: FontWeight,
     font_style:  FontStyle,
     font_family: Option<String>,
     color:       (f32, f32, f32),
+    text_align:  crate::spec::style::TextAlign,
 }
 
 /// Merge an optional per-inline `Style` onto a base `ResolvedStyle`.
@@ -575,6 +862,7 @@ fn merge_inline_style(base: &ResolvedStyle, inline: Option<&Style>) -> MergedSty
             font_style:  base.font_style,
             font_family: base.font_family.clone(),
             color:       base.color,
+            text_align:  base.text_align,
         },
         Some(s) => MergedStyle {
             font_size:   s.font_size,
@@ -584,6 +872,7 @@ fn merge_inline_style(base: &ResolvedStyle, inline: Option<&Style>) -> MergedSty
             color:       s.color.as_deref()
                 .and_then(parse_css_color)
                 .unwrap_or(base.color),
+            text_align:  s.text_align.unwrap_or(base.text_align),
         },
     }
 }
@@ -1083,5 +1372,69 @@ mod tests {
         // Display math should be centered: x > 0 (shifted right from origin).
         let first_x = frags[0].x;
         assert!(first_x > 100.0, "display math should be centered, x={first_x:.1}");
+    }
+
+    // ── Hyphenation ───────────────────────────────────────────────────────────
+
+    #[test]
+    fn wide_word_is_hyphenated_and_fits_within_column() {
+        let reg   = make_registry();
+        let rules = FontRules::default();
+        let resolver = FontResolver::new(&reg, &rules);
+        let style = ResolvedStyle::default();
+
+        // Very narrow column (40 pt) forces even short words to be hyphenated.
+        let eng = InlineLayoutEngine {
+            resolver:       &resolver,
+            available_width: 40.0,
+            font_size:       12.0,
+            line_spacing:    1.4,
+            blank_default_cm: BLANK_DEFAULT_CM,
+            justify:         false,
+        };
+
+        // A long word that would never fit in 40 pt as a single atom.
+        let content = vec![text_item("pneumonoultramicroscopicsilicovolcanoconiosis")];
+        let (frags, _height) = eng.layout(&content, FontRole::Body, &style, 0.0, 0.0);
+
+        // Every fragment must be within the available width.
+        for f in &frags {
+            assert!(
+                f.x + f.width <= 40.0 + 1.0, // 1 pt tolerance for rounding
+                "fragment x={:.1} width={:.1} exceeds column (40 pt)",
+                f.x, f.width
+            );
+        }
+
+        // Multiple lines must have been produced.
+        let unique_y: std::collections::HashSet<u32> =
+            frags.iter().map(|f| (f.y * 10.0) as u32).collect();
+        assert!(unique_y.len() > 1, "wide word should produce multiple lines");
+    }
+
+    #[test]
+    fn normal_word_is_not_hyphenated() {
+        let reg   = make_registry();
+        let rules = FontRules::default();
+        let resolver = FontResolver::new(&reg, &rules);
+        let style = ResolvedStyle::default();
+
+        let eng = InlineLayoutEngine {
+            resolver:       &resolver,
+            available_width: 400.0,
+            font_size:       12.0,
+            line_spacing:    1.4,
+            blank_default_cm: BLANK_DEFAULT_CM,
+            justify:         false,
+        };
+
+        let content = vec![text_item("hello")];
+        let (frags, _) = eng.layout(&content, FontRole::Body, &style, 0.0, 0.0);
+
+        // A single short word in a wide column: exactly one GlyphRun, no hyphen.
+        let glyph_runs: Vec<_> = frags.iter()
+            .filter(|f| matches!(f.kind, FragmentKind::GlyphRun(_)))
+            .collect();
+        assert_eq!(glyph_runs.len(), 1, "short word should produce exactly one glyph run");
     }
 }

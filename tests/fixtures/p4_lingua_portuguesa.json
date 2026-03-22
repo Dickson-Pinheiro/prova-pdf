@@ -1,0 +1,1491 @@
+{
+  "_images": {
+    "img_1": "tests/fixtures/images/p4_lingua_portuguesa/img_1.png",
+    "img_2": "tests/fixtures/images/p4_lingua_portuguesa/img_2.jpg",
+    "img_3": "tests/fixtures/images/p4_lingua_portuguesa/img_3.jpg",
+    "img_4": "tests/fixtures/images/p4_lingua_portuguesa/img_4.jpg",
+    "img_5": "tests/fixtures/images/p4_lingua_portuguesa/img_5.jpg",
+    "img_6": "tests/fixtures/images/p4_lingua_portuguesa/img_6.jpg",
+    "img_7": "tests/fixtures/images/p4_lingua_portuguesa/img_7.jpg"
+  },
+  "metadata": {
+    "title": "P4_Língua Portuguesa_F9_OBJETIVO_2024"
+  },
+  "config": {
+    "columns": 2,
+    "fontSize": 12,
+    "fontFamily": "body",
+    "lineSpacing": "normal",
+    "margins": {
+      "top": 0.6,
+      "bottom": 0.6,
+      "left": 0.6,
+      "right": 0.6
+    },
+    "discursiveLineHeight": 1.0,
+    "discursiveSpaceType": "lines",
+    "imageGrayscale": true,
+    "hideKnowledgeAreaName": true,
+    "hideQuestionsReferences": true,
+    "letterCase": "lower"
+  },
+  "header": {
+    "title": "P4_Língua Portuguesa_F9_OBJETIVO_2024",
+    "studentFields": [
+      {
+        "label": "Nome"
+      },
+      {
+        "label": "Turma",
+        "widthCm": 5
+      },
+      {
+        "label": "Data",
+        "widthCm": 4
+      },
+      {
+        "label": "Nota",
+        "widthCm": 3
+      }
+    ]
+  },
+  "sections": [
+    {
+      "questions": [
+        {
+          "kind": "choice",
+          "number": 1,
+          "stem": [
+            {
+              "type": "text",
+              "value": "O modo verbal imperativo é usado para expressar uma ordem, um pedido ou para dar um conselho. Sabendo disso, veja a imagem a seguir:\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_1",
+              "widthCm": 14.58,
+              "heightCm": 7.83
+            },
+            {
+              "type": "text",
+              "value": "\n\nINDIQUE a função do modo imperativo na frase acima:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Nessa mensagem, pode-se perceber uma ordem explícita, de modo que quem a lê se sente obrigado a curtir a vida. "
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A mensagem não faz sentido, já que a vida é, na verdade, muito longa."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O modo imperativo está utilizado de forma inadequada, o correto seria “curte”."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O modo imperativo foi utilizado dessa maneira para dar um conselho ao leitor e para enfatizar a ação de curtir, já que a palavra “curta” se repete."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O modo imperativo está indicando uma ação anterior a outra que já ocorreu."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.0
+        },
+        {
+          "kind": "choice",
+          "number": 2,
+          "stem": [
+            {
+              "type": "text",
+              "value": "COMPLETE as lacunas com os verbos entre parênteses, no modo imperativo, "
+            },
+            {
+              "type": "text",
+              "value": "conjugados na terceira pessoa do singular (você)",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ", indicando a alternativa que corresponde ao modo adequado dos verbos no imperativo:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Junte; mexa; deixe."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Juntai; mexei; deixai."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Junta; mexe; deixes."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Junte; mexas; deixa."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Junta; mexa; deixa."
+                  }
+                ]
+              }
+            ]
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Ingredientes",
+                  "style": {
+                    "bold": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n2 filhos que não param quietos\n3 sobrinhos da mesma espécie\n1 cachorro que adora uma farra\n1 fim de semana ao ar livre\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": " ",
+                  "style": {
+                    "bold": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Preparo",
+                  "style": {
+                    "bold": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n____ (juntar) tudo com os ingredientes do Açúcar Naturale, _____ (mexer) bem e _____ (deixar) descansar. Não as crianças, que não vai adiantar. Sirva imediatamente, porque pé de moleque não para. Quer essa e outras receitas completas?\n\nEntre no "
+                },
+                {
+                  "type": "text",
+                  "value": "site",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " cianaturale.com.br\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Onde tem doce, tem Naturale.",
+                  "style": {
+                    "bold": true,
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ".",
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\nRevista Saúde, n. 351, jun. 2012 (adaptado)."
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "Receitas de vida por um mundo mais doce Pé de moleque"
+            }
+          ],
+          "points": 0.5
+        },
+        {
+          "kind": "choice",
+          "number": 3,
+          "stem": [
+            {
+              "type": "text",
+              "value": "(ENEM – adaptada) O texto é resultante do hibridismo (junção ou mistura de dois gêneros para compor um só texto) de dois gêneros textuais, a receita e a propaganda. A respeito desse hibridismo, observa-se que a"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "receita mistura-se ao gênero propaganda com a finalidade de instruir o leitor a fazer um pé de moleque."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "receita é utilizada no gênero propaganda a fim de divulgar exemplos de vida."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "propaganda assume a forma do gênero receita para divulgar um produto."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "propaganda perde poder de persuasão ao assumir o gênero receita."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "receita está a serviço do gênero propaganda ao solicitar que o leitor faça o doce."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.526316
+        },
+        {
+          "kind": "choice",
+          "number": 4,
+          "stem": [
+            {
+              "type": "image",
+              "key": "img_2",
+              "widthCm": 18.07,
+              "heightCm": 5.24
+            },
+            {
+              "type": "text",
+              "value": "\n\n \nINDIQUE o que se pode interpretar sobre o modo imperativo utilizado no primeiro quadrinho."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "São verbos típicos utilizados em receitas, o que irrita Mafalda, pois ela estava com fome."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Esses verbos são exemplos de como eles aparecem em propagandas. Isso irrita Mafalda, pois é como se "
+                  },
+                  {
+                    "type": "text",
+                    "value": "eles ",
+                    "style": {
+                      "italic": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": "(autores das propagandas) estivessem dizendo-lhe o que fazer."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Em propagandas, é comum que apareçam verbos como esses. Por isso, Mafalda fica feliz; ela gosta que saibam quem ela é, mesmo que ela ainda não saiba."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Mafalda fica reflexiva com a quantidade de verbos a que ela foi exposta, principalmente porque são verbos no imperativo negativo."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Mafalda se convence facilmente, pois entende que aquilo é uma ordem prescritiva do que deve ser seguido."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.0
+        },
+        {
+          "kind": "choice",
+          "number": 5,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Com base nos fragmentos, ASSINALE a alternativa que indique as tipologias textuais às quais eles pertencem."
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "narração – descrição – dissertação – prescrição."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "descrição – narração – dissertação – prescrição."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "dissertação – prescrição – descrição – narração."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "prescrição – descrição – dissertação – narração."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "narração – dissertação – prescrição - descrição."
+                  }
+                ]
+              }
+            ]
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Texto I",
+                  "style": {
+                    "bold": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "“Dario vinha apressado, guarda-chuva no braço esquerdo e, assim que dobrou a esquina, diminuiu o passo até parar, encostando-se à parede de uma casa. Por ela escorregando, sentou-se na calçada, ainda úmida de chuva, e descansou na pedra o cachimbo. Dois ou três passantes rodearam-no e indagaram se não se sentia bem. Dario abriu a boca, moveu os lábios, não se ouviu resposta. O senhor gordo, de branco, sugeriu que devia sofrer de ataque (...)”. ",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "(Dalton Trevisan – Uma vela para Dario)",
+                  "style": {
+                    "bold": true,
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ".",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Texto 2",
+                  "style": {
+                    "bold": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "“Era um homem alto, robusto, muito forte, que caminhava lentamente, como se precisasse fazer esforço para movimentar seu corpo gigantesco. Tinha, em contrapartida, uma cara de menino, que a expressão alegre acentuava ainda mais.”",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Texto 3",
+                  "style": {
+                    "bold": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Novas tecnologias",
+                  "style": {
+                    "bold": true,
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Atualmente, prevalece na mídia um discurso de exaltação das novas tecnologias, principalmente aquelas ligadas às atividades de telecomunicações. Expressões frequentes como “o futuro já chegou”, “maravilhas tecnológicas” e “conexão total com o mundo” “fetichizam” novos produtos, transformando-os em objetos do desejo, de consumo obrigatório. Por esse motivo carregamos",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": " "
+                },
+                {
+                  "type": "text",
+                  "value": "hoje nos bolsos, bolsas e mochilas o “futuro” tão festejado.",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Todavia, não podemos reduzir-nos a meras vítimas de um aparelho midiático perverso, ou de um aparelho capitalista controlador. Há perversão, certamente, e controle, sem sombra de dúvida. Entretanto, desenvolvemos uma relação simbiótica de dependência mútua com os veículos de comunicação, que se estreita a cada imagem compartilhada e a cada dossiê pessoal transformado em objeto público de entretenimento.",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Não mais como aqueles acorrentados na caverna de Platão, somos livres para nos aprisionar, por espontânea vontade, a esta relação sadomasoquista com as estruturas midiáticas, na qual tanto controlamos quanto somos controlados.",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "SAMPAIO, A. S. A microfísica do espetáculo. Disponível em: http://observatoriodaimprensa.com.br. Acesso em: 1 mar. 2013 (adaptado).",
+                  "style": {
+                    "bold": true,
+                    "italic": true,
+                    "textAlign": "right"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Texto 4",
+                  "style": {
+                    "bold": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Modo de preparo:",
+                  "style": {
+                    "bold": true,
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Bata no liquidificador primeiro a cenoura com os ovos e o óleo, acrescente o açúcar e bata por 5 minutos;",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Depois, numa tigela ou na batedeira, coloque o restante dos ingredientes, misturando tudo, menos o fermento;",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Esse é misturado lentamente com uma colher;",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Asse em forno preaquecido (180° C) por 40 minutos.",
+                  "style": {
+                    "italic": true
+                  }
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "Fragmentos"
+            }
+          ],
+          "points": 1.0
+        },
+        {
+          "kind": "choice",
+          "number": 6,
+          "stem": [
+            {
+              "type": "text",
+              "value": "ASSINALE a alternativa na qual o hífen foi empregado de acordo com Novo Acordo Ortográfico em todas as palavras:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Pré-escola, gira-sol, super-homem."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Micro-ondas, subbloco, ex-presidente."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Vice-campeão, pós-graduação, auto-escola."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Bem-educado, micro-organismo, coocupante."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Girassol, autoescola, subbloco."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.0
+        },
+        {
+          "kind": "choice",
+          "number": 7,
+          "stem": [
+            {
+              "type": "image",
+              "key": "img_3",
+              "widthCm": 18.07,
+              "heightCm": 12.75
+            },
+            {
+              "type": "text",
+              "value": "\n\nA charge dialoga com uma parte do enigma da Esfinge de Tebas, criatura mitológica grega: “Decifra-me, ou devoro-te”. ASSINALE a alternativa que contenha o nome que pode ser dado ao diálogo entre a charge e o enigma.\n\n "
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Mote"
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Intertextualidade"
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Glosa"
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Epígrafe"
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Argumentação"
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.555556
+        },
+        {
+          "kind": "choice",
+          "number": 8,
+          "stem": [
+            {
+              "type": "image",
+              "key": "img_4",
+              "widthCm": 18.07,
+              "heightCm": 14.9
+            },
+            {
+              "type": "text",
+              "value": "\n\n \nEXPLIQUE por que o humor da charge acontece.\n\n "
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O último homem tem certeza que tão logo ficará doente."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Mesmo doente, o último homem permanece na fila de espera."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "A fila do SUS é enorme enquanto as pessoas aguardam atendimento."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Mesmo sem estar doente, o homem aguarda atendimento."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "O homem se confunde e acha que está em uma fila de liquidação de uma loja."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 1.0
+        },
+        {
+          "kind": "choice",
+          "number": 9,
+          "stem": [
+            {
+              "type": "text",
+              "value": " \nTexto I\n\n"
+            },
+            {
+              "type": "image",
+              "key": "img_5",
+              "widthCm": 9.26,
+              "heightCm": 12.73
+            },
+            {
+              "type": "text",
+              "value": "\n\nTexto II\n\n"
+            },
+            {
+              "type": "text",
+              "value": "O gordo é o novo fumante",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\n"
+            },
+            {
+              "type": "text",
+              "value": "Nunca houve tanta gente acima do peso – nem tanto preconceito contra gordos.",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\n"
+            },
+            {
+              "type": "text",
+              "value": "De um lado, o que há por trás é uma positiva discussão sobre saúde. Por outro, algo de podre: o nascimento de uma nova eugenia.",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\n"
+            },
+            {
+              "type": "text",
+              "value": "(Adaptado de: Super Interessante. Editora Abril. 306.ed. jul. 2012. p.21.)",
+              "style": {
+                "bold": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "\n\n \nEm relação ao texto, considere as afirmativas a seguir:\n\nI. O código não verbal, principalmente no que se refere ao segundo desenho, revela o discurso preconceituoso e, consequentemente, um aspecto ideológico.\n\nII. O sentido de proibição é captado por meio da intertextualidade estabelecida entre os códigos não verbais a qual, por sua vez, revela aspectos ligados ao gênero do humor.\n\nIII. O conteúdo expresso na placa revela que, futuramente, indivíduos obesos sofrerão ainda mais discriminação social.\n\nIV. O efeito de sentido expresso pelo conteúdo não verbal serve para reforçar o caráter polissêmico (fenômeno linguístico em que uma mesma palavra tem dois ou mais significados) da placa.\n\n \nASSINALE a alternativa correta:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Somente as afirmativas I e II são corretas."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Somente as afirmativas I e IV são corretas."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Somente as afirmativas III e IV são corretas."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Somente as afirmativas I, II e III são corretas."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Somente as afirmativas II, III e IV são corretas."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.588235
+        },
+        {
+          "kind": "choice",
+          "number": 10,
+          "stem": [
+            {
+              "type": "image",
+              "key": "img_6",
+              "widthCm": 10.58,
+              "heightCm": 14.29
+            },
+            {
+              "type": "text",
+              "value": "\n\n \nO cartum "
+            },
+            {
+              "type": "text",
+              "value": "Vida de Passarinho, do cartunista Caulos, ",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "estabelece um interessante diálogo com um famoso texto-fonte de nossa literatura. ASSINALE a alternativa que cita esse texto-fonte:"
+            }
+          ],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              {
+                "label": "A",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Canção do exílio",
+                    "style": {
+                      "italic": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": ", de Gonçalves Dias."
+                  }
+                ]
+              },
+              {
+                "label": "B",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Erro de português",
+                    "style": {
+                      "italic": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": ", de Oswald de Andrade."
+                  }
+                ]
+              },
+              {
+                "label": "C",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "No meio do caminho",
+                    "style": {
+                      "italic": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": ", de Carlos Drummond de Andrade."
+                  }
+                ]
+              },
+              {
+                "label": "D",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "Não há vagas",
+                    "style": {
+                      "italic": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": ", de Ferreira Gullar."
+                  }
+                ]
+              },
+              {
+                "label": "E",
+                "content": [
+                  {
+                    "type": "text",
+                    "value": "José",
+                    "style": {
+                      "italic": true
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "value": ", de Carlos Drummond de Andrade."
+                  }
+                ]
+              }
+            ]
+          },
+          "points": 0.625
+        }
+      ],
+      "title": "Linguagens - Ensino Fundamental",
+      "_subject": "Língua Portuguesa"
+    },
+    {
+      "questions": [
+        {
+          "kind": "file",
+          "number": 11,
+          "stem": [
+            {
+              "type": "text",
+              "value": "DESCREVA o sentimento vivido pelo eu lírico justificando sua resposta com elementos do texto."
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Meus oito anos",
+                  "style": {
+                    "bold": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\nOh! que saudades que tenho\nDa Aurora da minha vida,\nDa minha infância querida\nQue os anos não trazem mais!\nQue amor, que sonhos, que flores,\nNa que nas tardes fagueiras\nÀ sombra das bananeiras,\nDe baixo dos laranjais!\n\nDo despontar da existência!\n- Respira a alma inocência\nComo perfumes a flor;\nO mar é - lago sereno,\nO céu - um manto azulado,\nO mundo - um sonho dourado,\nA vida - um hino d'amor!\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Casimiro de Abreu",
+                  "style": {
+                    "fontSize": 12.0
+                  }
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "Meus oito anos"
+            }
+          ],
+          "points": 1.0
+        },
+        {
+          "kind": "file",
+          "number": 12,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Todos os versos do poema possuem o mesmo número de sílabas poéticas? INDIQUE a quantidade de sílabas poéticas do primeiro verso"
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "points": 1.0
+        },
+        {
+          "kind": "file",
+          "number": 13,
+          "stem": [
+            {
+              "type": "image",
+              "key": "img_7",
+              "widthCm": 18.07,
+              "heightCm": 6.09
+            },
+            {
+              "type": "text",
+              "value": "\n\nNo 2º quadrinho da tira, de acordo com o padrão culto da língua, EXPLIQUE se poderíamos empregar o verbo "
+            },
+            {
+              "type": "text",
+              "value": "dizer ",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "no plural, ou seja, "
+            },
+            {
+              "type": "text",
+              "value": "diriam",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": "?"
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "points": 1.0
+        },
+        {
+          "kind": "file",
+          "number": 14,
+          "stem": [
+            {
+              "type": "text",
+              "value": "REESCREVA o verso em que o eu lírico duvida da sua própria paixão."
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Ainda que mal pergunte,\nainda que mal respondas;\nainda que mal te entenda,\nainda que mal repitas;\nainda que mal insista,\nainda que mal desculpes;\nainda que mal me exprima,\nainda que mal me julgues;\nainda que mal me mostre,\nainda que mal me vejas;\nainda que mal te encare,\nainda que mal te furtes;\nainda que mal te siga,\nainda que mal te voltes;\nainda que mal te ame,\nainda que mal o saibas;\nainda que mal te agarre,\n\nainda que mal te mates;\nainda assim te pergunto\ne me queimando em teu seio,\nme salvo e me dano: amor.\n\n(Carlos Drummond de Andrade, in 'As Impurezas do Branco')"
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "Ainda que mal"
+            }
+          ],
+          "points": 1.0
+        },
+        {
+          "kind": "file",
+          "number": 15,
+          "stem": [
+            {
+              "type": "text",
+              "value": "De acordo com o que estudamos sobre poesia, EXPLIQUE como se chama este tipo de composição poética."
+            }
+          ],
+          "answer": {
+            "type": "file"
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Devagar, como fogo de monturo,\n\na saudade invadiu meu coração\".\n\n                                   (Dito popular nordestino)\n\n \n"
+                },
+                {
+                  "type": "text",
+                  "value": "Na fazenda, nasci e me criei,",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "peraltava e fazia escaramuça,",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "morcegava, no campo, a besta ruça,",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "jararaca até mesmo já matei.",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Não me lembro da vez em que acordei",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "assombrado com tiros de trovão,",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "pinotava da rede para o chão",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "e saía correndo pelo escuro.",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "Devagar, como fogo de monturo,",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "a saudade invadiu meu coração.",
+                  "style": {
+                    "italic": true
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "\n\n \nCarlos Severiano Cavalcanti"
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "Carlos Severiano Cavalcanti"
+            }
+          ],
+          "points": 1.0
+        },
+        {
+          "kind": "textual",
+          "number": 16,
+          "stem": [
+            {
+              "type": "text",
+              "value": "O texto se propõe a discutir o que é ser jovem. EXPLIQUE se o jovem de que o texto trata é particularizado, ou seja, é um único jovem, ou representa toda a juventude?"
+            }
+          ],
+          "answer": {
+            "type": "textual",
+            "lineCount": 5
+          },
+          "baseTexts": [
+            {
+              "content": [
+                {
+                  "type": "text",
+                  "value": "Ser jovem\n\nSer jovem é não perder o encanto e o susto de qualquer espera. É, sobretudo, não ficar fixado nos padrões da própria formação. Ser jovem é ter abertura para o novo na mesma medida do respeito ao imutável.\n\nÉ acreditar um pouco na imortalidade em vida, é querer a festa, o jogo, a brincadeira, a lua, o impossível, o distante. Ser jovem é ser bêbado de infinitos que terminam logo ali. É só pensar na morte de vez em quando. É não saber de nada e poder tudo.\n\nSer jovem é ainda acordar, pelo menos de vez em quando, assobiando uma canção, antes mesmo antes de escovar os dentes. Ser jovem é não dar bola para o síndico mas reconhecer que ele está na sua. É achar graça do riso, ter pena dos tristes e ficar ao lado das crianças.\n\nSer jovem é estar sempre aprendendo inglês, é gostar de cor, xarope, gengibirra e pastel de padaria. Ser jovem é não ter azia, é gostar de dormir e crer na mudança; é meter o dedo no bolo e lamber o glacê.\n\nÉ cantar fora do tom, mastigar depressa e engolir devagar a fala do avô É gostar de barca da Cantareira, carro velho e roupa sem amargura. É bater papo com a baiana, curtir o ônibus e detestar meia marrom.\n\nSer jovem é beber chuvas, ter estranhas, súbitas e inexplicáveis atrações. É temer o testemunho, detestar os solenes, duvidar das palavras. Ser jovem é não acreditar no que está pensando exceto se o pensamento permanecer depois. É saber sorrir e alimentar secretas simpatias pelos crentes que cantam nas praças em semicírculo, Bíblia na mão, sonho no coração.\n\nÉ gostar de ler e tentar silêncios quase impossíveis. É acreditar no dia novo como obra de Deus. É ser metafísica sem ter metafísica. É curtir trem, alface fresquinha, cheiro de hortelã. É gostar até de talco. Ser jovem é ter ódio de cachimbo, da bala jujuba, de manipulação, de ser usado.\n\nSer jovem é ser capaz de compreender a tia, de entender o reclamo da empregada e apoiar seu atraso. Ser jovem é continuar gostando de deitar na grama. É gostar de beijo, de pele, de olho. Ser jovem é não perder o hábito de se encabular. É ir para ser apresentado (“—Já conhece fulano?”) morrendo de medo. Ser jovem é permanecer descobrindo. É querer ir a lua ou conhecer Finlândia, Escócias e praias adivinhadas. É sentir cheiros raríssimos: cheiro de férias, cheiro de mãe chegando em casa em dia de chuva, cheiro de festa, aipim, camisa nova, marcenaria ou toalha lá do clube.\n\nSer jovem é andar confiante como quem salta, se possível de mãos dadas com o ar. É ter coragem de nascer a cada dia e embrulhar as fossas no celofane do não faz mal. É acreditar em frases, pessoas, mitos, forças, sons, é crer no que não vale a pena mas aí da vida se não fosse isso.\n\nÉ descobrir um belo que não conta. É recear as revelações e ir para casa com o gosto de seu silêncio amargo ou agridoce.\n\nSer jovem é ter a capacidade do perdão e andar com os olhos cheios de capim cheiroso. É ter tédios passageiros, é amar a vida, é ter uma palavra de compreensão. Ser jovem é lembrar pouco da infância por não precisar fazê-lo para suportar a vida. Ser jovem é ser capaz de anestesias salvadoras.\n\nSer jovem é misturar tudo isso com a idade que tenha, trinta, quarenta, cinquenta, sessenta, setenta ou dezenove. É sempre abrir a porta com emoção. É esperar dos outros o que ainda não desistiu de querer. Ser jovem é viver em estado de fundo musical de superprodução da Metro. É abraçar esquinas, mundos, espaços, luzes, flores, livros, discos, cachorros e a menininha com um profundo, aberto e incomensurável abraço feito de festa, cocada preta, dentes brancos e dedos tímidos, todos prontos para os desencontros da vida. Com uma profunda e permanente vontade de SER.\n\n"
+                },
+                {
+                  "type": "text",
+                  "value": "(Artur da Távola. ",
+                  "style": {
+                    "textAlign": "right"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": "Ser jovem",
+                  "style": {
+                    "italic": true,
+                    "textAlign": "right"
+                  }
+                },
+                {
+                  "type": "text",
+                  "value": ". 8. ed. Rio de Janeiro: Nova Fronteira, 1985. p. 13-4)",
+                  "style": {
+                    "textAlign": "right"
+                  }
+                }
+              ],
+              "position": "beforeQuestion",
+              "title": "Ser jovem"
+            }
+          ],
+          "points": 0.666667
+        },
+        {
+          "kind": "textual",
+          "number": 17,
+          "stem": [
+            {
+              "type": "text",
+              "value": "O tema é tratado de modo científico e objetivo ou poético e literário?"
+            }
+          ],
+          "answer": {
+            "type": "textual",
+            "lineCount": 5
+          },
+          "points": 0.714286
+        },
+        {
+          "kind": "textual",
+          "number": 18,
+          "stem": [
+            {
+              "type": "text",
+              "value": "INDIQUE se a finalidade central do texto diz respeito a qual ou quais destes elementos: informar, transmitir conhecimentos científicos, promover reflexões acerta do tema, emocionar, propiciar uma experiência estética?"
+            }
+          ],
+          "answer": {
+            "type": "textual",
+            "lineCount": 5
+          },
+          "points": 0.769231
+        },
+        {
+          "kind": "textual",
+          "number": 19,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Há um conhecido anúncio publicitário referente a uma instituição financeira, o qual se constitui dos seguintes dizeres: "
+            },
+            {
+              "type": "text",
+              "value": "“VEM PRA CAIXA VOCÊ TAMBÉM!”",
+              "style": {
+                "italic": true
+              }
+            },
+            {
+              "type": "text",
+              "value": ". Partindo do pressuposto de que somos regidos por um padrão convencional de linguagem, sendo esse manifestado nas situações formais de interlocução, INDIQUE como ficaria a construção desse anúncio empregando todos os termos na terceira pessoa do singular."
+            }
+          ],
+          "answer": {
+            "type": "textual",
+            "lineCount": 5
+          },
+          "points": 0.833333
+        },
+        {
+          "kind": "textual",
+          "number": 20,
+          "stem": [
+            {
+              "type": "text",
+              "value": "Considerando a frase “Não faça pré-julgamento dos fatos. Analise-os”, REESCREVA-A empregando os verbos flexionados na segunda pessoa do singular."
+            }
+          ],
+          "answer": {
+            "type": "textual",
+            "lineCount": 5
+          },
+          "points": 0.909091
+        }
+      ],
+      "title": "Linguagens - Ensino Fundamental",
+      "_subject": "Língua Portuguesa"
+    }
+  ]
+}

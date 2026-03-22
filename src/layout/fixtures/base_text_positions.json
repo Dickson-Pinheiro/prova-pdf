@@ -1,0 +1,86 @@
+[
+  {
+    "kind": "textual",
+    "stem": [{"type": "text", "value": "Questão 1 – BeforeQuestion"}],
+    "answer": {"type": "textual"},
+    "showNumber": false,
+    "baseTexts": [
+      {
+        "content": [{"type": "text", "value": "Leia o texto a seguir."}],
+        "position": "beforeQuestion"
+      }
+    ]
+  },
+  {
+    "kind": "textual",
+    "stem": [{"type": "text", "value": "Questão 2 – AfterQuestion"}],
+    "answer": {"type": "textual"},
+    "showNumber": false,
+    "baseTexts": [
+      {
+        "content": [{"type": "text", "value": "Fonte: IBGE, 2024."}],
+        "position": "afterQuestion"
+      }
+    ]
+  },
+  {
+    "kind": "textual",
+    "stem": [{"type": "text", "value": "Questão 3 – LeftOfQuestion"}],
+    "answer": {"type": "textual"},
+    "showNumber": false,
+    "baseTexts": [
+      {
+        "content": [{"type": "text", "value": "Imagem à esquerda da questão."}],
+        "position": "leftOfQuestion"
+      }
+    ]
+  },
+  {
+    "kind": "textual",
+    "stem": [{"type": "text", "value": "Questão 4 – RightOfQuestion"}],
+    "answer": {"type": "textual"},
+    "showNumber": false,
+    "baseTexts": [
+      {
+        "content": [{"type": "text", "value": "Imagem à direita da questão."}],
+        "position": "rightOfQuestion"
+      }
+    ]
+  },
+  {
+    "kind": "textual",
+    "stem": [{"type": "text", "value": "Questão 5 – SectionTop"}],
+    "answer": {"type": "textual"},
+    "showNumber": false,
+    "baseTexts": [
+      {
+        "content": [{"type": "text", "value": "Instrução da seção."}],
+        "position": "sectionTop"
+      }
+    ]
+  },
+  {
+    "kind": "textual",
+    "stem": [{"type": "text", "value": "Questão 6 – ExamTop"}],
+    "answer": {"type": "textual"},
+    "showNumber": false,
+    "baseTexts": [
+      {
+        "content": [{"type": "text", "value": "Instrução geral da prova."}],
+        "position": "examTop"
+      }
+    ]
+  },
+  {
+    "kind": "textual",
+    "stem": [{"type": "text", "value": "Questão 7 – ExamBottom"}],
+    "answer": {"type": "textual"},
+    "showNumber": false,
+    "baseTexts": [
+      {
+        "content": [{"type": "text", "value": "Gabarito ao final."}],
+        "position": "examBottom"
+      }
+    ]
+  }
+]

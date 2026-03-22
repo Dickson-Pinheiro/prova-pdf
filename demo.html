@@ -132,6 +132,14 @@ textarea{resize:vertical;min-height:56px;font-family:inherit;line-height:1.5}
     <option value="5">5 · Gabarito Econômico (2 colunas)</option>
     <option value="6">6 · Matemática (LaTeX)</option>
     <option value="7">7 · Simulado ENEM (20 questões + Redação)</option>
+    <option value="lize-1">8 · P4 Língua Portuguesa (banco lize)</option>
+    <option value="lize-2">9 · PGA 2ª EM 2º Trim. 2025 (banco lize)</option>
+    <option value="lize-3">10 · AG2 Simulado Matemática VML (banco lize)</option>
+    <option value="lize-4">11 · Português com Poema - 6º Ano (banco lize)</option>
+  </select>
+  <select class="tb-select" id="lize-section-mode" onchange="applyLizeSectionMode()" title="Organização das seções (provas lize)">
+    <option value="area">Seção: Área de conhecimento</option>
+    <option value="subject">Seção: Disciplina</option>
   </select>
   <div class="tb-sep"></div>
   <span id="status">Carregando WASM…</span>
@@ -183,6 +191,15 @@ textarea{resize:vertical;min-height:56px;font-family:inherit;line-height:1.5}
           <label>Tamanho da fonte (pt)</label>
           <input type="number" id="cfg-fontSize" value="12" min="8" max="24" step="0.5">
         </div>
+      </div>
+
+      <div class="field-group">
+        <label>Família da fonte</label>
+        <select id="cfg-fontFamily">
+          <option value="body">DejaVu Sans (padrão)</option>
+          <option value="plex">IBM Plex Sans (lize)</option>
+          <option value="iosevka">Iosevka Charon Mono</option>
+        </select>
       </div>
 
       <div class="row">
@@ -382,24 +399,37 @@ window.generate = async function() {
 
   try {
     clear_all();
-    // Re-register fonts after clear_all
+    // Re-register fonts after clear_all (bytes served from cache after first load)
     const fonts = [
       ['body', 0, './fonts/DejaVuSans.ttf'],
       ['body', 1, './fonts/DejaVuSans-Bold.ttf'],
       ['body', 2, './fonts/DejaVuSans-Oblique.ttf'],
       ['body', 3, './fonts/DejaVuSans-BoldOblique.ttf'],
+      ['plex', 0, './fonts/IBMPlexSans-Regular.ttf'],
+      ['plex', 1, './fonts/IBMPlexSans-Bold.ttf'],
+      ['plex', 2, './fonts/IBMPlexSans-Italic.ttf'],
+      ['plex', 3, './fonts/IBMPlexSans-BoldItalic.ttf'],
+      ['iosevka', 0, './fonts/IosevkaCharonMono-Regular.ttf'],
+      ['iosevka', 1, './fonts/IosevkaCharonMono-Bold.ttf'],
+      ['iosevka', 2, './fonts/IosevkaCharonMono-Italic.ttf'],
+      ['iosevka', 3, './fonts/IosevkaCharonMono-BoldItalic.ttf'],
     ];
     for (const [name, variant, url] of fonts) {
       try {
-        const buf = await fetch(url).then(r => r.arrayBuffer());
-        add_font(name, variant, new Uint8Array(buf));
-      } catch(e) { /* skip */ }
+        add_font(name, variant, await loadAsset(url));
+      } catch(e) { console.warn(`Font load failed [${name} v${variant}] ${url}: ${e.message}`); }
     }
     // Re-register logo image after clear_all
     try {
-      const logoBuf = await fetch('./img/logo.jpg').then(r => r.arrayBuffer());
-      add_image('logo.jpg', new Uint8Array(logoBuf));
+      add_image('logo.jpg', await loadAsset('./img/logo.jpg'));
     } catch(e) { /* skip */ }
+
+    // Re-register lize exam images if any
+    for (const [key, path] of Object.entries(lizeImages)) {
+      try {
+        add_image(key, await loadAsset('./' + path));
+      } catch(e) { console.warn('Lize image load failed', key, e.message); }
+    }
 
     const spec = buildSpec();
     const bytes = generate_pdf(spec);
@@ -463,6 +493,7 @@ function buildConfig() {
     },
     columns:             parseInt(v('cfg-columns')),
     fontSize:            numv('cfg-fontSize'),
+    fontFamily:          v('cfg-fontFamily'),
     lineSpacing:         v('cfg-lineSpacing'),
     discursiveSpaceType: v('cfg-discSpace'),
     discursiveLineHeight:numv('cfg-lineHeight'),
@@ -551,13 +582,18 @@ function buildQuestions(secEl) {
     // Use stored rich stem (with inline styles) if available, otherwise plain text
     const stemData = card._richStem || (stemText ? [{ type: 'text', value: stemText }] : [{ type: 'text', value: '(enunciado)' }]);
     const pointsVal = parseFloat(card.querySelector('.q-points')?.value);
+    const rq = card._richQuestion || {};
     const q = {
       kind:      type,
       stem:      stemData,
       answer:    card._richAnswer || buildAnswer(card, type),
-      showNumber: true,
+      showNumber: rq.showNumber !== false,
     };
-    if (fw) q.fullWidth = true;
+    if (fw || rq.fullWidth) q.fullWidth = true;
+    if (rq.forcePageBreak) q.forcePageBreak = true;
+    if (rq.draftLines) q.draftLines = rq.draftLines;
+    if (rq.baseTexts && rq.baseTexts.length) q.baseTexts = rq.baseTexts;
+    if (rq.number != null) q.number = rq.number;
     if (!isNaN(pointsVal) && pointsVal > 0) q.points = pointsVal;
     qs.push(q);
   });
@@ -698,6 +734,20 @@ window.addSection = function(data = {}) {
 // Questions
 // ──────────────────────────────────────────────────────────────────────────────
 let qCount = 0;
+let lizeImages = {}; // key → file path, for exams loaded from lize fixtures
+let lizeSpec   = null; // raw spec from last loaded lize JSON (with _subject fields)
+
+// Asset cache: url → Uint8Array. Populated on first fetch; reused on subsequent
+// generate() calls so fonts/images are never re-downloaded.
+const _assetCache = new Map();
+async function loadAsset(url) {
+  if (!_assetCache.has(url)) {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    _assetCache.set(url, new Uint8Array(await resp.arrayBuffer()));
+  }
+  return _assetCache.get(url);
+}
 
 window.addQuestion = function(listEl, data = {}) {
   const num = ++qCount;
@@ -709,6 +759,7 @@ window.addQuestion = function(listEl, data = {}) {
   // Preserve rich data (with inline styles, math) for buildSpec
   if (data.stem) card._richStem = data.stem;
   if (data.answer) card._richAnswer = data.answer;
+  if (Object.keys(data).length) card._richQuestion = data;
   card.innerHTML = `
     <div class="q-card-header">
       <span class="q-num">${num}</span>
@@ -872,6 +923,7 @@ function applySpec(spec) {
   setv('cfg-mr', cfg.margins?.right  ?? 1.5);
   setv('cfg-columns', cfg.columns ?? 1);
   setv('cfg-fontSize', cfg.fontSize ?? 12);
+  setv('cfg-fontFamily', cfg.fontFamily || 'body');
   setv('cfg-lineSpacing', cfg.lineSpacing || 'normal');
   setv('cfg-discSpace', cfg.discursiveSpaceType || 'lines');
   setv('cfg-lineHeight', cfg.discursiveLineHeight ?? 0.85);
@@ -1679,12 +1731,48 @@ const EXAMPLES = {
 
 window.loadExample = function(num) {
   if (!num) return;
+  if (num === 'lize-1') { loadLizeExam('lize-1', './tests/fixtures/p4_lingua_portuguesa.json', 'P4 Língua Portuguesa carregado. Clique em ▶ Gerar PDF.'); return; }
+  if (num === 'lize-2') { loadLizeExam('lize-2', './tests/fixtures/pga_2em_2trimestre.json',    'PGA 2ª EM 2º Trim. 2025 carregado. Clique em ▶ Gerar PDF.'); return; }
+  if (num === 'lize-3') { loadLizeExam('lize-3', './tests/fixtures/matematica_vml.json',         'AG2 Simulado Matemática carregado. Clique em ▶ Gerar PDF.'); return; }
+  if (num === 'lize-4') { loadLizeExam('lize-4', './tests/fixtures/portugues_poema.json',        'Português com Poema carregado. Clique em ▶ Gerar PDF.'); return; }
   const spec = EXAMPLES[num];
   if (!spec) return;
   applySpec(spec);
   document.getElementById('example-select').value = num;
   setStatus(`Exemplo ${num} carregado. Clique em ▶ Gerar PDF.`);
 };
+
+async function loadLizeExam(selectValue, path, successMsg) {
+  setStatus('Carregando prova lize…');
+  try {
+    const resp = await fetch(path);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    lizeImages = data._images || {};
+    lizeSpec   = data;
+    applyLizeSectionMode(data);
+    document.getElementById('example-select').value = selectValue;
+    setStatus(successMsg);
+  } catch(e) {
+    setStatus('Erro ao carregar prova lize: ' + e.message);
+    console.error(e);
+  }
+}
+
+// Apply the selected section title mode to the loaded lize spec and re-apply.
+function applyLizeSectionMode(data) {
+  const spec = data || lizeSpec;
+  if (!spec) return; // no lize exam loaded yet
+  const mode = document.getElementById('lize-section-mode').value;
+  const patched = {
+    ...spec,
+    sections: spec.sections.map(s => ({
+      ...s,
+      title: mode === 'subject' ? (s._subject || s.title) : s.title,
+    })),
+  };
+  applySpec(patched);
+}
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Utility

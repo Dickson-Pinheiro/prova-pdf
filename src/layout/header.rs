@@ -73,9 +73,10 @@ pub fn layout_header<'a>(
     let cw        = geometry.content_width_pt;
 
     // ── Table layout — matches lize HTML table-bordered structure ──────────
-    let has_logo    = header.logo_key.is_some();
-    let logo_col_w  = if has_logo { cw * LOGO_COL_FRACTION } else { 0.0 };
-    let text_col_x  = if has_logo { logo_col_w } else { 0.0 };
+    // The logo column is always reserved (w-25) regardless of whether a logo
+    // image is provided, so the header layout is consistent across all exams.
+    let logo_col_w  = cw * LOGO_COL_FRACTION;
+    let text_col_x  = logo_col_w;
     let text_col_w  = (cw - text_col_x).max(1.0);
 
     let mut cursor_y: f64 = 0.0;
@@ -246,25 +247,28 @@ pub fn layout_header<'a>(
     }
 
     // ── Logo cell — spans ALL rows (institution + title + student fields) ──
-    // Matches lize CSS: w-25 p-4 rowspan="6"
-    if let Some(ref logo_key) = header.logo_key {
+    // Matches lize CSS: w-25 p-4 rowspan="6". The cell border is always drawn
+    // (even without a logo) to keep the header layout consistent.
+    {
         let logo_h_pt = LOGO_DEFAULT_HEIGHT_CM * CM_TO_PT;
         let min_logo_cell_h = LOGO_CELL_PAD_PT * 2.0 + logo_h_pt;
         if cursor_y < min_logo_cell_h {
             cursor_y = min_logo_cell_h;
         }
-        let avail_w = (logo_col_w - LOGO_CELL_PAD_PT * 2.0).max(1.0);
-        let avail_h = (cursor_y - LOGO_CELL_PAD_PT * 2.0).max(1.0);
-        let img_w   = avail_w;
-        let img_h   = logo_h_pt.min(avail_h);
-        let img_x   = LOGO_CELL_PAD_PT;
-        let img_y   = LOGO_CELL_PAD_PT + (avail_h - img_h).max(0.0) / 2.0;
-
-        fragments.push(Fragment {
-            x: img_x, y: img_y, width: img_w, height: img_h,
-            kind: FragmentKind::Image(ImageFragment { key: logo_key.clone() }),
-        });
-        // Logo cell border spanning ALL rows
+        // Render logo image only when a key is provided.
+        if let Some(ref logo_key) = header.logo_key {
+            let avail_w = (logo_col_w - LOGO_CELL_PAD_PT * 2.0).max(1.0);
+            let avail_h = (cursor_y - LOGO_CELL_PAD_PT * 2.0).max(1.0);
+            let img_w   = avail_w;
+            let img_h   = logo_h_pt.min(avail_h);
+            let img_x   = LOGO_CELL_PAD_PT;
+            let img_y   = LOGO_CELL_PAD_PT + (avail_h - img_h).max(0.0) / 2.0;
+            fragments.push(Fragment {
+                x: img_x, y: img_y, width: img_w, height: img_h,
+                kind: FragmentKind::Image(ImageFragment { key: logo_key.clone() }),
+            });
+        }
+        // Logo cell border spanning ALL rows — always present.
         push_cell_border(&mut fragments, 0.0, 0.0, logo_col_w, cursor_y);
     }
 
@@ -649,16 +653,22 @@ mod tests {
         let (reg, rules) = make_resolver_and_rules();
         let res = FontResolver::new(&reg, &rules);
 
-        let (_, h_empty) = call(&InstitutionalHeader::default(), &res);
-        let (_, h_full)  = call(&InstitutionalHeader {
-            institution: Some("Escola".into()),
-            student_fields: vec![
-                StudentField { label: "Nome".into(), width_cm: None },
-            ],
+        // Minimal header — only the logo cell minimum enforces its height.
+        let (_, h_minimal) = call(&InstitutionalHeader::default(), &res);
+
+        // Rich header — institution + exam title + several rows of student fields,
+        // enough to exceed the logo-cell minimum height.
+        let many_fields: Vec<StudentField> = (0..8)
+            .map(|i| StudentField { label: format!("Campo {i}"), width_cm: None })
+            .collect();
+        let (_, h_rich) = call(&InstitutionalHeader {
+            institution:    Some("Escola Estadual Exemplo".into()),
+            title:          Some("Avaliação de Matemática — 2º Bimestre".into()),
+            student_fields: many_fields,
             ..Default::default()
         }, &res);
 
-        assert!(h_full > h_empty,
-            "full header ({h_full:.2}) should be taller than empty header ({h_empty:.2})");
+        assert!(h_rich > h_minimal,
+            "rich header ({h_rich:.2}) should be taller than minimal header ({h_minimal:.2})");
     }
 }

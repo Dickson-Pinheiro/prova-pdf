@@ -1,0 +1,89 @@
+{
+  "sections": [
+    {
+      "title": "Seção A — Questões Objetivas",
+      "instructions": [
+        { "type": "text", "value": "Escolha a alternativa correta." }
+      ],
+      "questions": [
+        {
+          "kind": "choice",
+          "stem": [{ "type": "text", "value": "Qual é a capital do Brasil?" }],
+          "answer": {
+            "type": "choice",
+            "alternatives": [
+              { "label": "A", "content": [{ "type": "text", "value": "Rio de Janeiro" }] },
+              { "label": "B", "content": [{ "type": "text", "value": "São Paulo" }] },
+              { "label": "C", "content": [{ "type": "text", "value": "Brasília" }] },
+              { "label": "D", "content": [{ "type": "text", "value": "Salvador" }] },
+              { "label": "E", "content": [{ "type": "text", "value": "Manaus" }] }
+            ]
+          }
+        },
+        {
+          "kind": "sum",
+          "stem": [{ "type": "text", "value": "Assinale as afirmativas corretas e some os valores." }],
+          "answer": {
+            "type": "sum",
+            "items": [
+              { "value": 1,  "content": [{ "type": "text", "value": "A Terra é redonda." }] },
+              { "value": 2,  "content": [{ "type": "text", "value": "O Sol é uma estrela." }] },
+              { "value": 4,  "content": [{ "type": "text", "value": "A Lua é um planeta." }] },
+              { "value": 8,  "content": [{ "type": "text", "value": "A água é H₂O." }] }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Seção B — Questões Discursivas",
+      "questions": [
+        {
+          "kind": "textual",
+          "stem": [{ "type": "text", "value": "Explique o conceito de democracia em até 5 linhas." }],
+          "answer": {
+            "type": "textual",
+            "lineCount": 5
+          }
+        },
+        {
+          "kind": "essay",
+          "stem": [{ "type": "text", "value": "Redija um texto sobre sustentabilidade." }],
+          "answer": {
+            "type": "essay",
+            "minLines": 10
+          }
+        }
+      ]
+    },
+    {
+      "title": "Seção C — Questões Especiais",
+      "questions": [
+        {
+          "kind": "cloze",
+          "stem": [
+            { "type": "text", "value": "Complete com as palavras: " },
+            { "type": "blank" },
+            { "type": "text", "value": " é a capital de Minas Gerais e " },
+            { "type": "blank" },
+            { "type": "text", "value": " é a capital do Rio Grande do Sul." }
+          ],
+          "answer": {
+            "type": "cloze",
+            "wordBank": [
+              [{ "type": "text", "value": "Belo Horizonte" }],
+              [{ "type": "text", "value": "Porto Alegre" }]
+            ]
+          }
+        },
+        {
+          "kind": "file",
+          "stem": [{ "type": "text", "value": "Envie um arquivo com a resolução desta questão." }],
+          "answer": {
+            "type": "file"
+          }
+        }
+      ]
+    }
+  ]
+}
