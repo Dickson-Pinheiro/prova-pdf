@@ -17,6 +17,8 @@ build-browser:
 	  echo "wasm-opt not found, skipping"; \
 	fi
 	cp npm/package.json pkg/package.json
+	cp npm/prova-pdf.d.ts pkg/prova-pdf.d.ts
+	cp npm/index.js pkg/index.js
 	@echo "Browser build complete → pkg/"
 
 ## WASI library (C-ABI, for Python/Go/CLI)
