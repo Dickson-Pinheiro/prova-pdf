@@ -47,7 +47,7 @@ jobs:
           cp demo.html _site/index.html
           cp pkg/prova_pdf.js pkg/prova_pdf_bg.wasm _site/pkg/
           cp pkg/prova_pdf.d.ts _site/pkg/ 2>/dev/null || true
-          cp fonts/DejaVuSans*.ttf _site/fonts/
+          cp fonts/*.ttf _site/fonts/
           cp img/logo.jpg _site/img/
           cp -r tests/fixtures _site/tests/fixtures
 
