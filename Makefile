@@ -19,6 +19,7 @@ build-browser:
 	cp npm/package.json pkg/package.json
 	cp npm/prova-pdf.d.ts pkg/prova-pdf.d.ts
 	cp npm/index.js pkg/index.js
+	cp README.md pkg/README.md
 	@echo "Browser build complete → pkg/"
 
 ## WASI library (C-ABI, for Python/Go/CLI)

@@ -1,6 +1,6 @@
 {
   "name": "prova-pdf",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "Purpose-built exam PDF generator compiled to WebAssembly",
   "main": "prova_pdf.js",
@@ -12,7 +12,8 @@
     "prova_pdf_bg.wasm.d.ts",
     "prova_pdf.d.ts",
     "prova-pdf.d.ts",
-    "index.js"
+    "index.js",
+    "README.md"
   ],
   "sideEffects": false,
   "exports": {
