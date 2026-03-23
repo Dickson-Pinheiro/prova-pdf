@@ -537,20 +537,49 @@ Implementar `packages/go/`:
 
 ---
 
-## Fase 10 — Testes de qualidade visual e compatibilidade com o pdf-service da lize
+## Fase 10 — Comparação visual e calibração contra o pdf-service da lize
 
-### TASK-038 — Fixtures de ExamSpec representativas `[ ]`
-Criar `tests/fixtures/` com casos sintéticos cobrindo toda a superfície do schema:
+### Contexto do fluxo atual
 
-- `simple_choice.json` — 10 questões choice, fonte única
-- `all_kinds.json` — 1 questão de cada kind
-- `full_header.json` — header completo com todos os campos e student_fields
-- `multi_font.json` — 3 famílias (body/heading/question) com FontRules
-- `economy_mode.json` — economyMode=true, allBlack=true
-- `two_columns.json` — 2 colunas com mix de full_width e questões normais
-- `cloze_with_bank.json` — questões lacunadas com banco de palavras
-- `math_formulas.json` — questões com LaTeX inline e display
-- `ata_page.json` — pageSize=Ata, 40 questões, sem header
+O pdf-service da lize gera PDFs assim:
+1. Django renderiza `exam_print.html` (template Django + Vue.js + MathJax) com dados do banco
+2. pdf-service (Go + go-rod) abre a URL num Chromium headless
+3. Chromium renderiza HTML/CSS/JS → `page.PDF()` gera o PDF
+4. pdfcpu pós-processa: watermark (footer), numeração de página, páginas em branco
+
+Para comparar o prova-pdf contra esse fluxo, é necessário:
+- Gerar o PDF pelo fluxo Chromium (referência)
+- Gerar o PDF pelo prova-pdf a partir dos **mesmos dados do banco**
+- Comparar visualmente
+
+Locais relevantes da lize:
+- Template: `lizeedu/fiscallizeon/exams/templates/dashboard/exams/exam_print.html`
+- pdf-service: `lize/pdf-service/` (Go, go-rod, pdfcpu)
+- CSS: `exam-print.css` + inline styles no template
+- Dados: Vue `exam_data.js` alimenta as questões via API
+
+### TASK-038 — Fixtures de ExamSpec a partir de provas reais `[~]`
+
+Expandir o `parse_exam.py` (que já separa banco da formatação via `exam_formatter.py`)
+para gerar fixtures representativas a partir de provas reais do banco da lize.
+
+Fixtures já existentes (geradas pelo parse_exam.py):
+- `all_kinds.json` ✅
+- `simple_choice.json` ✅ (sintética)
+- `portugues_poema.json` ✅
+- `pga_2em_2trimestre.json` ✅
+- `exatas.json` ✅
+- `matematica_vml.json` ✅
+- `p4_lingua_portuguesa.json` ✅
+
+Fixtures adicionais necessárias (cobrir variações de PrintConfig):
+- [ ] Prova com `economyMode=true` + `allBlack=true`
+- [ ] Prova com `pageSize=Ata` (200×266mm) + 2 colunas
+- [ ] Prova com `breakAllQuestions=true`
+- [ ] Prova com header customizado (logo + campos de aluno completos)
+- [ ] Prova com math LaTeX pesado (fórmulas display + inline)
+
+**Critério:** 10+ fixtures cobrindo todas as variações de PrintConfig usadas em produção.
 
 ### TASK-039 — Testes cross-platform: browser == WASI `[x]`
 Implementar `tests/cross-platform/`:
@@ -561,105 +590,158 @@ Implementar `tests/cross-platform/`:
 
 **Critério:** todos os fixtures geram bytes idênticos nos 3 ambientes.
 
-### TASK-040 — Captura de PDFs de referência do pdf-service da lize `[ ]`
-Criar o baseline de referência a partir do fluxo Chromium existente.
+### TASK-040 — Captura de PDFs de referência via Chromium `[ ]`
 
-Pré-requisito: acesso ao ambiente de desenvolvimento da lize com pdf-service rodando.
+Gerar PDFs de referência chamando o fluxo real da lize (Django + pdf-service + Chromium).
 
-- Criar script `tests/visual/capture_reference.sh`:
-  - Para cada caso de teste (ver lista abaixo), chamar o endpoint do pdf-service com os parâmetros Django equivalentes
-  - Salvar os PDFs em `tests/visual/reference/chromium/<case_name>.pdf`
-  - Registrar em `tests/visual/reference/manifest.json`: parâmetros usados, data de captura, versão do pdf-service
-- Casos de teste obrigatórios (cobrindo variações reais da lize):
-  - `choice_a4_normal` — A4, 10 questões choice, 1 coluna, fontes padrão
-  - `choice_a4_economy` — A4, economyMode=true
-  - `choice_a4_allblack` — A4, allBlack=true
-  - `choice_ata_normal` — ATA (200×266mm), 40 questões choice, 2 colunas
-  - `textual_with_lines` — questões dissertativas com linhas, discursiveLineHeight variado
-  - `cloze_with_bank` — questões lacunadas com banco de palavras
-  - `sum_with_box` — questões de somatório com caixa de soma
-  - `full_header_fields` — header completo com logo, campos de aluno e instruções
-  - `multi_section` — 3 seções com títulos e instruções distintas
-  - `break_all_questions` — breakAllQuestions=true, 1 questão por página
-- Após captura, converter cada PDF para PNG (300 DPI) com `pdftoppm`:
-  `pdftoppm -r 300 reference.pdf reference_page`
-- Armazenar PNGs em `tests/visual/reference/chromium/<case_name>/page_*.png`
+**Pré-requisitos:** ambiente local da lize rodando (Django + pdf-service + PostgreSQL).
 
-**Critério:** 10+ casos capturados com manifest.json válido; PNGs gerados para cada página.
+**Estratégia:**
+1. Selecionar 10 provas no banco que cubram as variações de layout (ver lista abaixo)
+2. Para cada prova, chamar `POST /print` do pdf-service com a URL do `exam_print.html`
+3. Salvar o PDF de referência em `tests/visual/reference/chromium/<case_name>.pdf`
+4. Converter para PNG (300 DPI) com `pdftoppm` para comparação pixel-level
+5. Em paralelo, gerar o ExamSpec JSON da mesma prova via `parse_exam.py`
+6. Registrar em `tests/visual/manifest.json`: exam_id, parâmetros usados, data
 
-### TASK-041 — Fixtures reais da lize mapeadas para ExamSpec `[ ]`
-Para cada PDF de referência capturado na TASK-040, criar o `ExamSpec.json` equivalente
-em `tests/visual/fixtures/lize/`:
+**Casos obrigatórios:** (cada um exercita flags diferentes do template)
 
-- Mapear cada parâmetro Django do manifest.json para o campo PrintConfig correspondente
-  (usar a tabela de mapeamento em MIGRATION.md do webassembly-pdf como referência)
-- O conteúdo das questões deve ser idêntico ao usado na captura (mesmo texto, mesmas alternativas)
-- Incluir mesmas fontes (carregar as mesmas TTF usadas pelo Chromium/CSS na lize)
-- Validar que cada fixture deserializa sem erro e passa a Fase 1 de validação do pipeline
-- Documentar em `tests/visual/fixtures/lize/README.md` o que cada caso exercita
-  e qual parâmetro do ExamPrintView ele corresponde
+| Caso | PrintConfig exercitado | Regra CSS/template correspondente |
+|------|------------------------|-----------------------------------|
+| `choice_a4_1col` | A4, 1 coluna, IBM Plex Sans | `@page { size: a4 }`, `column-count: unset` |
+| `choice_a4_2col` | A4, 2 colunas | `column-count: 2`, `column-rule: 1px solid #3b4863` |
+| `choice_ata_2col` | ATA 200×266mm, 2 colunas | `@page { size: 200mm 266mm }` |
+| `economy_allblack` | economyMode + allBlack | `* { color: black !important }`, 2 colunas forçadas |
+| `textual_lines` | Questões dissertativas com linhas | `.discursive-line-height`, `border-bottom border-dark` |
+| `sum_with_cloze` | Somatório + cloze | Alternativas com `Math.pow(2, index)`, lacunas |
+| `full_header` | Header com logo, campos, instruções | Tabela `table-bordered` com logo + campos aluno |
+| `break_all` | breakAllQuestions=true | `.pagebreak { break-before: right }` |
+| `font_size_large` | fontSize=18pt | `.question * { font-size: 18pt !important }` |
+| `multi_section` | 3 seções separadas por disciplina | `separate_subjects == 1`, `subject-section` page-break |
 
-**Critério:** 10+ ExamSpec.json alinhados 1:1 com os PDFs de referência; todos validam sem erro.
+**Critério:** 10 PDFs de referência capturados + ExamSpec equivalente validado.
 
-### TASK-042 — Comparação visual por região: SSIM page-level e region-level `[ ]`
+### TASK-041 — Mapeamento CSS↔Layout: documentar regras de correspondência `[ ]`
+
+Documentar como cada regra CSS/template do `exam_print.html` corresponde a parâmetros
+do motor de layout do prova-pdf. Este mapeamento é a base para calibração.
+
+**Correspondências a documentar:**
+
+| Elemento | CSS da lize (exam_print.html) | prova-pdf (Rust) |
+|----------|-------------------------------|-------------------|
+| Fonte base | `font-size: .875rem` (=14px screen, `font_size`pt no @media print) | `PrintConfig.font_size` |
+| Line-height | `line-height: 1.5` / `2.5` / `3.5` / `normal` | `LineSpacing` enum multiplier |
+| Margem página | `@page { margin-left/top/right/bottom }` em cm | `Margins { top, bottom, left, right }` em cm |
+| 2 colunas | `column-count: 2; column-gap: 35px; column-rule: 1px solid #3b4863` | `columns: 2`, `column_gap_pt: 14.0`, VRule 0.75pt |
+| Número questão | `span.question-number` (circle badge, 29px, bg-black) | `format_number()` + GlyphRun badge |
+| Alternativa badge | `span.question-alternative` (circle, bold, uppercase) | `render_choice()` com `alt_badge_scale` |
+| Linha resposta | `hr.border-dark` com `margin-top: Xcm` | `HRule` com `discursive_line_height` cm |
+| Rascunho | `.draft-area { border: 2px solid black }` + `.draft-row { min-height: 7mm }` | `draft_lines` × `draft_line_height` |
+| Page break | `.pagebreak { break-before: right / break-after: page }` | `force_page_break` / `break_all_questions` |
+| Full-width | `.force-one-column { column-span: all }` | `full_width: true` |
+| allBlack | `* { color: black !important }` | `apply_all_black()` pós-processamento |
+| Espaçamento MathJax | `mjx-container.MathJax { font-size: 120% !important }` | MathLayout scale factor |
+
+**Critério:** tabela completa em `tests/visual/CSS_LAYOUT_MAP.md` com todas as correspondências.
+
+### TASK-042 — Comparação visual: SSIM por página `[ ]`
+
 Implementar `tests/visual/compare.py`:
 
 ```
-python compare.py --case choice_a4_normal [--region header|questions|answers|full]
+python compare.py --case choice_a4_1col
 ```
 
-- Converter PDF do prova-pdf → PNG com mesma resolução (300 DPI)
-- Comparação **page-level**: SSIM de página inteira — threshold ≥ 0.92
-- Comparação **region-level** (mais sensível a regressões):
-  - `header`: bounding box do InstitutionalHeader (y=0 até fim do header)
-  - `questions`: cada bloco de questão individualmente (detectado por posição ou metadata)
-  - `answers`: área de resposta de cada questão (linhas, caixas, blanks)
-- Saída: relatório HTML `tests/visual/reports/<case_name>.html` com:
-  - Imagens lado a lado (referência | prova-pdf | diff colorido)
-  - Score SSIM por região em tabela
-  - Flag visual PASS/FAIL por região e por página
-- Thresholds diferenciados:
-  - Header: SSIM ≥ 0.90 (logo pode ter pequenas diferenças de renderização)
-  - Questões (texto): SSIM ≥ 0.93
-  - Espaços de resposta (linhas, caixas): SSIM ≥ 0.95
-  - Página inteira: SSIM ≥ 0.92
+1. Converter ambos os PDFs (referência Chromium + prova-pdf) para PNG a 300 DPI
+2. Calcular SSIM por página
+3. Gerar relatório HTML com imagens lado a lado + diff colorido + scores
+4. Threshold geral: SSIM ≥ 0.85 (tolerância maior porque são engines diferentes)
 
-**Critério:** script funciona para os 10 casos de referência; relatório HTML gerado com scores.
+O objetivo não é paridade pixel-perfect (impossível entre Chromium e um motor Rust),
+mas garantir que a **estrutura visual** é equivalente: mesmos elementos na mesma posição,
+mesma hierarquia, mesmo número de páginas.
 
-### TASK-043 — Calibração visual de parâmetros `[ ]`
-Calibrar as constantes do pipeline para maximizar SSIM vs referências Chromium.
+**Critério:** script funciona para os 10 casos; relatório HTML gerado.
 
-Processo iterativo documentado em `tests/visual/calibration.md`:
+### TASK-043 — Calibração iterativa de constantes de layout `[ ]`
 
+Ajustar as constantes do prova-pdf para maximizar semelhança visual com o Chromium.
+
+**Processo iterativo:**
 1. Executar `compare.py` para todos os casos → baseline de scores
-2. Identificar regiões com SSIM mais baixo → investigar causa (espaçamento, tamanho de fonte, margem)
-3. Ajustar constantes em `src/layout/` e `src/spec/config.rs`:
-   - `line_height` padrão por `LineSpacing` variant
-   - `margin` defaults em `Margins::default()`
-   - `question_spacing_cm` default
-   - `alternative_spacing_cm` default
-   - `font_size` base (atualmente 12pt — verificar o que o CSS da lize usa)
-   - `discursiveLineHeight` default
-4. Re-executar compare.py → verificar se SSIM melhorou
-5. Documentar cada ajuste, o delta de SSIM e a justificativa em `calibration.md`
+2. Identificar as maiores divergências (espaçamentos, tamanhos, margens)
+3. Comparar com os valores CSS reais do template:
+   - `column-gap: 35px` (CSS) → ajustar `column_gap_pt` (Rust)
+   - `font-size: .875rem` / `15pt` → ajustar `font_size` default
+   - `margin-top: 0.85cm` para linhas → ajustar `discursive_line_height`
+   - `min-height: 7mm` para draft → ajustar `draft_line_height`
+   - `width: 29px` para badge → ajustar `alt_badge_scale`
+4. Re-executar compare.py → documentar delta de SSIM
+5. Repetir até convergir
 
-Meta: todos os 10 casos atingem os thresholds definidos na TASK-042 **com as fontes reais da lize**.
+**Fontes-chave:** O CSS da lize usa `IBM Plex Sans` (Google Fonts) + `Noto Sans Math`.
+O prova-pdf precisa receber os mesmos TTFs para comparação justa.
 
-**Critério:** `calibration.md` com pelo menos 3 rodadas de ajuste documentadas; scores finais acima do threshold em ≥ 8/10 casos.
+**Critério:** `tests/visual/CALIBRATION.md` com pelo menos 3 rodadas documentadas.
 
-### TASK-044 — Testes de regressão visual automatizados (CI) `[ ]`
-Integrar os testes visuais no pipeline de CI para prevenir regressões:
+### TASK-044 — Integração do pdf-service: endpoint `/print-json` `[ ]`
 
-- Job `visual-regression` no GitHub Actions (roda apenas em PRs que tocam `src/`):
-  1. Build prova-pdf WASI
-  2. Gerar PDFs para todos os fixtures da lize (TASK-041) via Go wrapper
-  3. Executar `compare.py --all`
-  4. Publicar relatório HTML como artefato do workflow
-  5. Falhar o job se qualquer caso ficar abaixo do threshold
-- Armazenar PNGs de referência do Chromium no repositório (`tests/visual/reference/`) — estes não mudam com commits do prova-pdf
-- Atualizar referências apenas via workflow manual `update-visual-references` (com aprovação)
+Adicionar ao pdf-service da lize um novo endpoint que aceita ExamSpec JSON
+e chama o prova-pdf (via Go wrapper wazero) em vez do Chromium.
 
-**Critério:** job visual-regression passa para todos os casos após calibração; falha detectável ao introduzir regressão proposital.
+```go
+// pdf-service/print_json.go
+router.POST("/print-json", printJsonPdf)
+
+func printJsonPdf(c *gin.Context) {
+    // 1. Parse ExamSpec JSON do body
+    // 2. Carregar fontes de /fonts/ no container
+    // 3. Chamar provapdf.GeneratePDF(spec, fonts)
+    // 4. Pós-processar com pdfcpu (watermark, page numbers, blank pages)
+    // 5. Retornar PDF ou upload S3
+}
+```
+
+**Importante:** o endpoint `/print` (Chromium) continua funcionando.
+O novo `/print-json` é uma rota paralela para testes A/B.
+
+**Pré-requisito:** TASK-043 concluída (constantes calibradas).
+
+**Critério:** PDF gerado por `/print-json` com mesma prova do banco → visualmente comparável ao `/print`.
+
+### TASK-044b — Serialização Django: `exam_to_spec()` `[ ]`
+
+Implementar no Django (lizeedu) a função que converte os modelos ORM em ExamSpec JSON.
+
+Reutiliza o `exam_formatter.py` (já separado de acesso ao banco):
+- `build_print_config(exam_row)` → PrintConfig
+- `build_question(q, alts, base_texts, ...)` → Question
+- `html_to_inline(html_str, images)` → InlineContent[]
+
+**Novo no Django:**
+```python
+# exams/services/exam_spec_serializer.py
+def exam_to_spec(exam: Exam, print_config: ExamPrintConfig) -> dict:
+    """Serializa um Exam + PrintConfig do Django para ExamSpec JSON."""
+    # Usa exam_formatter.build_print_config, build_question, etc.
+```
+
+**Critério:** `exam_to_spec(exam)` → JSON que passa na validação do prova-pdf.
+
+### TASK-044c — Testes A/B: Chromium vs prova-pdf em produção `[ ]`
+
+Com ambos os endpoints funcionando (`/print` e `/print-json`):
+
+1. Feature flag no Django para selecionar qual endpoint usar
+2. Para X% dos pedidos, chamar ambos e comparar:
+   - Tamanho do PDF (devem ser similares)
+   - Tempo de geração (prova-pdf deve ser 20-100x mais rápido)
+   - Número de páginas (deve ser idêntico)
+3. Log de divergências para investigação
+4. Rollout gradual: 1% → 10% → 50% → 100%
+
+**Critério:** dashboard de métricas comparativas; zero divergência de número de páginas.
 
 ---
 
@@ -734,26 +816,37 @@ Escrever `README.md` com:
 | 7 | 031–033 | Pipeline completo, bindings finais |
 | 8 | 034 | Math LaTeX |
 | 9 | 035–037 | npm, Python, Go |
-| 10 | 038–044 | Fixtures sintéticas, cross-platform, **compatibilidade visual lize** (captura de referência, fixtures reais, SSIM por região, calibração, CI de regressão) |
+| 10 | 038–044c | **Comparação visual e integração lize** (fixtures reais, mapeamento CSS↔Layout, SSIM, calibração, endpoint /print-json, serialização Django, testes A/B) |
 | 11 | 045–047 | PrintConfig completo |
 | 12 | 048–050 | CI, benchmarks, docs |
 
-**Total: 50 tasks | Fase 0 completa (6/6) | Pendente: 44 tasks**
-
 ---
 
-## Dependências entre tasks de compatibilidade visual
+## Dependências entre tasks da Fase 10
 
 ```
-TASK-031 (pipeline completo)
-    └─► TASK-038 (fixtures sintéticas)
-    └─► TASK-039 (cross-platform)
-
-TASK-040 (captura referência Chromium) ◄── requer acesso ao pdf-service da lize
-    └─► TASK-041 (fixtures reais mapeadas)
-            └─► TASK-042 (compare.py SSIM page+region)
-                    └─► TASK-043 (calibração de parâmetros)
-                            └─► TASK-044 (CI regressão visual)
+TASK-038 (fixtures reais via parse_exam.py)
+    │
+    ├─► TASK-040 (captura PDFs referência Chromium) ◄── requer Django + pdf-service rodando
+    │       │
+    │       ├─► TASK-041 (mapeamento CSS ↔ Layout)
+    │       │
+    │       └─► TASK-042 (compare.py SSIM por página)
+    │               │
+    │               └─► TASK-043 (calibração iterativa de constantes)
+    │
+    └─► TASK-044 (endpoint /print-json no pdf-service)
+            │
+            ├── TASK-044b (serialização Django: exam_to_spec)
+            │
+            └─► TASK-044c (testes A/B: Chromium vs prova-pdf)
 ```
 
-**Nota:** TASK-040 requer acesso ao ambiente de desenvolvimento da lize para chamar o pdf-service e gerar os PDFs de referência. As tarefas TASK-041–044 dependem dessas referências e só podem ser executadas após TASK-040 ter ao menos os primeiros casos capturados. A calibração (TASK-043) é iterativa e deve ocorrer em paralelo com o refinamento do pipeline de layout.
+**Fluxo:** fixtures reais (038) alimentam tanto a captura de referência (040) quanto
+a integração direta no pdf-service (044). A calibração (043) é iterativa e ocorre em
+paralelo com o refinamento do layout. O rollout em produção (044c) é o passo final.
+
+**Pré-requisitos externos:**
+- TASK-040: Django + pdf-service + PostgreSQL rodando localmente
+- TASK-044: Acesso ao repositório `lize/pdf-service` para adicionar endpoint
+- TASK-044b: Acesso ao repositório `lize/lizeedu` para adicionar serializer
