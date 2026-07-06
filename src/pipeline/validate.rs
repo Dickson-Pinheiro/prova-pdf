@@ -75,15 +75,10 @@ fn check_fonts(registry: &FontRegistry, errors: &mut Vec<ValidationError>) {
 }
 
 fn check_sections(spec: &ExamSpec, errors: &mut Vec<ValidationError>) {
-    if spec.sections.is_empty() {
-        errors.push(ValidationError::NoSections);
-        return; // no point iterating an empty slice
-    }
-    for (i, section) in spec.sections.iter().enumerate() {
-        if section.questions.is_empty() {
-            errors.push(ValidationError::EmptySectionAt { index: i });
-        }
-    }
+    // Empty sections list and sections with no questions are allowed.
+    // This enables header-only rendering and sections that contain only
+    // base-texts or instructions without questions.
+    let _ = (spec, errors);
 }
 
 fn check_choice_questions(spec: &ExamSpec, errors: &mut Vec<ValidationError>) {
@@ -339,23 +334,14 @@ mod tests {
     // ── NoSections ────────────────────────────────────────────────────────────
 
     #[test]
-    fn no_sections_reported_when_sections_empty() {
+    fn empty_sections_allowed() {
         let spec   = ExamSpec::default(); // sections = []
-        let errors = validate(&spec, &ready_registry(), &no_images());
-        assert!(has_error(&errors, &ValidationError::NoSections));
-    }
-
-    #[test]
-    fn no_sections_absent_when_at_least_one_section() {
-        let spec   = one_section(vec![textual_question()]);
         let errors = validate(&spec, &ready_registry(), &no_images());
         assert!(!has_error(&errors, &ValidationError::NoSections));
     }
 
-    // ── EmptySection ──────────────────────────────────────────────────────────
-
     #[test]
-    fn empty_section_reported_at_correct_index() {
+    fn empty_section_questions_allowed() {
         let spec = ExamSpec {
             sections: vec![
                 Section { questions: vec![textual_question()], title: None, instructions: vec![], category: None, style: None, force_page_break: false },
@@ -364,8 +350,7 @@ mod tests {
             ..ExamSpec::default()
         };
         let errors = validate(&spec, &ready_registry(), &no_images());
-        assert!(has_error(&errors, &ValidationError::EmptySectionAt { index: 1 }));
-        assert!(!has_error(&errors, &ValidationError::EmptySectionAt { index: 0 }));
+        assert!(!has_error(&errors, &ValidationError::EmptySectionAt { index: 1 }));
     }
 
     // ── Choice: too few alternatives ──────────────────────────────────────────
@@ -511,12 +496,11 @@ mod tests {
 
     #[test]
     fn multiple_errors_collected_in_single_call() {
-        // No font + no sections → two errors at once.
+        // No font → at least one error.
         let spec   = ExamSpec::default();
         let errors = validate(&spec, &empty_registry(), &no_images());
         assert!(has_error(&errors, &ValidationError::NoFont));
-        assert!(has_error(&errors, &ValidationError::NoSections));
-        assert_eq!(errors.len(), 2);
+        assert!(errors.len() >= 1);
     }
 
     // ── Clean spec produces no errors ─────────────────────────────────────────

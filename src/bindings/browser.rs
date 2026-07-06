@@ -260,11 +260,11 @@ mod tests {
     }
 
     #[test]
-    fn generate_pdf_fails_with_no_sections() {
+    fn generate_pdf_succeeds_with_no_sections() {
         setup();
-        let spec = ExamSpec::default(); // no sections
-        let err  = generate_pdf_from_spec(spec).unwrap_err();
-        assert!(!err.is_empty());
+        let spec = ExamSpec::default(); // no sections — header-only is valid
+        let pdf  = generate_pdf_from_spec(spec).expect("empty sections should produce valid PDF");
+        assert!(pdf.starts_with(b"%PDF-"));
     }
 
     #[test]

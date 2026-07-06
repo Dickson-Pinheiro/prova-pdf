@@ -139,7 +139,7 @@ pub(crate) fn layout_exam(
         );
         header_height = h;
         if h > 0.0 {
-            composer.push_block_full_width(h, frags);
+            composer.push_block_full_width(h, frags, true, &[]);
         }
     }
 
@@ -172,7 +172,10 @@ pub(crate) fn layout_exam(
             let (frags, height, split_points) = layout_question(question, q_number, resolver, &col_geom, config);
 
             if fw {
-                composer.push_block_full_width(height, frags);
+                // CSS break-inside: avoid applies when each question is forced to a new page.
+                // Otherwise (normal essay), paginate across pages.
+                let avoid = question.force_page_break || config.break_all_questions;
+                composer.push_block_full_width(height, frags, avoid, &split_points);
             } else {
                 composer.push_block_splittable(height, frags, &split_points);
             }
@@ -304,7 +307,13 @@ fn apply_all_black(pages: &mut [Vec<Fragment>]) {
                 }
                 FragmentKind::HRule(r) => r.color = BLACK.to_owned(),
                 FragmentKind::VRule(r) => r.color = BLACK.to_owned(),
-                FragmentKind::StrokedRect(r) => r.color = BLACK.to_owned(),
+                FragmentKind::StrokedRect(_) => {
+                    // Keep original border colour — thin table borders rendered
+                    // in grey look identical in Chromium even under the CSS
+                    // `* { border-color: black !important }` rule because of
+                    // anti-aliasing.  Forcing them to pure black makes them
+                    // visually heavier than the Chromium reference.
+                }
                 FragmentKind::FilledCircle(r) => r.color = BLACK.to_owned(),
                 FragmentKind::FilledRect(r) => {
                     // Keep existing black or white; turn decorative colours
@@ -357,23 +366,23 @@ mod tests {
     }
 
     #[test]
-    fn render_fails_with_no_sections() {
+    fn render_no_sections_produces_valid_pdf() {
         let ctx  = ready_ctx();
-        let spec = ExamSpec::default(); // no sections
-        let err  = render(&spec, &ctx).unwrap_err();
-        assert!(matches!(err, PipelineError::ValidationFailed(_)));
+        let spec = ExamSpec::default(); // no sections — allowed
+        let pdf  = render(&spec, &ctx).unwrap();
+        assert!(pdf.len() > 100);
     }
 
     #[test]
-    fn validation_error_carries_all_errors() {
+    fn validation_error_on_no_font() {
         let ctx = RenderContext {
             registry: FontRegistry::new(),
             rules:    FontRules::default(),
             images:   HashMap::new(),
         };
-        let spec = ExamSpec::default(); // no font + no sections = 2 errors
+        let spec = ExamSpec::default(); // no font = error
         match render(&spec, &ctx).unwrap_err() {
-            PipelineError::ValidationFailed(errs) => assert_eq!(errs.len(), 2),
+            PipelineError::ValidationFailed(errs) => assert!(errs.len() >= 1),
             other => panic!("expected ValidationFailed, got {other:?}"),
         }
     }
@@ -458,7 +467,7 @@ mod tests {
     }
 
     #[test]
-    fn render_empty_section_is_rejected() {
+    fn render_empty_section_produces_valid_pdf() {
         use crate::spec::exam::Section;
         let ctx  = ready_ctx();
         let spec = ExamSpec {
@@ -472,8 +481,8 @@ mod tests {
             }],
             ..ExamSpec::default()
         };
-        let err = render(&spec, &ctx).unwrap_err();
-        assert!(matches!(err, PipelineError::ValidationFailed(_)));
+        let pdf = render(&spec, &ctx).unwrap();
+        assert!(pdf.len() > 100); // valid PDF produced
     }
 
     // ── apply_all_black ──────────────────────────────────────────────────────

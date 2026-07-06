@@ -38,8 +38,11 @@ use std::collections::HashMap;
 use serde::Deserialize;
 
 use crate::fonts::{FontRegistry, FontRules};
+use crate::layout::fragment::FragmentKind;
+use crate::layout::page::PageGeometry;
 use crate::pipeline::{self, RenderContext};
 use crate::spec::ExamSpec;
+use crate::spec::config::PrintConfig;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Thread-local state
@@ -284,6 +287,335 @@ pub extern "C" fn prova_pdf_last_error_message(buf: *mut u8) {
             unsafe { std::ptr::copy_nonoverlapping(bytes.as_ptr(), buf, bytes.len()); }
         }
     });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fragment dump — JSON snapshot (same schema as pdf_snapshot.py)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// JSON output types for `prova_pdf_dump_fragments`.
+mod snapshot {
+    use serde::Serialize;
+
+    #[derive(Serialize)]
+    pub struct Snapshot {
+        pub source:       &'static str,
+        pub page_count:   usize,
+        pub page_size_pt: [f64; 2],
+        pub pages:        Vec<Page>,
+    }
+
+    #[derive(Serialize)]
+    pub struct Page {
+        pub index:     usize,
+        pub text_runs: Vec<TextRun>,
+        pub chars:     Vec<()>,       // always empty — glyph IDs are not Unicode text
+        pub rects:     Vec<Rect>,
+        pub lines:     Vec<Line>,
+        pub images:    Vec<Image>,
+    }
+
+    #[derive(Serialize)]
+    pub struct TextRun {
+        pub text:  String,
+        pub x:     f64,
+        pub y:     f64,
+        pub font:  String,
+        pub size:  f64,
+        pub color: String,
+    }
+
+    #[derive(Serialize)]
+    pub struct Rect {
+        pub x:      f64,
+        pub y:      f64,
+        pub w:      f64,
+        pub h:      f64,
+        pub stroke: f64,
+        pub fill:   Option<String>,
+        pub color:  String,
+    }
+
+    #[derive(Serialize)]
+    pub struct Line {
+        pub x0:     f64,
+        pub y0:     f64,
+        pub x1:     f64,
+        pub y1:     f64,
+        pub stroke: f64,
+        pub color:  String,
+    }
+
+    #[derive(Serialize)]
+    pub struct Image {
+        pub key: String,
+        pub x:   f64,
+        pub y:   f64,
+        pub w:   f64,
+        pub h:   f64,
+    }
+}
+
+/// Format a color string to uppercase `#RRGGBB`.
+///
+/// Input is expected to already be a CSS hex color; we just normalise the case.
+fn normalize_color(c: &str) -> String {
+    let s = c.trim();
+    if s.starts_with('#') && (s.len() == 7 || s.len() == 4) {
+        format!("#{}", s[1..].to_uppercase())
+    } else {
+        "#000000".to_owned()
+    }
+}
+
+/// Round to 2 decimal places (matches `r2()` in pdf_snapshot.py).
+#[inline]
+fn r2(v: f64) -> f64 {
+    (v * 100.0).round() / 100.0
+}
+
+/// Build a `snapshot::Snapshot` from laid-out pages and page geometry.
+fn build_snapshot(
+    pages:    &[Vec<crate::layout::fragment::Fragment>],
+    geometry: &PageGeometry,
+) -> snapshot::Snapshot {
+    let mx = geometry.margin_left_pt;
+    let my = geometry.margin_top_pt;
+
+    let snap_pages: Vec<snapshot::Page> = pages
+        .iter()
+        .enumerate()
+        .map(|(idx, frags)| {
+            let mut text_runs = Vec::new();
+            let mut rects     = Vec::new();
+            let mut lines     = Vec::new();
+            let mut images    = Vec::new();
+
+            for frag in frags {
+                // Fragment coords are relative to the content area; add margins
+                // to get absolute page coordinates (top-left origin, y grows down).
+                let ax = r2(mx + frag.x);
+                let ay = r2(my + frag.y);
+                let aw = r2(frag.width);
+                let ah = r2(frag.height);
+
+                match &frag.kind {
+                    FragmentKind::GlyphRun(run) => {
+                        let variant_suffix = match run.variant {
+                            1 => "-Bold",
+                            2 => "-Italic",
+                            3 => "-BoldItalic",
+                            _ => "",
+                        };
+                        text_runs.push(snapshot::TextRun {
+                            text:  String::new(), // glyph IDs only — no Unicode text
+                            x:     ax,
+                            y:     ay,
+                            font:  format!("{}{}", run.font_family, variant_suffix),
+                            size:  r2(run.font_size),
+                            color: normalize_color(&run.color),
+                        });
+                    }
+
+                    FragmentKind::FilledRect(fr) => {
+                        rects.push(snapshot::Rect {
+                            x:      ax,
+                            y:      ay,
+                            w:      aw,
+                            h:      ah,
+                            stroke: 0.0,
+                            fill:   Some(normalize_color(&fr.color)),
+                            color:  normalize_color(&fr.color),
+                        });
+                    }
+
+                    FragmentKind::StrokedRect(sr) => {
+                        rects.push(snapshot::Rect {
+                            x:      ax,
+                            y:      ay,
+                            w:      aw,
+                            h:      ah,
+                            stroke: r2(sr.stroke_width),
+                            fill:   None,
+                            color:  normalize_color(&sr.color),
+                        });
+                    }
+
+                    FragmentKind::FilledCircle(fc) => {
+                        // Emit as a filled rect bounding-box — no dedicated circle type in schema.
+                        rects.push(snapshot::Rect {
+                            x:      ax,
+                            y:      ay,
+                            w:      aw,
+                            h:      ah,
+                            stroke: 0.0,
+                            fill:   Some(normalize_color(&fc.color)),
+                            color:  normalize_color(&fc.color),
+                        });
+                    }
+
+                    FragmentKind::HRule(hr) => {
+                        lines.push(snapshot::Line {
+                            x0:     ax,
+                            y0:     r2(ay + ah / 2.0),
+                            x1:     r2(ax + aw),
+                            y1:     r2(ay + ah / 2.0),
+                            stroke: r2(hr.stroke_width),
+                            color:  normalize_color(&hr.color),
+                        });
+                    }
+
+                    FragmentKind::VRule(vr) => {
+                        lines.push(snapshot::Line {
+                            x0:     r2(ax + aw / 2.0),
+                            y0:     ay,
+                            x1:     r2(ax + aw / 2.0),
+                            y1:     r2(ay + ah),
+                            stroke: r2(vr.stroke_width),
+                            color:  normalize_color(&vr.color),
+                        });
+                    }
+
+                    FragmentKind::Image(img) => {
+                        images.push(snapshot::Image {
+                            key: img.key.clone(),
+                            x:   ax,
+                            y:   ay,
+                            w:   aw,
+                            h:   ah,
+                        });
+                    }
+
+                    FragmentKind::Spacer => {}
+                }
+            }
+
+            snapshot::Page {
+                index: idx,
+                text_runs,
+                chars: Vec::new(),
+                rects,
+                lines,
+                images,
+            }
+        })
+        .collect();
+
+    snapshot::Snapshot {
+        source:       "provapdf-fragments",
+        page_count:   snap_pages.len(),
+        page_size_pt: [
+            r2(geometry.page_width_pt),
+            r2(geometry.page_height_pt),
+        ],
+        pages: snap_pages,
+    }
+}
+
+/// Run validation + style cascade + layout phases only (no PDF emission).
+///
+/// Returns a JSON snapshot in the same schema as `pdf_snapshot.py`.
+///
+/// # Return convention
+/// - `>= 0` — JSON bytes written to `out_buf`.
+/// - `< 0`  — error; call `prova_pdf_last_error_*` to retrieve the message.
+///
+/// # Two-call protocol (same as `prova_pdf_generate`)
+///
+/// Pass `out_buf = null` / `out_cap = 0` to query the required byte count.
+/// The JSON is kept in the internal staging buffer.  On the second call,
+/// pass the allocated pointer and the returned size.
+#[unsafe(no_mangle)]
+pub extern "C" fn prova_pdf_dump_fragments(
+    json_ptr: *const u8,
+    json_len: usize,
+    out_buf:  *mut u8,
+    out_cap:  usize,
+) -> i32 {
+    let json_bytes = unsafe { std::slice::from_raw_parts(json_ptr, json_len) };
+    let json_str   = match std::str::from_utf8(json_bytes) {
+        Ok(s)  => s,
+        Err(e) => { set_last_error(format!("UTF-8 error: {e}")); return -1; }
+    };
+
+    let spec: ExamSpec = match serde_json::from_str(json_str) {
+        Ok(s)  => s,
+        Err(e) => { set_last_error(format!("JSON parse error: {e}")); return -1; }
+    };
+
+    let snap_bytes = match dump_fragments_from_spec(spec) {
+        Ok(b)  => b,
+        Err(e) => { set_last_error(e); return -1; }
+    };
+
+    let n = snap_bytes.len();
+
+    if !out_buf.is_null() && out_cap >= n {
+        unsafe { std::ptr::copy_nonoverlapping(snap_bytes.as_ptr(), out_buf, n); }
+    }
+
+    OUTPUT_BUF.with(|b| *b.borrow_mut() = snap_bytes);
+
+    clear_last_error();
+    n as i32
+}
+
+/// Run layout phases and build a JSON fragment snapshot from an already-parsed spec.
+///
+/// Separated from the C-ABI function so tests can call it without unsafe.
+pub(crate) fn dump_fragments_from_spec(spec: ExamSpec) -> Result<Vec<u8>, String> {
+    FONT_REGISTRY.with(|reg| {
+        FONT_RULES.with(|rules| {
+            IMAGE_STORE.with(|images| {
+                let ctx = RenderContext {
+                    registry: reg.borrow().clone(),
+                    rules:    rules.borrow().clone(),
+                    images:   images.borrow().clone(),
+                };
+
+                // Validate
+                let errors = pipeline::validate::validate(&spec, &ctx.registry, &ctx.images);
+                if !errors.is_empty() {
+                    return Err(format!("validation failed: {:?}", errors[0]));
+                }
+
+                // Compute effective config (mirrors pipeline::render)
+                let effective_config: PrintConfig = if spec.config.economy_mode {
+                    let mut c = spec.config.clone();
+                    c.columns = 2;
+                    c.break_enunciation = true;
+                    c
+                } else {
+                    spec.config.clone()
+                };
+
+                let effective_rules;
+                let rules_ref = if effective_config.font_family != "body" {
+                    effective_rules = {
+                        let mut r = ctx.rules.clone();
+                        r.body     = effective_config.font_family.clone();
+                        r.heading  = effective_config.font_family.clone();
+                        r.question = effective_config.font_family.clone();
+                        r
+                    };
+                    &effective_rules
+                } else {
+                    &ctx.rules
+                };
+
+                let resolver = crate::fonts::resolve::FontResolver::new(&ctx.registry, rules_ref);
+                let geometry = PageGeometry::from_config(&effective_config);
+
+                // Run layout (Phase 3) without Phase 4 (PDF emission)
+                let pages = pipeline::layout_exam(&spec, &effective_config, &resolver, &geometry, &ctx.images)
+                    .map_err(|e| e.to_string())?;
+
+                let snapshot = build_snapshot(&pages, &geometry);
+
+                serde_json::to_vec(&snapshot).map_err(|e| format!("JSON serialization error: {e}"))
+            })
+        })
+    })
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

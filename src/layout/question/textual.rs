@@ -14,6 +14,9 @@ pub(super) const DEFAULT_LINE_COUNT: u32 = 5;
 pub(super) const HRULE_STROKE_PT: f64 = 0.5;
 /// StrokedRect border stroke width in points (Blank mode).
 pub(super) const BLANK_BOX_STROKE_PT: f64 = 0.7;
+/// CSS: `div.lines-response { height: 18px !important }` (when font_size ≤ 18).
+/// 1px in print = 0.75pt (72dpi/96dpi). Added per line on top of `margin-top`.
+pub(super) const DISCURSIVE_LINE_DIV_PT: f64 = 13.5;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Functions
@@ -30,9 +33,14 @@ pub(super) fn layout_textual(
     config:   &PrintConfig,
     spc:      f64,
 ) -> (Vec<Fragment>, f64) {
-    let line_height_pt = textual.line_height_cm
+    // CSS: margin-top: {{discursive_line_height}}cm + div.lines-response height: 18px (13.5pt).
+    // In economy mode the answer-space sizing follows the compressed ECONOMY_FACTOR only
+    // (the 18px div is not shown/relevant), so skip the extra div height.
+    let div_pt = if config.economy_mode { 0.0 } else { DISCURSIVE_LINE_DIV_PT };
+    let line_height_pt = (textual.line_height_cm
         .unwrap_or(config.discursive_line_height)
         * 28.3465
+        + div_pt)
         * spc;
 
     let n_lines = textual.line_count.unwrap_or(DEFAULT_LINE_COUNT);

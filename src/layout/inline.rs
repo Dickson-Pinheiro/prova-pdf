@@ -26,6 +26,10 @@ const CM_TO_PT: f64 = 28.3465;
 pub const BLANK_DEFAULT_CM: f64 = 3.5;
 /// Fraction of font_size used as the height of a blank underline stroke.
 const BLANK_HEIGHT_FACTOR: f64 = 0.08;
+/// Extra vertical margin added for a paragraph break (\n\n).
+/// Matches CSS `<p> { margin-bottom: 1rem }` at Chromium print scale:
+/// 1rem = 16px × (72/96)² = 9.0pt.
+const PARA_MARGIN_PT: f64 = 9.0;
 /// Sub/Sup font size scale relative to parent.
 const SUB_SUP_SCALE: f64 = 0.65;
 /// Baseline offset for sub (downward) and sup (upward), in em units.
@@ -161,11 +165,32 @@ impl<'a> InlineLayoutEngine<'a> {
         // Each line height is at least line_height_pt, but expands when a line
         // contains a tall element (e.g. an image taller than the normal line height).
         let mut cursor_y = origin_y;
+        // Tracks whether the previous rendered entity was a paragraph-break line,
+        // so that \n\n\n produces line_height + PARA_MARGIN + line_height rather than
+        // line_height + PARA_MARGIN + PARA_MARGIN.
+        let mut prev_was_para_break = false;
 
         for (line_idx, indices) in lines.iter().enumerate() {
             if indices.is_empty() {
                 continue;
             }
+
+            // Detect paragraph-separator lines: produced by \n\n (and \n\n\n).
+            // These lines contain only zero-width atoms (empty text after stripping \n).
+            let line_has_content = indices.iter()
+                .any(|&i| atoms[i].width_pt > 0.0);
+            if !line_has_content {
+                // First empty line after content → CSS paragraph margin only (not full line).
+                // Subsequent empty lines (from \n\n\n) → full line_height.
+                cursor_y += if prev_was_para_break {
+                    line_height_pt
+                } else {
+                    PARA_MARGIN_PT
+                };
+                prev_was_para_break = true;
+                continue;
+            }
+            prev_was_para_break = false;
 
             let line_y      = cursor_y;
             let line_ascent = indices.iter()

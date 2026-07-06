@@ -20,16 +20,20 @@ use crate::spec::style::{FontStyle, FontWeight, ResolvedStyle};
 const CM_TO_PT: f64 = 28.3465;
 
 /// Body font size in points — matches lize CSS `body { font-size: 0.875rem }`.
-/// 0.875rem × 16px = 14px × 0.75 pt/px = 10.5pt.
+/// 0.875rem × 16px = 14px CSS. Chromium renders the print PDF with an effective
+/// 75% zoom (scale = 72/96): the px→pt conversion (×72/96) compounds with the
+/// zoom (×72/96), giving:
+///   14px × (72/96)² = 14 × 0.5625 = 7.875pt.
 /// Used for header text, student fields, instructions — NOT for question content.
-pub(crate) const BODY_FONT_SIZE_PT: f64 = 10.5;
+pub(crate) const BODY_FONT_SIZE_PT: f64 = 7.875;
 
 /// Default logo height when `logo_height_cm` is not specified.
 const LOGO_DEFAULT_HEIGHT_CM: f64 = 2.0;
 /// Fraction of the content width reserved for the logo column (matches lize CSS w-25).
 const LOGO_COL_FRACTION: f64 = 0.25;
-/// Padding inside the logo cell (matches lize CSS p-4 ≈ 1.5rem ≈ 18pt).
-const LOGO_CELL_PAD_PT: f64 = 18.0;
+/// Padding inside the logo cell.
+/// CSS `p-4` = 1.5rem = 24px CSS. At 120 DPI: 24 × 72/120 = 14.4pt.
+const LOGO_CELL_PAD_PT: f64 = 14.4;
 /// Stroke thickness of table borders (matches lize CSS table-bordered ≈ 1px).
 const TABLE_BORDER_PT: f64 = 0.75;
 /// Table border color (rgba(72,94,144,0.16) on white ≈ #e1e5ea).
@@ -40,10 +44,14 @@ const HRULE_THICKNESS_PT: f64 = 0.5;
 const HRULE_V_MARGIN_PT: f64 = 4.0;
 /// Top margin before the instructions block (matches lize mt-3 = 1rem = 16px ≈ 12pt).
 const INSTRUCTIONS_TOP_MARGIN_PT: f64 = 12.0;
-/// Cell vertical padding for table rows (Bootstrap .table td padding = 8px ≈ 6pt vertical).
-const CELL_V_PAD_PT: f64 = 6.0;
-/// Cell horizontal padding for table rows (Bootstrap .table td padding = 10px ≈ 7.5pt horizontal).
-const CELL_H_PAD_PT: f64 = 7.5;
+/// Text color for all header content — matches lize CSS primary dark navy (#001737).
+const HEADER_TEXT_COLOR: &str = "#001737";
+/// Cell vertical padding for table rows.
+/// Bootstrap `.table td { padding: 0.75rem }` = 12px CSS.
+/// Chromium print at effective 75% zoom: 12 × (72/96)² = 12 × 0.5625 = 6.75pt.
+const CELL_V_PAD_PT: f64 = 6.75;
+/// Cell horizontal padding for table rows (same 0.75rem = 6.75pt).
+const CELL_H_PAD_PT: f64 = 6.75;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public entry point
@@ -102,7 +110,7 @@ pub fn layout_header<'a>(
             width:  text_w,
             height: font_size,
             kind:   FragmentKind::GlyphRun(GlyphRun::from_shaped(
-                &glyphs, font_size, family, 1, Rc::from("#000000"), ascent_pt,
+                &glyphs, font_size, family, 1, Rc::from(HEADER_TEXT_COLOR), ascent_pt,
             )),
         });
         inst_row_h = CELL_V_PAD_PT * 2.0 + font_size;
@@ -133,7 +141,7 @@ pub fn layout_header<'a>(
         fragments.push(Fragment {
             x: x_base, y: y_base, width: label_w, height: font_size,
             kind: FragmentKind::GlyphRun(GlyphRun::from_shaped(
-                &label_glyphs, font_size, family.clone(), 0, Rc::from("#000000"), ascent_pt,
+                &label_glyphs, font_size, family.clone(), 0, Rc::from(HEADER_TEXT_COLOR), ascent_pt,
             )),
         });
 
@@ -141,7 +149,7 @@ pub fn layout_header<'a>(
         fragments.push(Fragment {
             x: x_base + label_w, y: y_base, width: title_w, height: font_size,
             kind: FragmentKind::GlyphRun(GlyphRun::from_shaped(
-                &title_glyphs, font_size, family, 1, Rc::from("#000000"), ascent_pt,
+                &title_glyphs, font_size, family, 1, Rc::from(HEADER_TEXT_COLOR), ascent_pt,
             )),
         });
 
@@ -150,33 +158,75 @@ pub fn layout_header<'a>(
         cursor_y += row_h;
     }
 
-    // ── Row: subject · year (if present) ──────────────────────────────────
-    let subject_year = build_subject_year(&header.subject, &header.year);
-    if !subject_year.is_empty() {
-        let body_style = ResolvedStyle {
-            font_size,
-            line_spacing,
-            ..ResolvedStyle::default()
-        };
-        let engine = InlineLayoutEngine {
-            resolver,
-            available_width:  text_col_w - CELL_H_PAD_PT * 2.0,
-            font_size,
-            line_spacing,
-            blank_default_cm: blank_cm,
-            justify: false,
-        };
-        let (frags, h) = engine.layout(
-            &[text_inline(&subject_year)],
-            FontRole::Body,
-            &body_style,
-            text_col_x + CELL_H_PAD_PT,
-            cursor_y + CELL_V_PAD_PT,
-        );
-        fragments.extend(frags);
-        let row_h = CELL_V_PAD_PT * 2.0 + h;
+    // ── Row: subject (if present) ───────────────────────────────────────
+    // Matches lize separate_subjects.html:
+    //   "DISCIPLINA: " (normal weight) + <span class="font-weight-bold">name</span>
+    if let Some(ref subject) = header.subject {
+        let fd_normal = resolver.resolve(FontRole::Body, FontWeight::Normal, FontStyle::Normal, None);
+        let fd_bold   = resolver.resolve(FontRole::Body, FontWeight::Bold, FontStyle::Normal, None);
+        let family: Rc<str> = Rc::from(resolver.resolve_family_name(FontRole::Body, None));
+        let ascent_pt = fd_normal.ascender as f64 / fd_normal.units_per_em as f64 * font_size;
+
+        let label = "DISCIPLINA: ";
+        let label_glyphs = shape_text(fd_normal, label);
+        let label_w      = shaped_text_width(&label_glyphs, font_size, fd_normal.units_per_em);
+
+        let subj_glyphs = shape_text(fd_bold, subject);
+        let subj_w      = shaped_text_width(&subj_glyphs, font_size, fd_bold.units_per_em);
+
+        let x_base = text_col_x + CELL_H_PAD_PT;
+        let y_base = cursor_y + CELL_V_PAD_PT;
+
+        // "DISCIPLINA: " in normal weight
+        fragments.push(Fragment {
+            x: x_base, y: y_base, width: label_w, height: font_size,
+            kind: FragmentKind::GlyphRun(GlyphRun::from_shaped(
+                &label_glyphs, font_size, family.clone(), 0, Rc::from(HEADER_TEXT_COLOR), ascent_pt,
+            )),
+        });
+
+        // Subject name in bold
+        fragments.push(Fragment {
+            x: x_base + label_w, y: y_base, width: subj_w, height: font_size,
+            kind: FragmentKind::GlyphRun(GlyphRun::from_shaped(
+                &subj_glyphs, font_size, family, 1, Rc::from(HEADER_TEXT_COLOR), ascent_pt,
+            )),
+        });
+
+        let row_h = CELL_V_PAD_PT * 2.0 + font_size;
         push_cell_border(&mut fragments, text_col_x, cursor_y, text_col_w, row_h);
         cursor_y += row_h;
+    }
+
+    // ── Row: year (if present, without subject) ──────────────────────────
+    // When subject is absent but year is set, render year in its own row.
+    if header.subject.is_none() {
+        if let Some(ref year) = header.year {
+            let body_style = ResolvedStyle {
+                font_size,
+                line_spacing,
+                ..ResolvedStyle::default()
+            };
+            let engine = InlineLayoutEngine {
+                resolver,
+                available_width:  text_col_w - CELL_H_PAD_PT * 2.0,
+                font_size,
+                line_spacing,
+                blank_default_cm: blank_cm,
+                justify: false,
+            };
+            let (frags, h) = engine.layout(
+                &[text_inline(year)],
+                FontRole::Body,
+                &body_style,
+                text_col_x + CELL_H_PAD_PT,
+                cursor_y + CELL_V_PAD_PT,
+            );
+            fragments.extend(frags);
+            let row_h = CELL_V_PAD_PT * 2.0 + h;
+            push_cell_border(&mut fragments, text_col_x, cursor_y, text_col_w, row_h);
+            cursor_y += row_h;
+        }
     }
 
     // ── Student fields — bordered table cells (matches lize HTML) ─────────
@@ -207,7 +257,7 @@ pub fn layout_header<'a>(
 
                 for (j, field) in group.iter().enumerate() {
                     let cell_x = text_col_x + cell_w * j as f64;
-                    let label_text = format!("{}:", field.label);
+                    let label_text = format!("{}:", field.label.to_uppercase());
                     let label_glyphs = shape_text(fd, &label_text);
                     let label_w = shaped_text_width(&label_glyphs, font_size, fd.units_per_em);
 
@@ -217,7 +267,7 @@ pub fn layout_header<'a>(
                         width:  label_w,
                         height: font_size,
                         kind:   FragmentKind::GlyphRun(GlyphRun::from_shaped(
-                            &label_glyphs, font_size, family_name.clone(), 0, Rc::from("#000000"), ascent_pt,
+                            &label_glyphs, font_size, family_name.clone(), 0, Rc::from(HEADER_TEXT_COLOR), ascent_pt,
                         )),
                     });
                     push_cell_border(&mut fragments, cell_x, cursor_y, cell_w, row_h);
@@ -226,7 +276,7 @@ pub fn layout_header<'a>(
             } else {
                 // Full-width row for this field
                 let field = &fields[i];
-                let label_text = format!("{}:", field.label);
+                let label_text = format!("{}:", field.label.to_uppercase());
                 let label_glyphs = shape_text(fd, &label_text);
                 let label_w = shaped_text_width(&label_glyphs, font_size, fd.units_per_em);
 
@@ -236,7 +286,7 @@ pub fn layout_header<'a>(
                     width:  label_w,
                     height: font_size,
                     kind:   FragmentKind::GlyphRun(GlyphRun::from_shaped(
-                        &label_glyphs, font_size, family_name.clone(), 0, Rc::from("#000000"), ascent_pt,
+                        &label_glyphs, font_size, family_name.clone(), 0, Rc::from(HEADER_TEXT_COLOR), ascent_pt,
                     )),
                 });
                 push_cell_border(&mut fragments, text_col_x, cursor_y, text_col_w, row_h);
@@ -249,11 +299,18 @@ pub fn layout_header<'a>(
     // ── Logo cell — spans ALL rows (institution + title + student fields) ──
     // Matches lize CSS: w-25 p-4 rowspan="6". The cell border is always drawn
     // (even without a logo) to keep the header layout consistent.
+    //
+    // When a logo is present, enforce a minimum cell height so the logo has
+    // enough space.  When there is NO logo, let the cell height be driven
+    // purely by the text rows (matching Chromium behavior where rowspan
+    // collapses to the actual number of rows).
     {
         let logo_h_pt = LOGO_DEFAULT_HEIGHT_CM * CM_TO_PT;
-        let min_logo_cell_h = LOGO_CELL_PAD_PT * 2.0 + logo_h_pt;
-        if cursor_y < min_logo_cell_h {
-            cursor_y = min_logo_cell_h;
+        if header.logo_key.is_some() {
+            let min_logo_cell_h = LOGO_CELL_PAD_PT * 2.0 + logo_h_pt;
+            if cursor_y < min_logo_cell_h {
+                cursor_y = min_logo_cell_h;
+            }
         }
         // Render logo image only when a key is provided.
         if let Some(ref logo_key) = header.logo_key {
@@ -299,19 +356,8 @@ pub fn layout_header<'a>(
         cursor_y += h;
     }
 
-    // ── Final separator rule ──────────────────────────────────────────────────
-    cursor_y += HRULE_V_MARGIN_PT;
-    fragments.push(Fragment {
-        x:      0.0,
-        y:      cursor_y,
-        width:  cw,
-        height: HRULE_THICKNESS_PT,
-        kind:   FragmentKind::HRule(HRule {
-            stroke_width: HRULE_THICKNESS_PT,
-            color:        "#000000".to_owned(),
-        }),
-    });
-    cursor_y += HRULE_THICKNESS_PT + HRULE_V_MARGIN_PT;
+    // No final separator rule — the table-bordered cells already provide the
+    // bottom border, matching the lize Chromium template.
 
     (fragments, cursor_y)
 }
@@ -336,14 +382,6 @@ fn text_inline(s: &str) -> InlineContent {
     InlineContent::Text(InlineText { value: s.to_owned(), style: None })
 }
 
-fn build_subject_year(subject: &Option<String>, year: &Option<String>) -> String {
-    match (subject.as_deref(), year.as_deref()) {
-        (Some(s), Some(y)) => format!("{s} · {y}"),
-        (Some(s), None)    => s.to_owned(),
-        (None,    Some(y)) => y.to_owned(),
-        (None,    None)    => String::new(),
-    }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tests
@@ -395,20 +433,12 @@ mod tests {
     // ── Empty header ──────────────────────────────────────────────────────────
 
     #[test]
-    fn empty_header_has_exactly_one_hrule() {
+    fn empty_header_has_no_hrules() {
         let (reg, rules) = make_resolver_and_rules();
         let res = FontResolver::new(&reg, &rules);
         let header = InstitutionalHeader::default();
         let (frags, _h) = call(&header, &res);
-        assert_eq!(count_hrules(&frags), 1, "empty header should have exactly one HRule");
-    }
-
-    #[test]
-    fn empty_header_height_is_positive() {
-        let (reg, rules) = make_resolver_and_rules();
-        let res = FontResolver::new(&reg, &rules);
-        let (_, h) = call(&InstitutionalHeader::default(), &res);
-        assert!(h > 0.0, "even an empty header has a rule, so height must be > 0");
+        assert_eq!(count_hrules(&frags), 0, "no separator rule below header");
     }
 
     // ── Logo ──────────────────────────────────────────────────────────────────
@@ -478,7 +508,7 @@ mod tests {
     }
 
     #[test]
-    fn hrule_is_below_text_block() {
+    fn institution_text_produces_glyph_runs() {
         let (reg, rules) = make_resolver_and_rules();
         let res = FontResolver::new(&reg, &rules);
         let header = InstitutionalHeader {
@@ -486,28 +516,10 @@ mod tests {
             ..Default::default()
         };
         let (frags, _) = call(&header, &res);
-        let rule_y = frags.iter()
-            .filter(|f| matches!(f.kind, FragmentKind::HRule(_)))
-            .map(|f| f.y)
-            .next()
-            .unwrap();
-        let text_max_y = frags.iter()
-            .filter(|f| matches!(f.kind, FragmentKind::GlyphRun(_)))
-            .map(|f| f.y + f.height)
-            .fold(0.0_f64, f64::max);
-        assert!(rule_y >= text_max_y,
-            "HRule y ({rule_y:.2}) should be at or below text bottom ({text_max_y:.2})");
+        assert!(count_glyph_runs(&frags) > 0, "institution text should produce glyph runs");
     }
 
     #[test]
-    fn subject_year_joined_with_separator() {
-        assert_eq!(build_subject_year(&Some("Matemática".into()), &Some("2024".into())),
-                   "Matemática · 2024");
-        assert_eq!(build_subject_year(&Some("Física".into()), &None), "Física");
-        assert_eq!(build_subject_year(&None, &Some("2024".into())), "2024");
-        assert_eq!(build_subject_year(&None, &None), "");
-    }
-
     // ── Student fields ────────────────────────────────────────────────────────
 
     #[test]
@@ -627,7 +639,7 @@ mod tests {
         let (frags, total_h) = call(&header, &res);
 
         assert!(total_h > 0.0,            "full header height should be positive");
-        assert!(count_hrules(&frags)  == 1, "exactly one separator rule");
+        assert!(count_hrules(&frags)  == 0, "no separator rule below header");
         assert!(count_images(&frags)  == 1, "exactly one logo");
         assert!(count_glyph_runs(&frags)  > 0, "should have text runs");
         assert!(count_stroked_rects(&frags) > 0, "should have bordered cells");

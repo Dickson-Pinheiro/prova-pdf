@@ -98,7 +98,8 @@ fn default_font_size() -> f64 { 12.0 }
 fn default_font_family() -> String { "body".to_string() }
 fn default_line_height_cm() -> f64 { 0.85 }
 fn default_true() -> bool { true }
-fn default_alternative_spacing() -> f64 { 0.3 }
+/// CSS template uses `py-0` on alternative table cells → zero vertical padding.
+fn default_alternative_spacing() -> f64 { 0.0 }
 fn default_text_question_format() -> u8 { 1 }
 
 impl Default for PrintConfig {
@@ -119,7 +120,7 @@ impl Default for PrintConfig {
             show_score: false,
             hide_numbering: false,
             header_full: true,
-            alternative_spacing_cm: 0.3,
+            alternative_spacing_cm: 0.0,
             letter_case: LetterCase::default(),
             remove_color_alternatives: false,
             break_enunciation: false,
@@ -266,6 +267,8 @@ mod tests {
     fn margins_cm_to_pt() {
         let m = Margins { top: 1.0, bottom: 1.0, left: 1.0, right: 1.0 };
         assert!((m.top_pt() - 28.3465).abs() < 0.001);
+        assert!((m.left_pt() - 28.3465).abs() < 0.001);
+        assert!((m.right_pt() - 28.3465).abs() < 0.001);
     }
 
     #[test]

@@ -240,13 +240,15 @@ pub fn embed_fonts(
 
         let italic_angle = face.italic_angle();
 
-        // PostScript name: prefer the face's own name, fall back to key.
+        // PostScript name: iterate all POST_SCRIPT_NAME records, use the first
+        // one that decodes successfully (Mac Roman records return None from
+        // to_string(); Windows Unicode records work).
         let ps_name: String = {
             use ttf_parser::name_id;
             face.names()
                 .into_iter()
-                .find(|n| n.name_id == name_id::POST_SCRIPT_NAME)
-                .and_then(|n| n.to_string())
+                .filter(|n| n.name_id == name_id::POST_SCRIPT_NAME)
+                .find_map(|n| n.to_string())
                 .unwrap_or_else(|| format!("{}-{}", key.family, key.variant))
                 .replace(' ', "-")
         };

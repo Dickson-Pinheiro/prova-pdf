@@ -3,7 +3,7 @@ use crate::spec::answer::EssayAnswer;
 use crate::spec::config::PrintConfig;
 
 use super::ColumnGeometry;
-use super::textual::{BLANK_BOX_STROKE_PT, DEFAULT_LINE_COUNT, HRULE_STROKE_PT};
+use super::textual::{BLANK_BOX_STROKE_PT, DEFAULT_LINE_COUNT, DISCURSIVE_LINE_DIV_PT, HRULE_STROKE_PT};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Functions
@@ -23,7 +23,10 @@ pub(super) fn layout_essay(
     config:   &PrintConfig,
     spc:      f64,
 ) -> (Vec<Fragment>, f64) {
-    let line_height_pt = config.discursive_line_height * 28.3465 * spc;
+    // CSS: margin-top: {{discursive_line_height}}cm + div.lines-response height: 18px (13.5pt).
+    // In economy mode the 18px div is not rendered — only the margin_top contributes.
+    let div_pt = if config.economy_mode { 0.0 } else { DISCURSIVE_LINE_DIV_PT };
+    let line_height_pt = (config.discursive_line_height * 28.3465 + div_pt) * spc;
 
     if let Some(h_cm) = essay.height_cm {
         // Fixed-height blank box — no internal lines.

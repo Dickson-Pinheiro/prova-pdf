@@ -48,8 +48,8 @@ use crate::spec::style::{FontStyle, FontWeight, ResolvedStyle};
 /// Stroke width of the separator rule rendered below the question number heading.
 const QUESTION_RULE_STROKE_PT: f64 = 0.7;
 /// Vertical gap below the question separator rule before the stem.
-/// Matches lize CSS: hr.mb-3 = 1rem = 12pt at 12pt font.
-const QUESTION_RULE_GAP_PT: f64 = 8.0;
+/// Matches lize CSS: hr.mb-3 = 1rem = 12pt (at 16px root font, 1rem = 12pt in print).
+const QUESTION_RULE_GAP_PT: f64 = 12.0;
 /// Vertical margin inserted below the stem before the answer space.
 const STEM_BOTTOM_MARGIN_PT: f64 = 3.0;
 /// Vertical margin after each BeforeQuestion base-text block.
@@ -60,10 +60,14 @@ const BASE_TEXT_V_MARGIN_PT: f64 = 18.0;
 const ECONOMY_FACTOR: f64 = 0.7;
 /// Horizontal gap between the question number and the start of the stem text.
 const NUMBER_STEM_GAP_PT: f64 = 4.0;
-/// Top margin before each question block (matches lize CSS `.question.mt-3` = 1rem = 12pt at 12pt font).
-const QUESTION_TOP_MARGIN_PT: f64 = 12.0;
+/// Top margin before each question block.
+/// CSS: `.question.mt-3` = 1rem = 12pt + inner `div.row.mt-2` = 0.5rem = 6pt → 18pt total.
+const QUESTION_TOP_MARGIN_PT: f64 = 18.0;
 /// Scale factor for the alternative letter badge size (badge side = font_size × scale).
 const ALT_BADGE_SCALE: f64 = 1.5;
+/// Scale factor for the "Questão N" heading font size relative to question body font_size.
+/// CSS: 12.5pt heading / 15pt body = 0.8333; effective: 11.25 × 0.8333 = 9.375pt ≈ 9.35pt in Chromium.
+const QUESTION_HEADING_FONT_SCALE: f64 = 5.0 / 6.0;
 /// Gap between the right edge of the alternative badge and the content start.
 const ALT_BADGE_GAP_PT: f64 = 6.0;
 
@@ -136,7 +140,7 @@ pub fn layout_question<'a>(
     // Uses fixed 1.2 line spacing so config.line_spacing doesn't push it away from the rule.
     let show_number = q.show_number && !config.hide_numbering;
     if show_number {
-        let heading_size = 9.0;
+        let heading_size = font_size * QUESTION_HEADING_FONT_SCALE;
         let heading_y    = cursor_y;  // saved for score badge alignment
         let heading_text = format!("Questão {}", number);
         let fd     = resolver.resolve(FontRole::Question, FontWeight::Bold, FontStyle::Normal, None);
@@ -193,6 +197,18 @@ pub fn layout_question<'a>(
             }),
         });
         cursor_y += QUESTION_RULE_STROKE_PT + QUESTION_RULE_GAP_PT * spc;
+
+        // Split point: after heading, before stem.
+        // Only for essay / full-width questions: for those, the stem can be a
+        // full-page image and the heading is tiny (~52pt), so placing the heading
+        // alone on a page is the right CSS-semantic behaviour (matches Chromium).
+        // For choice questions this split is wasteful: it would strand the
+        // BeforeQuestion context material + heading in the current column while
+        // stem + alternatives flow to the next, adding pages.
+        let is_full_width = q.full_width || q.kind == QuestionKind::Essay;
+        if is_full_width {
+            split_points.push(cursor_y);
+        }
     }
 
     // ── Stem ─────────────────────────────────────────────────────────────────
@@ -735,18 +751,31 @@ mod tests {
 
     #[test]
     fn choice_vertical_height_greater_than_stem_alone() {
+        // Compare a choice question with 5 alternatives against a choice question
+        // with no alternatives. The alternatives block must add positive height.
+        use crate::spec::answer::{Alternative, ChoiceAnswer};
         let (reg, rules) = make_resolver_and_rules();
         let res  = FontResolver::new(&reg, &rules);
-        let stem = simple_question("Qual a alternativa correta?", false);
-        let (_, h_stem, _) = layout_question(&stem, 1, &res, &col_geom(400.0), &default_config());
 
+        // Choice question with 5 alternatives.
         let choice = make_choice_question(
             &[("A","alfa"),("B","beta"),("C","gama"),("D","delta"),("E","épsilon")],
             AlternativeLayout::Vertical,
         );
         let (_, h_choice, _) = layout_question(&choice, 1, &res, &col_geom(400.0), &default_config());
-        assert!(h_choice > h_stem,
-            "choice question ({h_choice:.2}) should be taller than stem only ({h_stem:.2})");
+
+        // Same question with no alternatives (empty choice block).
+        let choice_empty = Question {
+            answer: AnswerSpace::Choice(ChoiceAnswer {
+                alternatives: vec![],
+                layout: AlternativeLayout::Vertical,
+            }),
+            ..choice.clone()
+        };
+        let (_, h_empty, _) = layout_question(&choice_empty, 1, &res, &col_geom(400.0), &default_config());
+
+        assert!(h_choice > h_empty,
+            "choice question with 5 alts ({h_choice:.2}) should be taller than with 0 alts ({h_empty:.2})");
     }
 
     /// Critério: 5 alternativas em grid 2×3 posicionadas corretamente.
@@ -1461,9 +1490,11 @@ mod tests {
         };
         let cfg = PrintConfig { force_choices_with_statement: 1, ..default_config() };
         let (_, _, split_points) = layout_question(&q, 1, &res, &col_geom(400.0), &cfg);
-        // With force_choices_with_statement, no split point between stem and alternatives.
+        // With force_choices_with_statement, the stem-alternatives split point is suppressed.
+        // Choice questions do not get a heading split point (only essay/full-width do).
         assert!(split_points.is_empty(),
-            "force_choices_with_statement should suppress the stem-alternatives split point");
+            "force_choices_with_statement on a choice question should produce no split points \
+             (got {:?})", split_points);
     }
 
     #[test]

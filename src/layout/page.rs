@@ -58,10 +58,10 @@ impl PageGeometry {
         let page_width_pt  = cfg.page_size.width_pt();
         let page_height_pt = cfg.page_size.height_pt();
 
-        let margin_top_pt    = cfg.margins.top    * CM_TO_PT;
-        let margin_bottom_pt = cfg.margins.bottom * CM_TO_PT;
-        let margin_left_pt   = cfg.margins.left   * CM_TO_PT;
-        let margin_right_pt  = cfg.margins.right  * CM_TO_PT;
+        let margin_top_pt    = cfg.margins.top_pt();
+        let margin_bottom_pt = cfg.margins.bottom_pt();
+        let margin_left_pt   = cfg.margins.left_pt();
+        let margin_right_pt  = cfg.margins.right_pt();
 
         let content_width_pt  = page_width_pt  - margin_left_pt  - margin_right_pt;
         let content_height_pt = page_height_pt - margin_top_pt   - margin_bottom_pt;
@@ -288,9 +288,18 @@ impl PageComposer {
     /// After placing a full-width block the composer resets to column 0 so that
     /// subsequent normal blocks start from the left column again.
     ///
+    /// `break_inside_avoid` — when `true`, the block is treated as `break-inside: avoid`
+    /// (CSS semantics): it moves to the next page if it doesn't fit but is never split
+    /// across pages. When `false`, tall blocks are split across pages (pagination).
+    ///
+    /// `split_points` lists y-positions (block-relative) where the block may be
+    /// semantically split.  When non-empty, the compositor prefers the largest
+    /// split point that fits over a mechanical page-boundary split.  Pass `&[]`
+    /// when no semantic splits are desired (e.g. for the institutional header).
+    ///
     /// `LeftOfQuestion` / `RightOfQuestion` base texts produce full-width blocks
     /// via [`crate::layout::base_text::layout_side_by_side`] and must use this method.
-    pub fn push_block_full_width(&mut self, height: f64, mut fragments: Vec<Fragment>) {
+    pub fn push_block_full_width(&mut self, height: f64, fragments: Vec<Fragment>, break_inside_avoid: bool, split_points: &[f64]) {
         // A full-width block must start below ALL columns' content, not just
         // the current column's cursor.  When in column 1, col0_exit_y holds
         // how far column 0 reached; take the max of both.
@@ -298,32 +307,76 @@ impl PageComposer {
 
         // Overflow check against the true starting point.
         if start_y + height > self.geometry.content_height_pt {
+            if break_inside_avoid {
+                // CSS break-inside: avoid — move to next page and place entire block
+                // (may overflow if taller than one page, matching Chromium behaviour).
+                self.new_page();
+                let y_off = self.cursor_y;
+                let mut fragments = fragments;
+                for f in &mut fragments {
+                    f.y += y_off;
+                }
+                self.current_page.extend(fragments);
+                self.cursor_y = y_off + height;
+                let fw_start = y_off;
+                let fw_end   = self.cursor_y;
+                self.fw_ranges.push((fw_start, fw_end));
+                self.column_top_y = self.cursor_y;
+                self.col0_exit_y  = self.cursor_y;
+                self.current_col  = 0;
+                return;
+            }
+            // Paginating mode: if not already at the top of a fresh page, move there first.
+            if start_y > self.column_top_y {
+                self.new_page();
+            }
+        }
+
+        let y_off     = self.cursor_y.max(self.col0_exit_y);
+        let available = self.geometry.content_height_pt - y_off;
+
+        if !break_inside_avoid && height > available {
+            // Choose the best split point: prefer the largest semantic split ≤ available,
+            // fall back to a mechanical split at the page boundary.
+            let threshold = split_points.iter()
+                .copied()
+                .rev()
+                .find(|&sp| sp <= available)
+                .unwrap_or(available);
+
+            let (head, tail, tail_height) = split_fragments_at(fragments, threshold, height);
+            let fw_start = y_off;
+            for mut f in head {
+                f.y += y_off;
+                self.current_page.push(f);
+            }
+            self.cursor_y = self.geometry.content_height_pt;
+            self.fw_ranges.push((fw_start, self.cursor_y));
+            self.column_top_y = self.cursor_y;
+            self.col0_exit_y  = self.cursor_y;
+            self.current_col  = 0;
             self.new_page();
-            // After new_page all cursors are reset to 0; start fresh.
-            let y_off = self.cursor_y; // == column_top_y == 0 after new_page
+
+            // Adjust split_points for the tail (subtract the split threshold).
+            let adjusted: Vec<f64> = split_points.iter()
+                .copied()
+                .filter(|&sp| sp > threshold)
+                .map(|sp| sp - threshold)
+                .collect();
+            self.push_block_full_width(tail_height, tail, false, &adjusted);
+        } else {
+            let fw_start = y_off;
+            let mut fragments = fragments;
             for f in &mut fragments {
                 f.y += y_off;
             }
             self.current_page.extend(fragments);
-            self.cursor_y     = y_off + height;
-        } else {
-            for f in &mut fragments {
-                f.y += start_y;
-            }
-            self.current_page.extend(fragments);
-            self.cursor_y = start_y + height;
+            self.cursor_y = y_off + height;
+            self.fw_ranges.push((fw_start, self.cursor_y));
+            self.column_top_y = self.cursor_y;
+            self.col0_exit_y  = self.cursor_y;
+            self.current_col  = 0;
         }
-
-        // Record the Y range of this full-width block so the column rule
-        // can be split around it.
-        let fw_start = self.cursor_y - height;
-        self.fw_ranges.push((fw_start, self.cursor_y));
-
-        // A full-width block always resets layout to column 0, and advances
-        // column_top_y so that subsequent column content starts below it.
-        self.column_top_y = self.cursor_y;
-        self.col0_exit_y  = self.cursor_y;
-        self.current_col  = 0;
     }
 
     /// Flush the last page and return all collected pages.
@@ -728,7 +781,7 @@ mod tests {
         let mut c = PageComposer::new(PageGeometry::from_config(&cfg));
         let frag = Fragment { x: 0.0, y: 0.0, width: c.geometry.content_width_pt, height: 10.0,
             kind: crate::layout::fragment::FragmentKind::Spacer };
-        c.push_block_full_width(10.0, vec![frag]);
+        c.push_block_full_width(10.0, vec![frag], true, &[]);
         let (pages, _fw) = c.finalize();
         let placed = &pages[0][0];
         // x should remain 0 (no column offset applied).
@@ -745,7 +798,7 @@ mod tests {
         c.push_block(threshold + 1.0, vec![]);
         assert_eq!(c.current_col, 1, "should be in col 1 before full-width block");
 
-        c.push_block_full_width(10.0, vec![]);
+        c.push_block_full_width(10.0, vec![], true, &[]);
         assert_eq!(c.current_col, 0, "push_block_full_width should reset to col 0");
     }
 
@@ -757,7 +810,7 @@ mod tests {
         // Fill most of the page.
         c.push_block(content_h - 5.0, vec![spacer(content_h - 5.0)]);
         // Push a full-width block that won't fit.
-        c.push_block_full_width(20.0, vec![spacer(20.0)]);
+        c.push_block_full_width(20.0, vec![spacer(20.0)], true, &[]);
         let (pages, _fw) = c.finalize();
         assert_eq!(pages.len(), 2, "full_width overflow should produce a new page");
     }

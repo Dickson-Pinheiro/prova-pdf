@@ -8,7 +8,7 @@ Relatório de progresso com base no plano original (`webassembly-pdf/MIGRATION.m
 ## Resumo executivo
 
 O motor `prova-pdf` cobre a grande maioria das funcionalidades previstas no plano de migração.
-Das **13 lacunas críticas** identificadas originalmente, **11 estão resolvidas**, 1 parcialmente implementada e 1 pendente. O lado WASM (Rust) está em estágio avançado; o lado de integração (Django serializer + pdf-service Go) ainda não foi iniciado.
+Das **13 lacunas críticas** identificadas originalmente, **12 estão resolvidas** e 1 pendente (parser HTML, que fica no Django). O lado WASM (Rust) está em estágio avançado; o lado de integração (Django serializer + pdf-service Go) ainda não foi iniciado.
 
 ---
 
@@ -28,7 +28,7 @@ Das **13 lacunas críticas** identificadas originalmente, **11 estão resolvidas
 | 10 | **Grayscale de imagens** | Baixa | ✅ Completo | `PrintConfig.image_grayscale` e `all_black` mode. Conversão via `image 0.25` no emitter (`src/pdf/images.rs`). |
 | 11 | **Tamanho ATA (200×266mm)** | TASK-032 — Baixa | ✅ Completo | `PageSize::Ata` = 566.9×754pt. Implementado como enum variant. |
 | 12 | **Fonte IBM Plex Sans** | TASK-033 — Média | ⬜ Pendente (infra) | O motor suporta qualquer TTF/OTF via `add_font()`. O embed das fontes é responsabilidade do pdf-service (Go container). |
-| 13 | **Hifenização** | Baixa | 🔶 Parcial | Line-breaking via `unicode-linebreak` (UAX #14). Hifenização automática (inserir hífens em palavras longas) não implementada. |
+| 13 | **Hifenização** | Baixa | ✅ Completo | Line-breaking via `unicode-linebreak` (UAX #14) + hifenização greedy via `push_hyphenated()` em `inline.rs`. Palavras que excedem a largura são quebradas com hífen. |
 
 ---
 
@@ -127,9 +127,9 @@ src/ (~15.500 LOC, 39 arquivos .rs)
 
 | Item | Esforço | Notas |
 |---|---|---|
-| Hifenização automática | Médio | Integrar crate `hyphenation` com dicionário pt-BR. |
+| ~~Hifenização automática~~ | ✅ Completo | Implementada em `src/layout/inline.rs` via `push_hyphenated()`. Quebra greedy por largura com inserção de hífen. Não usa crate de sílabas — quebra por glyph boundary. |
 | Gabarito separado | Médio | Gerar segundo PDF com respostas corretas marcadas. |
-| Integração math no inline engine | Médio | `InlineContent::Math` está ignorado no layout (TASK-034). Parser e layout math existem, falta conectar ao pipeline de fragments. |
+| ~~Integração math no inline engine~~ | ✅ Completo | `InlineContent::Math` integrado no inline layout (`src/layout/inline.rs:391-414`). Pipeline: `parse_latex()` → `layout_math()` → fragments. Suporte inline e display mode. |
 | Tabelas HTML | Alto | Não há suporte a `<table>` no inline layout. Questões com tabelas precisam ser convertidas para outra representação. |
 | Listas (ul/ol) | Baixo | Converter para texto com bullet/número no serializer Django, ou adicionar suporte nativo. |
 
@@ -169,7 +169,7 @@ Foco no Django serializer e pdf-service. O motor Rust já suporta tudo necessár
 - [ ] Serializar questões SUM, CLOZE, ESSAY
 - [ ] Cabeçalho estruturado com logo
 - [ ] Textos-base em todas as posições
-- [ ] Integração math (TASK-034: conectar parser/layout ao inline engine)
+- [x] Integração math (TASK-034: conectar parser/layout ao inline engine)
 - [ ] Testar com 20 provas diversas
 
 ### Fase 3 — Paridade e rollout
@@ -192,5 +192,5 @@ Foco no Django serializer e pdf-service. O motor Rust já suporta tudo necessár
 | Tamanhos de página | A4 + ATA | A4 + ATA + Custom ✅ |
 | Targets WASM | browser | browser + WASI ✅ |
 | Testes unitários | — | 477 passando |
-| Lacunas críticas resolvidas | 0/13 | 11/13 |
+| Lacunas críticas resolvidas | 0/13 | 12/13 |
 | Performance esperada | 50-200ms | A verificar em integração |

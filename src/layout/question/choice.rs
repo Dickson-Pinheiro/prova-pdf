@@ -25,10 +25,14 @@ const ALT_BORDER_COLOR: &str = "#C2C2C2";
 /// Border-bottom stroke width (matches lize CSS: 1.5px ≈ 1.125pt).
 const ALT_BORDER_STROKE_PT: f64 = 1.125;
 
-/// Muted color for the "Alternativas da questão N" label (matches lize CSS text-muted).
-const ALT_LABEL_COLOR: &str = "#6c757d";
+/// Color for the "Alternativas da questão N" label — lize custom steel-blue-gray (#7886a1).
+const ALT_LABEL_COLOR: &str = "#7886a1";
 /// Scale factor for the alternatives label font size relative to question font_size.
-const ALT_LABEL_FONT_SCALE: f64 = 0.75;
+/// CSS: 12pt label / 15pt body = 0.80; effective: 11.25 × 0.80 = 9.0pt ≈ 9.02pt in Chromium.
+const ALT_LABEL_FONT_SCALE: f64 = 0.80;
+/// Base vertical padding per side inside each alternative row.
+/// Matches lize CSS: ~6px per side × (72/96)² = 3.375pt. Produces row_h ≈ 23.625pt (REF=23.67pt).
+const ALT_ROW_V_PAD_PT: f64 = 3.375;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Functions
@@ -54,7 +58,8 @@ pub(super) fn layout_choice<'a>(
     let mut local_y = origin_y;
 
     // ── "Alternativas da questão N" label ────────────────────────────────────
-    {
+    // CSS: shown only when !printConfig.hideQuestionsReferencies
+    if !config.hide_questions_references {
         let label_text = format!("Alternativas da questão {}", number);
         let label_size = font_size * ALT_LABEL_FONT_SCALE;
         let fd     = resolver.resolve(FontRole::Body, FontWeight::Normal, FontStyle::Normal, None);
@@ -110,9 +115,11 @@ pub(super) fn layout_choice<'a>(
 
                 // ── Badge mode ──────────────────────────────────────────────
                 let row_start = local_y;
-                let row_pad   = alt_spacing_pt / 2.0;
+                let row_pad   = ALT_ROW_V_PAD_PT * spc + alt_spacing_pt / 2.0;
 
-                // Pre-compute text to know row height
+                // Pre-compute text to know row height.
+                // text_y: center the em-square (font_size) in the preliminary single-line row height.
+                // Matches CSS vertical-align:middle (aligns em-box midpoint to row center).
                 let content_x  = badge_margin + badge_diam + ALT_BADGE_GAP_PT;
                 let text_width = (geometry.column_width_pt - content_x).max(1.0);
                 let engine = InlineLayoutEngine {
@@ -121,9 +128,10 @@ pub(super) fn layout_choice<'a>(
                     font_size, line_spacing, blank_default_cm,
             justify: true,
                 };
-                let text_y = row_start + row_pad + (badge_diam - font_size * line_spacing).max(0.0) / 2.0;
+                let prelim_row_h = badge_diam + row_pad * 2.0;
+                let text_y = row_start + (prelim_row_h - font_size) / 2.0;
                 let (text_frags, text_h) = engine.layout(&alt.content, FontRole::Body, &style, content_x, text_y);
-                let row_h = (badge_diam + row_pad * 2.0).max(text_h + row_pad * 2.0);
+                let row_h = prelim_row_h.max(text_h + row_pad * 2.0);
 
                 // Striped background (pushed first → drawn behind)
                 if idx % 2 == 0 {
@@ -135,7 +143,7 @@ pub(super) fn layout_choice<'a>(
                     });
                 }
 
-                // Badge circle
+                // Badge circle — black background, matches lize CSS.
                 let bx = badge_margin;
                 let by = row_start + (row_h - badge_diam) / 2.0;
                 frags.push(Fragment {
@@ -145,7 +153,7 @@ pub(super) fn layout_choice<'a>(
                     }),
                 });
 
-                // White letter inside badge
+                // White letter inside badge (matches lize CSS: badge text color = #fff).
                 let fd     = resolver.resolve(FontRole::Body, FontWeight::Bold, FontStyle::Normal, None);
                 let glyphs = shape_text(fd, &letter);
                 let tw     = shaped_text_width(&glyphs, font_size, fd.units_per_em);
