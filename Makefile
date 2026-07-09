@@ -5,7 +5,7 @@
 ## Browser package (wasm-bindgen, JS/TS target)
 build-browser:
 	cargo build --target wasm32-unknown-unknown \
-	  --features browser,math,images --no-default-features --release
+	  --features browser,math,images,answer-sheet --no-default-features --release
 	wasm-bindgen --target web \
 	  target/wasm32-unknown-unknown/release/prova_pdf.wasm --out-dir pkg/
 	@if command -v wasm-opt >/dev/null 2>&1; then \
@@ -74,7 +74,7 @@ size:
 size-check:
 	@echo "=== Building browser (math+images) ==="
 	@cargo build --target wasm32-unknown-unknown \
-	  --features browser,math,images --no-default-features --release 2>/dev/null
+	  --features browser,math,images,answer-sheet --no-default-features --release 2>/dev/null
 	@wasm-bindgen --target web \
 	  target/wasm32-unknown-unknown/release/prova_pdf.wasm --out-dir /tmp/prova-size-full 2>/dev/null
 	@if command -v wasm-opt >/dev/null 2>&1; then \
