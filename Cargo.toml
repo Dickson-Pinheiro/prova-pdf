@@ -1,6 +1,6 @@
 [package]
 name = "prova-pdf"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 
 [lib]
@@ -30,7 +30,7 @@ serde      = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1",   optional = true }
 
 # Browser bindings
-wasm-bindgen       = { version = "0.2", optional = true }
+wasm-bindgen       = { version = "0.2.126", optional = true }
 serde-wasm-bindgen = { version = "0.6", optional = true }
 js-sys             = { version = "0.3", optional = true }
 
