@@ -196,6 +196,9 @@ fn build_content_stream(
             FragmentKind::FilledRect(fr) => {
                 emit_filled_rect(&mut content, px, py, frag.width, frag.height, fr, ph);
             }
+            FragmentKind::StrokedCircle(sc) => {
+                crate::pdf::drawing::emit_stroked_circle(&mut content, px, py, frag.width, frag.height, sc, ph);
+            }
             FragmentKind::FilledCircle(fc) => {
                 crate::pdf::drawing::emit_filled_circle(&mut content, px, py, frag.width, frag.height, fc, ph);
             }

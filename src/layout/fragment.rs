@@ -36,6 +36,8 @@ pub enum FragmentKind {
     StrokedRect(StrokedRect),
     /// A solid filled circle (used for question number badges).
     FilledCircle(FilledCircle),
+    /// A stroked (outlined) circle (used for OMR answer bubbles).
+    StrokedCircle(StrokedCircle),
     /// An embedded image (raster).
     Image(ImageFragment),
     /// Vertical whitespace (no content, used for spacing).
@@ -139,6 +141,17 @@ pub struct StrokedRect {
 #[derive(Debug, Clone)]
 pub struct FilledCircle {
     /// Fill color as CSS string.
+    pub color: String,
+}
+
+/// A stroked (outlined) circle inscribed in the fragment bounding box.
+///
+/// Used for OMR answer bubbles and fiducial marker rings.
+#[derive(Debug, Clone)]
+pub struct StrokedCircle {
+    /// Stroke width in points.
+    pub stroke_width: f64,
+    /// Stroke color as CSS string.
     pub color: String,
 }
 

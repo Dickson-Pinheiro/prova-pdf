@@ -38,6 +38,9 @@ pub enum ValidationError {
     MissingImage { key: String },
     /// A StudentField declares `width_cm ≤ 0`.
     InvalidStudentFieldWidth { label: String, width_cm: f64 },
+    /// The answer-sheet QR payload exceeds the QR byte-mode capacity.
+    #[cfg(feature = "answer-sheet")]
+    QrPayloadTooLarge { len: usize },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

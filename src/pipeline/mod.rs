@@ -5,6 +5,8 @@
 //! Phase 3: Layout       — lay out all elements into positioned fragments
 //! Phase 4: Emission     — write PDF bytes from fragments
 
+#[cfg(feature = "answer-sheet")]
+pub mod answer_sheet;
 pub mod style;
 pub mod validate;
 
@@ -315,6 +317,7 @@ fn apply_all_black(pages: &mut [Vec<Fragment>]) {
                     // visually heavier than the Chromium reference.
                 }
                 FragmentKind::FilledCircle(r) => r.color = BLACK.to_owned(),
+                FragmentKind::StrokedCircle(r) => r.color = BLACK.to_owned(),
                 FragmentKind::FilledRect(r) => {
                     // Keep existing black or white; turn decorative colours
                     // (stripes, tinted backgrounds) into white so they vanish.

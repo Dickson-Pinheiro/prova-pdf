@@ -25,7 +25,7 @@ build-browser:
 ## WASI library (C-ABI, for Python/Go/CLI)
 build-wasi:
 	cargo build --target wasm32-wasip1 \
-	  --features wasi-lib,math,images --no-default-features --release
+	  --features wasi-lib,math,images,answer-sheet --no-default-features --release
 	mkdir -p wasm
 	cp target/wasm32-wasip1/release/prova_pdf.wasm wasm/prova_pdf.wasm
 	@if command -v wasm-opt >/dev/null 2>&1; then \

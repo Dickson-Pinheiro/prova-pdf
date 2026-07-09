@@ -38,7 +38,14 @@ src/
 │   ├── header.rs       layout do InstitutionalHeader
 │   ├── question.rs     layout de cada QuestionKind
 │   ├── answer.rs       layout de cada AnswerSpace
-│   └── base_text.rs    posicionamento de BaseText nas 7 posições
+│   ├── base_text.rs    posicionamento de BaseText nas 7 posições
+│   └── answer_sheet/   folha de respostas OMR (feature "answer-sheet")
+│       ├── mod.rs          constantes calibradas + shaping quantizado (px grid)
+│       ├── header.rs       tabela logo | campos | QR
+│       ├── qr.rs           qrcodegen → FilledRects por módulo
+│       ├── panels.rs       orientações, assinatura, matrícula, exemplo
+│       ├── answers.rs      grade de bolhas numeradas
+│       └── marks.rs        alvos fiduciais vetoriais
 │
 ├── pdf/            ← Emissão PDF a partir do Fragment IR
 │   ├── emit.rs         PdfEmitter — converte Vec<PageFragments> → Vec<u8>

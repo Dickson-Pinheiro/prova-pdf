@@ -1,0 +1,16 @@
+{
+  "trackingCode": "#A:1:2ea687c7-8ff8-4821-8d55-1443fe392a9c#",
+  "qrData": "#A:1:2ea687c7-8ff8-4821-8d55-1443fe392a9c#",
+  "header": {
+    "institution": "Rede Decisão",
+    "title": "P5_MATEMÁTICA_F7_ANGLO_2026",
+    "logoKey": "client_logo",
+    "studentFields": [
+      { "label": "Unidade" },
+      { "label": "Turma" },
+      { "label": "Aluno" }
+    ]
+  },
+  "answers": { "count": 5, "alternatives": 4 },
+  "footerText": "Lize - 2026"
+}

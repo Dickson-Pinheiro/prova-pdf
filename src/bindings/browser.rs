@@ -147,6 +147,23 @@ pub fn generate_pdf(input: JsValue) -> Result<Vec<u8>, JsError> {
     generate_pdf_from_spec(spec).map_err(|e| JsError::new(&e))
 }
 
+/// Generate an OMR answer sheet (gabarito) PDF from an `AnswerSheetSpec`
+/// JavaScript object.
+///
+/// Uses the same font/image registries as `generate_pdf` — register at least
+/// the `"body"` regular font (and typically the bold variant) first.
+///
+/// @param input - A plain JavaScript object matching the `AnswerSheetSpec` schema
+/// @returns     - `Uint8Array` containing the complete PDF bytes
+#[cfg(feature = "answer-sheet")]
+#[wasm_bindgen]
+pub fn generate_answer_sheet(input: JsValue) -> Result<Vec<u8>, JsError> {
+    let spec: crate::spec::AnswerSheetSpec = serde_wasm_bindgen::from_value(input)
+        .map_err(|e| JsError::new(&format!("spec deserialization error: {e}")))?;
+
+    generate_answer_sheet_from_spec(spec).map_err(|e| JsError::new(&e))
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Internal helper — testable without JsValue
 // ─────────────────────────────────────────────────────────────────────────────
@@ -166,6 +183,26 @@ pub(crate) fn generate_pdf_from_spec(spec: ExamSpec) -> Result<Vec<u8>, String> 
                     images:   images.borrow().clone(),
                 };
                 pipeline::render(&spec, &ctx).map_err(|e| e.to_string())
+            })
+        })
+    })
+}
+
+/// Run the answer-sheet pipeline from an already-deserialized spec.
+#[cfg(feature = "answer-sheet")]
+pub(crate) fn generate_answer_sheet_from_spec(
+    spec: crate::spec::AnswerSheetSpec,
+) -> Result<Vec<u8>, String> {
+    FONT_REGISTRY.with(|reg| {
+        FONT_RULES.with(|rules| {
+            IMAGE_STORE.with(|images| {
+                let ctx = RenderContext {
+                    registry: reg.borrow().clone(),
+                    rules:    rules.borrow().clone(),
+                    images:   images.borrow().clone(),
+                };
+                pipeline::answer_sheet::render_answer_sheet(&spec, &ctx)
+                    .map_err(|e| e.to_string())
             })
         })
     })

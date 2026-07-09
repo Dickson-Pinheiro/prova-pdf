@@ -1010,6 +1010,51 @@ Escrever `README.md` com:
 
 ---
 
+## Fase 13 — Folha de respostas (gabarito OMR) — concluída em 2026-07-09
+
+Geração da "Folha de Respostas Avulsa" (modelo lize/Rede Decisão) diretamente pelo
+motor Rust/WASM. Referência visual: `Folha_de_Respostas_Avulsa_P5_MATEMTICA_F7_ANGLO_2026.pdf`
+(página 1, isolada em `tests/answer_sheet/reference/`). Análise completa da geometria:
+`tests/answer_sheet/ANALYSIS.md`.
+
+### TASK-062 — Spec `AnswerSheetSpec` + feature `answer-sheet` `[x]`
+`src/spec/answer_sheet.rs`: trackingCode, qrData (JSON arbitrário → QR), header
+(reutiliza `InstitutionalHeader`), orientations, signatureLabel, fillInstructions,
+registration (matrícula, **opcional e desligada por padrão** — decisão de produto),
+answers (count/alternatives/startNumber/rowsPerColumn), footerText.
+Feature `answer-sheet` (default) com deps `qrcodegen` + `serde_json`.
+
+### TASK-063 — `StrokedCircle` no Fragment IR `[x]`
+Novo `FragmentKind::StrokedCircle` (bolhas OMR e anéis fiduciais) +
+`emit_stroked_circle` (Bézier 4 arcos) + arm no emitter e no `apply_all_black`.
+
+### TASK-064 — Layout `src/layout/answer_sheet/` `[x]`
+Template fixo em coordenadas absolutas de página (PageGeometry margem-zero):
+`header.rs` (tabela logo|campos|QR com segmentação exata de bordas),
+`qr.rs` (qrcodegen → FilledRects de 1.77pt, igual à referência),
+`panels.rs` (orientações justificadas, assinatura, matrícula opcional, faixa de
+instruções com exemplo Correto/Errado vetorial), `answers.rs` (linhas com 5ª
+alternativa oculta pintada na cor do fundo, wrap em colunas e páginas de
+continuação), `marks.rs` (alvos fiduciais vetoriais).
+
+### TASK-065 — Pipeline + bindings `[x]`
+`pipeline::answer_sheet::render_answer_sheet` (validação NoFont/MissingImage/
+QrPayloadTooLarge → layout → emissão); `generate_answer_sheet` (browser),
+`prova_pdf_generate_answer_sheet` (WASI C-ABI); wrappers `GenerateAnswerSheet`
+(Go), `generate_answer_sheet` (Python), export npm + tipos em `prova-pdf.d.ts`.
+
+### TASK-066 — Harness de comparação + calibração `[x]`
+`tests/answer_sheet/{snapshot.py,compare.py}` (mesma filosofia do antigo
+tests/compare/): pdfplumber → diff com tolerância 0.5pt, excluindo divergências
+propositais (fiduciais/exemplo vetoriais, matrícula ausente, QR comparado por
+bounding box). Teste cargo `answer_sheet_render` gera `out/candidate.pdf`.
+**Resultado: 0 divergências.** Modelo de métricas do Chromium descoberto e
+implementado (advances FreeType hintados a ppem inteiro, kerning arredondado
+separado, letter-spacing 0.8px no tracking, justificação por espaço) — ver
+ANALYSIS.md §"Modelo de métricas".
+
+---
+
 ## Resumo por fase
 
 | Fase | Tasks | Descrição |
@@ -1027,6 +1072,7 @@ Escrever `README.md` com:
 | 10 | 038–055 | **Comparação visual por partes isoladas** (10A: header, 10B: questões, 10C: seções/textos-base, 10D: composição completa, 10E: integração lize) |
 | 11 | 056–058 | PrintConfig completo |
 | 12 | 059–061 | CI, benchmarks, docs |
+| 13 | 062–066 | **Folha de respostas (gabarito OMR)** — concluída |
 
 **Pré-requisitos externos da Fase 10:**
 - TASK-041/046/048/049: Acesso ao repositório `lize/lizeedu` para criar novas rotas Django

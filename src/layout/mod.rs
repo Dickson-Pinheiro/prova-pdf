@@ -1,3 +1,5 @@
+#[cfg(feature = "answer-sheet")]
+pub mod answer_sheet;
 pub mod appendix;
 pub mod base_text;
 pub mod section;

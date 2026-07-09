@@ -37,3 +37,4 @@ node_modules/
 
 # Claude
 .claude/
+tests/answer_sheet/out/

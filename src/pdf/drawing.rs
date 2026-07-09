@@ -16,7 +16,7 @@
 
 use pdf_writer::Content;
 
-use crate::layout::fragment::{FilledCircle, FilledRect, HRule, StrokedRect, VRule};
+use crate::layout::fragment::{FilledCircle, FilledRect, HRule, StrokedCircle, StrokedRect, VRule};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Color helper
@@ -151,6 +151,53 @@ pub fn emit_filled_circle(
 
     content.close_path();
     content.fill_nonzero();
+    content.restore_state();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// StrokedCircle
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Emit a stroked (outlined) circle (`StrokedCircle`) inscribed in the
+/// fragment box.
+///
+/// Same 4-segment Bézier approximation as [`emit_filled_circle`], stroked
+/// instead of filled.  Operators emitted: `q  w  RG  m  c×4  h  S  Q`.
+pub fn emit_stroked_circle(
+    content: &mut Content,
+    frag_x:  f64,
+    frag_y:  f64,
+    frag_w:  f64,
+    frag_h:  f64,
+    circle:  &StrokedCircle,
+    ph:      f64,
+) {
+    let r = (frag_w.min(frag_h)) / 2.0;
+    let cx = frag_x + frag_w / 2.0;
+    let cy = ph - frag_y - frag_h / 2.0; // PDF y-up
+
+    let (cr, cg, cb) = parse_hex_color(&circle.color);
+
+    const KAPPA: f64 = 0.5522847498;
+    let k = r * KAPPA;
+
+    let cx = cx as f32;
+    let cy = cy as f32;
+    let r = r as f32;
+    let k = k as f32;
+
+    content.save_state();
+    content.set_line_width(circle.stroke_width as f32);
+    content.set_stroke_rgb(cr, cg, cb);
+
+    content.move_to(cx, cy + r);
+    content.cubic_to(cx + k, cy + r, cx + r, cy + k, cx + r, cy);
+    content.cubic_to(cx + r, cy - k, cx + k, cy - r, cx, cy - r);
+    content.cubic_to(cx - k, cy - r, cx - r, cy - k, cx - r, cy);
+    content.cubic_to(cx - r, cy + k, cx - k, cy + r, cx, cy + r);
+
+    content.close_path();
+    content.stroke();
     content.restore_state();
 }
 

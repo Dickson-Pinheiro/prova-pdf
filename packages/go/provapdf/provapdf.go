@@ -110,6 +110,22 @@ func getRuntime() (*compiledRuntime, error) {
 // fonts must include at least one entry with Family="body" and Variant=0
 // (regular).
 func GeneratePDF(spec any, fonts []FontInput, opts ...Option) ([]byte, error) {
+	return generate("prova_pdf_generate", spec, fonts, opts...)
+}
+
+// GenerateAnswerSheet generates an OMR answer sheet (gabarito) PDF from an
+// AnswerSheetSpec.
+//
+// spec is any JSON-serialisable value matching the prova-pdf AnswerSheetSpec
+// schema (trackingCode, qrData, header, orientations, answers, ...).
+//
+// fonts must include at least one entry with Family="body" and Variant=0
+// (regular); the bold variant (Variant=1) is used for titles when present.
+func GenerateAnswerSheet(spec any, fonts []FontInput, opts ...Option) ([]byte, error) {
+	return generate("prova_pdf_generate_answer_sheet", spec, fonts, opts...)
+}
+
+func generate(exportName string, spec any, fonts []FontInput, opts ...Option) ([]byte, error) {
 	r, err := getRuntime()
 	if err != nil {
 		return nil, err
@@ -138,7 +154,7 @@ func GeneratePDF(spec any, fonts []FontInput, opts ...Option) ([]byte, error) {
 	fnSetFontRules := inst.ExportedFunction("prova_pdf_set_font_rules")
 	fnAddImage := inst.ExportedFunction("prova_pdf_add_image")
 	fnClearAll := inst.ExportedFunction("prova_pdf_clear_all")
-	fnGenerate := inst.ExportedFunction("prova_pdf_generate")
+	fnGenerate := inst.ExportedFunction(exportName)
 	fnOutputPtr := inst.ExportedFunction("prova_pdf_output_ptr")
 	fnOutputLen := inst.ExportedFunction("prova_pdf_output_len")
 	fnLastErrLen := inst.ExportedFunction("prova_pdf_last_error_len")

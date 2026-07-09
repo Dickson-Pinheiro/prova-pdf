@@ -195,6 +195,35 @@ func f64Ptr(f float64) *float64 { return &f }
 func u8Ptr(n uint8) *uint8      { return &n }
 ```
 
+## Folha de Respostas (gabarito OMR)
+
+Além da prova, o motor gera a **folha de respostas avulsa** (cartão OMR) a partir
+de um `AnswerSheetSpec`: cabeçalho institucional (reutiliza `InstitutionalHeader`),
+QR code com payload JSON, marcadores fiduciais, orientações, linha de assinatura,
+instruções de preenchimento com exemplo Correto/Errado e grade de bolhas A–E.
+
+```typescript
+import { generate_answer_sheet } from "prova-pdf";
+
+const pdf = generate_answer_sheet({
+  trackingCode: "#A:1:2ea687c7-8ff8-4821-8d55-1443fe392a9c#",
+  qrData: { exam: "2ea687c7", application: 1 },   // vira QR code
+  header: {
+    institution: "Rede Decisão",
+    title: "P5_MATEMÁTICA_F7_ANGLO_2026",
+    logoKey: "client_logo",
+    studentFields: [{ label: "Unidade" }, { label: "Turma" }, { label: "Aluno" }],
+  },
+  answers: { count: 10, alternatives: 4 },
+  footerText: "Lize - 2026",
+});
+```
+
+Python: `generate_answer_sheet(spec, fonts, images=...)` · Go:
+`provapdf.GenerateAnswerSheet(spec, fonts, opts...)` · WASI:
+`prova_pdf_generate_answer_sheet`. O layout é calibrado byte-a-byte contra a
+saída do Chromium do sistema lize — ver `tests/answer_sheet/ANALYSIS.md`.
+
 ## Tipos de Questão
 
 | Tipo | `kind` | Descrição |

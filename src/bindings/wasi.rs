@@ -250,6 +250,47 @@ pub extern "C" fn prova_pdf_generate(
     n as i32
 }
 
+/// Generate an OMR answer sheet (gabarito) PDF from a JSON-encoded
+/// `AnswerSheetSpec`.
+///
+/// Same calling convention, staging buffer, and error reporting as
+/// [`prova_pdf_generate`].
+#[cfg(feature = "answer-sheet")]
+#[unsafe(no_mangle)]
+pub extern "C" fn prova_pdf_generate_answer_sheet(
+    json_ptr: *const u8,
+    json_len: usize,
+    out_buf:  *mut u8,
+    out_cap:  usize,
+) -> i32 {
+    let json_bytes = unsafe { std::slice::from_raw_parts(json_ptr, json_len) };
+    let json_str   = match std::str::from_utf8(json_bytes) {
+        Ok(s)  => s,
+        Err(e) => { set_last_error(format!("UTF-8 error: {e}")); return -1; }
+    };
+
+    let spec: crate::spec::AnswerSheetSpec = match serde_json::from_str(json_str) {
+        Ok(s)  => s,
+        Err(e) => { set_last_error(format!("JSON parse error: {e}")); return -1; }
+    };
+
+    let pdf_bytes = match generate_answer_sheet_from_spec(spec) {
+        Ok(b)  => b,
+        Err(e) => { set_last_error(e); return -1; }
+    };
+
+    let n = pdf_bytes.len();
+
+    if !out_buf.is_null() && out_cap >= n {
+        unsafe { std::ptr::copy_nonoverlapping(pdf_bytes.as_ptr(), out_buf, n); }
+    }
+
+    OUTPUT_BUF.with(|b| *b.borrow_mut() = pdf_bytes);
+
+    clear_last_error();
+    n as i32
+}
+
 /// Returns a pointer to the most recently generated PDF bytes (staging buffer).
 /// Valid until the next call to `prova_pdf_generate` or `prova_pdf_clear_all`.
 #[unsafe(no_mangle)]
@@ -454,6 +495,20 @@ fn build_snapshot(
                         });
                     }
 
+                    FragmentKind::StrokedCircle(sc) => {
+                        // Bounding-box rect, stroke only — matches how
+                        // pdfplumber reports circles as curves with a bbox.
+                        rects.push(snapshot::Rect {
+                            x:      ax,
+                            y:      ay,
+                            w:      aw,
+                            h:      ah,
+                            stroke: r2(sc.stroke_width),
+                            fill:   None,
+                            color:  normalize_color(&sc.color),
+                        });
+                    }
+
                     FragmentKind::HRule(hr) => {
                         lines.push(snapshot::Line {
                             x0:     ax,
@@ -636,6 +691,26 @@ pub(crate) fn generate_from_spec(spec: ExamSpec) -> Result<Vec<u8>, String> {
                     images:   images.borrow().clone(),
                 };
                 pipeline::render(&spec, &ctx).map_err(|e| e.to_string())
+            })
+        })
+    })
+}
+
+/// Run the answer-sheet pipeline against the thread-local registries.
+#[cfg(feature = "answer-sheet")]
+pub(crate) fn generate_answer_sheet_from_spec(
+    spec: crate::spec::AnswerSheetSpec,
+) -> Result<Vec<u8>, String> {
+    FONT_REGISTRY.with(|reg| {
+        FONT_RULES.with(|rules| {
+            IMAGE_STORE.with(|images| {
+                let ctx = RenderContext {
+                    registry: reg.borrow().clone(),
+                    rules:    rules.borrow().clone(),
+                    images:   images.borrow().clone(),
+                };
+                pipeline::answer_sheet::render_answer_sheet(&spec, &ctx)
+                    .map_err(|e| e.to_string())
             })
         })
     })

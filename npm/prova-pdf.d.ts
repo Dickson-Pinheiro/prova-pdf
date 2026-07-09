@@ -374,3 +374,55 @@ export interface FontRulesInput {
   question?: string;
   math?: string;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AnswerSheetSpec — OMR answer sheet (gabarito), accepted by
+// `generate_answer_sheet()`
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface AnswerSheetSpec {
+  /** Machine-readable line printed centered at the very top (e.g. "#A:1:<uuid>#"). */
+  trackingCode?: string;
+  /** Data encoded into the header QR code: objects/arrays are serialized as
+   *  compact JSON; a plain string is encoded as-is. */
+  qrData?: unknown;
+  /** Reuses the exam InstitutionalHeader: institution → top row, title →
+   *  "PROVA:" row, logoKey → left cell. All studentFields except the last
+   *  share the row above "PROVA:"; the last one gets the full-width bottom
+   *  row (e.g. [UNIDADE, TURMA, ALUNO]). */
+  header?: InstitutionalHeader;
+  /** Bullet items of the "Orientações" panel. Empty/omitted = default lize wording. */
+  orientations?: string[];
+  /** Label under the signature line. Default "Assinatura do aluno". */
+  signatureLabel?: string;
+  /** Text of the grey fill-instructions strip. Omitted = default lize wording. */
+  fillInstructions?: string;
+  /** Draw the Correto/Errado marking example. Default true. */
+  showFillExample?: boolean;
+  /** Matrícula/RA bubble grid. Omitted = not rendered. */
+  registration?: RegistrationGrid;
+  /** Answer bubble grid. */
+  answers?: AnswerGrid;
+  /** Centered footer under the answers box (e.g. "Lize - 2026"). */
+  footerText?: string;
+}
+
+export interface RegistrationGrid {
+  /** Panel title. Default "Matrícula". */
+  label?: string;
+  /** Number of digit columns. Default 10; 0 hides the panel. */
+  digits?: number;
+}
+
+export interface AnswerGrid {
+  /** Number of questions (rows). */
+  count: number;
+  /** Visible alternatives per question (1–5 → A–E). Default 4. The template
+   *  always reserves 5 bubble columns; hidden ones are painted in the row
+   *  background color. */
+  alternatives?: number;
+  /** First question number. Default 1. */
+  startNumber?: number;
+  /** Rows per column before wrapping inside the box. Default 30. */
+  rowsPerColumn?: number;
+}

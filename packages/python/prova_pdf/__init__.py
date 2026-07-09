@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 __version__ = "0.1.3"
-__all__ = ["generate_pdf", "FontInput", "ProvaPdfError"]
+__all__ = ["generate_pdf", "generate_answer_sheet", "FontInput", "ProvaPdfError"]
 
 import ctypes
 import json
@@ -73,6 +73,8 @@ class _Runtime:
         self._add_image = exports["prova_pdf_add_image"]
         self._clear_all = exports["prova_pdf_clear_all"]
         self._generate = exports["prova_pdf_generate"]
+        # Present in builds with the "answer-sheet" feature (>= 0.2).
+        self._generate_answer_sheet = exports.get("prova_pdf_generate_answer_sheet")
         self._output_ptr = exports["prova_pdf_output_ptr"]
         self._output_len = exports["prova_pdf_output_len"]
         self._last_error_len = exports["prova_pdf_last_error_len"]
@@ -167,12 +169,20 @@ class _Runtime:
             self._free_pair(key_ptr, key_len)
             self._free_pair(dat_ptr, dat_len)
 
-    def generate(self, spec_json: bytes) -> bytes:
+    def generate(self, spec_json: bytes, *, answer_sheet: bool = False) -> bytes:
         """Run the two-call generate protocol and return PDF bytes."""
+        fn = self._generate
+        if answer_sheet:
+            if self._generate_answer_sheet is None:
+                raise ProvaPdfError(
+                    "this prova_pdf.wasm build does not export "
+                    "prova_pdf_generate_answer_sheet"
+                )
+            fn = self._generate_answer_sheet
         ptr, length = self._write_bytes(spec_json)
         try:
             # First call: out_buf=0, out_cap=0 -> stages output internally
-            rc: int = self._generate(self._store, ptr, length, 0, 0)
+            rc: int = fn(self._store, ptr, length, 0, 0)
             self._check(rc)
         finally:
             self._free_pair(ptr, length)
@@ -240,3 +250,28 @@ def generate_pdf(
     # 5. Generate
     spec_bytes = json.dumps(spec).encode("utf-8")
     return rt.generate(spec_bytes)
+
+
+def generate_answer_sheet(
+    spec: dict[str, Any],
+    fonts: list[FontInput],
+    images: dict[str, bytes] | None = None,
+    font_rules: dict[str, Any] | None = None,
+) -> bytes:
+    """Generate an OMR answer sheet (gabarito) PDF from *spec*.
+
+    Same contract as :func:`generate_pdf`, but *spec* follows the
+    AnswerSheetSpec schema (trackingCode, qrData, header, orientations,
+    answers, ...).
+    """
+    rt = _Runtime.get()
+    rt.clear_all()
+    for font in fonts:
+        rt.add_font(font["family"], font["variant"], font["data"])
+    if images:
+        for key, data in images.items():
+            rt.add_image(key, data)
+    if font_rules is not None:
+        rt.set_font_rules(font_rules)
+    spec_bytes = json.dumps(spec).encode("utf-8")
+    return rt.generate(spec_bytes, answer_sheet=True)
