@@ -11,8 +11,24 @@ use std::collections::HashMap;
 
 use crate::layout::fragment::{Fragment, FragmentKind, ImageFragment};
 use crate::spec::answer_sheet::AnswerSheetSpec;
+use crate::spec::header::StudentField;
 
 use super::{filled_rect, qr, SheetCtx, BORDER_GRAY, BORDER_W, NAVY, SIZE_HEADER};
+
+/// Render a student field as `LABEL:` and, when a pre-filled value is present,
+/// the value in bold right after it (matching the "PROVA: <bold title>" row).
+/// The label is uppercased like the rest of the template; the value keeps its
+/// original case so names read naturally.
+fn push_field(ctx: &SheetCtx<'_>, x: f64, top: f64, field: &StudentField, out: &mut Vec<Fragment>) {
+    let label = format!("{}:", field.label.to_uppercase());
+    out.push(ctx.text(x, top, &label, SIZE_HEADER, false, NAVY));
+    // A missing, empty, or whitespace-only value keeps just the blank label.
+    if let Some(value) = field.value.as_deref().filter(|v| !v.trim().is_empty()) {
+        // Position the value one space after the colon.
+        let prefix_w = ctx.width(&format!("{label} "), SIZE_HEADER, false);
+        out.push(ctx.text(x + prefix_w, top, value, SIZE_HEADER, true, NAVY));
+    }
+}
 
 // ── Measured geometry ────────────────────────────────────────────────────────
 
@@ -106,21 +122,13 @@ pub(crate) fn layout_sheet_header(
 
     // ── Row 2: side-by-side fields (all but the last student field) ───────
     let fields = &header.student_fields;
-    let side_fields: &[crate::spec::header::StudentField] =
+    let side_fields: &[StudentField] =
         if fields.len() >= 2 { &fields[..fields.len() - 1] } else { &fields[..] };
     if let Some(first) = side_fields.first() {
-        out.push(ctx.text(
-            MID_X0 + CELL_PAD, ROW_TOPS[1],
-            &format!("{}:", first.label.to_uppercase()),
-            SIZE_HEADER, false, NAVY,
-        ));
+        push_field(ctx, MID_X0 + CELL_PAD, ROW_TOPS[1], first, out);
     }
     if let Some(second) = side_fields.get(1) {
-        out.push(ctx.text(
-            FIELD_SPLIT_X + BORDER_W + CELL_PAD, ROW_TOPS[1],
-            &format!("{}:", second.label.to_uppercase()),
-            SIZE_HEADER, false, NAVY,
-        ));
+        push_field(ctx, FIELD_SPLIT_X + BORDER_W + CELL_PAD, ROW_TOPS[1], second, out);
     }
 
     // ── Row 3: "PROVA: " + bold title ──────────────────────────────────────
@@ -133,12 +141,7 @@ pub(crate) fn layout_sheet_header(
 
     // ── Row 4: full-width last field (ALUNO) ───────────────────────────────
     if fields.len() >= 2 {
-        let last = &fields[fields.len() - 1];
-        out.push(ctx.text(
-            MID_X0 + CELL_PAD, ROW_TOPS[3],
-            &format!("{}:", last.label.to_uppercase()),
-            SIZE_HEADER, false, NAVY,
-        ));
+        push_field(ctx, MID_X0 + CELL_PAD, ROW_TOPS[3], &fields[fields.len() - 1], out);
     }
 
     // ── Logo: fixed height (40px), aspect-fit width, at the reference's
@@ -177,4 +180,66 @@ fn probe_dims(data: &[u8]) -> Option<(u32, u32)> {
 #[cfg(not(feature = "images"))]
 fn probe_dims(_data: &[u8]) -> Option<(u32, u32)> {
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fonts::resolve::FontResolver;
+    use crate::layout::fragment::FragmentKind;
+    use crate::test_helpers::fixtures::make_resolver_and_rules;
+
+    fn header_glyph_runs(spec: &AnswerSheetSpec) -> Vec<String> {
+        let (registry, rules) = make_resolver_and_rules();
+        let resolver = FontResolver::new(&registry, &rules);
+        let ctx = SheetCtx::new(&resolver);
+        let images = HashMap::new();
+        let mut out = Vec::new();
+        layout_sheet_header(spec, &ctx, &images, &mut out);
+        out.iter()
+            .filter(|f| matches!(f.kind, FragmentKind::GlyphRun(_)))
+            .map(|f| format!("{:.1}", f.x))
+            .collect()
+    }
+
+    fn spec_with_fields(fields: Vec<StudentField>) -> AnswerSheetSpec {
+        let mut spec = AnswerSheetSpec::default();
+        spec.header.student_fields = fields;
+        spec
+    }
+
+    #[test]
+    fn label_only_when_no_value() {
+        let spec = spec_with_fields(vec![
+            StudentField { label: "Unidade".into(), width_cm: None, value: None },
+            StudentField { label: "Turma".into(),   width_cm: None, value: None },
+            StudentField { label: "Aluno".into(),   width_cm: None, value: None },
+        ]);
+        // 3 fields → exactly 3 label runs, no value runs.
+        assert_eq!(header_glyph_runs(&spec).len(), 3);
+    }
+
+    #[test]
+    fn empty_string_value_keeps_label_only() {
+        let spec = spec_with_fields(vec![
+            StudentField { label: "Unidade".into(), width_cm: None, value: Some(String::new()) },
+            StudentField { label: "Turma".into(),   width_cm: None, value: Some("  ".into()) },
+            StudentField { label: "Aluno".into(),   width_cm: None, value: None },
+        ]);
+        // Empty / whitespace-only values still render just the label.
+        let runs = header_glyph_runs(&spec);
+        assert_eq!(runs.iter().filter(|_| true).count(), 3,
+            "empty value must not add a value run");
+    }
+
+    #[test]
+    fn value_adds_a_run_per_filled_field() {
+        let spec = spec_with_fields(vec![
+            StudentField { label: "Unidade".into(), width_cm: None, value: Some("Centro".into()) },
+            StudentField { label: "Turma".into(),   width_cm: None, value: Some("7A".into()) },
+            StudentField { label: "Aluno".into(),   width_cm: None, value: Some("João Silva".into()) },
+        ]);
+        // 3 labels + 3 values = 6 glyph runs.
+        assert_eq!(header_glyph_runs(&spec).len(), 6);
+    }
 }

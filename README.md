@@ -219,6 +219,19 @@ const pdf = generate_answer_sheet({
 });
 ```
 
+**Cabeçalho pré-preenchido.** `institution`, `title` (prova) e `logoKey` (logo)
+já preenchem o cabeçalho. Os campos do aluno aceitam um `value` opcional — útil
+para imprimir um gabarito por aluno (combina com `generate_answer_sheets`).
+Quando `value` é omitido ou vazio, imprime só o rótulo em branco:
+
+```typescript
+studentFields: [
+  { label: "Unidade", value: "Centro" },      // → UNIDADE: Centro
+  { label: "Turma",   value: "7A" },           // → TURMA: 7A
+  { label: "Aluno",   value: "João Silva" },   // → ALUNO: João Silva
+]
+```
+
 Python: `generate_answer_sheet(spec, fonts, images=...)` · Go:
 `provapdf.GenerateAnswerSheet(spec, fonts, opts...)` · WASI:
 `prova_pdf_generate_answer_sheet`. O layout é calibrado byte-a-byte contra a

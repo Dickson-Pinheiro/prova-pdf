@@ -34,6 +34,13 @@ pub struct StudentField {
     /// Width of the underline in cm. If None, fills the remaining row width.
     #[serde(default)]
     pub width_cm: Option<f64>,
+    /// Pre-filled value printed after the label (e.g. the student's name on a
+    /// per-student answer sheet). When present and non-empty, the answer-sheet
+    /// header prints `LABEL: value` instead of a blank field. Currently honored
+    /// by the OMR answer-sheet header; the exam header ignores it and always
+    /// renders a blank line to be filled by hand.
+    #[serde(default)]
+    pub value: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

@@ -528,7 +528,7 @@ mod tests {
         let res = FontResolver::new(&reg, &rules);
         let header = InstitutionalHeader {
             student_fields: vec![
-                StudentField { label: "Nome".into(), width_cm: None },
+                StudentField { label: "Nome".into(), width_cm: None, value: None },
             ],
             ..Default::default()
         };
@@ -544,7 +544,7 @@ mod tests {
         let res = FontResolver::new(&reg, &rules);
         let header = InstitutionalHeader {
             student_fields: vec![
-                StudentField { label: "Nome".into(), width_cm: None },
+                StudentField { label: "Nome".into(), width_cm: None, value: None },
             ],
             ..Default::default()
         };
@@ -565,8 +565,8 @@ mod tests {
         let res = FontResolver::new(&reg, &rules);
         let header = InstitutionalHeader {
             student_fields: vec![
-                StudentField { label: "Nº".into(), width_cm: Some(3.0) },
-                StudentField { label: "Turma".into(), width_cm: Some(3.0) },
+                StudentField { label: "Nº".into(), width_cm: Some(3.0), value: None },
+                StudentField { label: "Turma".into(), width_cm: Some(3.0), value: None },
             ],
             ..Default::default()
         };
@@ -589,7 +589,7 @@ mod tests {
         let res = FontResolver::new(&reg, &rules);
         let header = InstitutionalHeader {
             student_fields: vec![
-                StudentField { label: "Nome".into(), width_cm: None },
+                StudentField { label: "Nome".into(), width_cm: None, value: None },
             ],
             instructions: vec![
                 InlineContent::Text(InlineText { value: "Leia com atenção.".into(), style: None }),
@@ -622,10 +622,10 @@ mod tests {
             year:           Some("2024".into()),
             logo_key:       Some("logo.png".into()),
             student_fields: vec![
-                StudentField { label: "Nome".into(), width_cm: None },
-                StudentField { label: "Turma".into(), width_cm: Some(3.0) },
-                StudentField { label: "Data".into(),  width_cm: Some(3.0) },
-                StudentField { label: "Nota".into(),  width_cm: Some(2.5) },
+                StudentField { label: "Nome".into(), width_cm: None, value: None },
+                StudentField { label: "Turma".into(), width_cm: Some(3.0), value: None },
+                StudentField { label: "Data".into(),  width_cm: Some(3.0), value: None },
+                StudentField { label: "Nota".into(),  width_cm: Some(2.5), value: None },
             ],
             instructions:   vec![
                 InlineContent::Text(InlineText {
@@ -671,7 +671,7 @@ mod tests {
         // Rich header — institution + exam title + several rows of student fields,
         // enough to exceed the logo-cell minimum height.
         let many_fields: Vec<StudentField> = (0..8)
-            .map(|i| StudentField { label: format!("Campo {i}"), width_cm: None })
+            .map(|i| StudentField { label: format!("Campo {i}"), width_cm: None, value: None })
             .collect();
         let (_, h_rich) = call(&InstitutionalHeader {
             institution:    Some("Escola Estadual Exemplo".into()),

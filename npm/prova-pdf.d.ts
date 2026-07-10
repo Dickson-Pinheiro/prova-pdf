@@ -253,6 +253,11 @@ export interface InstitutionalHeader {
 export interface StudentField {
   label: string;
   widthCm?: number;
+  /** Pre-filled value printed after the label (e.g. the student's name on a
+   *  per-student answer sheet). When present and non-empty, the OMR answer-sheet
+   *  header prints `LABEL: value` in bold; when omitted/empty it stays a blank
+   *  label. Honored by the answer-sheet header only. */
+  value?: string;
 }
 
 export interface RunningHeader {

@@ -453,7 +453,7 @@ mod tests {
     fn student_field_zero_width_reported() {
         let spec = ExamSpec {
             header: InstitutionalHeader {
-                student_fields: vec![StudentField { label: "Nome".into(), width_cm: Some(0.0) }],
+                student_fields: vec![StudentField { label: "Nome".into(), width_cm: Some(0.0), value: None }],
                 ..Default::default()
             },
             sections: vec![Section { questions: vec![textual_question()], title: None, instructions: vec![], category: None, style: None, force_page_break: false }],
@@ -469,7 +469,7 @@ mod tests {
     fn student_field_negative_width_reported() {
         let spec = ExamSpec {
             header: InstitutionalHeader {
-                student_fields: vec![StudentField { label: "Turma".into(), width_cm: Some(-1.5) }],
+                student_fields: vec![StudentField { label: "Turma".into(), width_cm: Some(-1.5), value: None }],
                 ..Default::default()
             },
             sections: vec![Section { questions: vec![textual_question()], title: None, instructions: vec![], category: None, style: None, force_page_break: false }],
@@ -485,7 +485,7 @@ mod tests {
     fn student_field_none_width_is_valid() {
         let spec = ExamSpec {
             header: InstitutionalHeader {
-                student_fields: vec![StudentField { label: "Nome".into(), width_cm: None }],
+                student_fields: vec![StudentField { label: "Nome".into(), width_cm: None, value: None }],
                 ..Default::default()
             },
             sections: vec![Section { questions: vec![textual_question()], title: None, instructions: vec![], category: None, style: None, force_page_break: false }],
