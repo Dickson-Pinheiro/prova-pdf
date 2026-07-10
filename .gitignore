@@ -38,3 +38,6 @@ node_modules/
 # Claude
 .claude/
 tests/answer_sheet/out/
+
+# Large source reference PDFs (isolated single pages live under reference/)
+/Folha_de_Respostas_Avulsa_*.pdf

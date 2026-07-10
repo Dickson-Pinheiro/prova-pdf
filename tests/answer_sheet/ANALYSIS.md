@@ -77,6 +77,14 @@ Escala CSS→pt observada: **1px = 0.52pt** (bordas 2px = 1.04; fonte 14px = 7.2
    - **5ª alternativa oculta**: o template SEMPRE reserva 5 colunas; quando a prova tem 4
      alternativas, a bolha E e sua letra são pintadas na cor do fundo da linha
      (`#EAEDF3` em linha sombreada, `#FFFFFF` caso contrário) — invisíveis, mas presentes.
+   - **Múltiplas colunas de questões** (calibrado com a referência ENEM `OUTUBRO`,
+     p.1 isolada em `reference/folha_respostas_enem_multicol.pdf`, 90 questões):
+     as colunas de questões avançam por um **stride fixo de 98.714 pt** (A-bolhas em
+     x = 70.907 + k·98.714), com 30 linhas por coluna. Até **5 colunas** cabem na caixa
+     antes de transbordar para uma página de continuação. O passo interno de cada coluna
+     (célula do número, 5 bolhas, pitch 11.825, row pitch 13.776) é idêntico ao da coluna 0.
+     Verificado: candidato vs. referência com IBM Plex Sans → colunas dentro de 0.05pt e
+     stride exato.
 8. **Rodapé** — "Lize - 2026" 7.28 regular centrado, top 813.05.
 
 ## Modelo de métricas de texto do Chromium (descoberto na calibração)
@@ -115,9 +123,9 @@ Derivado por engenharia reversa comparando advances caractere a caractere
 
 ## Incógnitas (a calibrar com referências futuras)
 
-- Quebra em múltiplas colunas da caixa Respostas com mais questões (referência tem só 5,
-  em 1 coluna). Implementado como `rowsPerColumn` (30) + passo de coluna = largura/4;
-  transborda para páginas de continuação com a mesma caixa.
+- ~~Quebra em múltiplas colunas da caixa Respostas~~ — **calibrado** (2026-07-10) com a
+  referência ENEM de 90 questões: stride fixo de **98.714 pt**, 30 linhas/coluna, até 5
+  colunas por página (ver §7). O `COLUMN_STRIDE = largura/4` anterior (137.5) era um chute.
 - Reflow do layout quando a matrícula está ausente (mantidas as posições fixas do
   template; o painel direito fica vazio).
 

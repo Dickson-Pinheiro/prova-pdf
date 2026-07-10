@@ -208,9 +208,9 @@ mod tests {
 
     #[test]
     fn batch_preserves_per_sheet_spill() {
-        // Sheet 0: 1 page. Sheet 1: 150 questions → 2 pages. Total = 3.
+        // Sheet 0: 1 page. Sheet 1: 160 questions (> 5 cols × 30) → 2 pages. Total = 3.
         let mut big = basic_spec();
-        big.answers.count = 150;
+        big.answers.count = 160;
         let specs = vec![basic_spec(), big];
         let pdf = render_answer_sheets(&specs, &ready_ctx()).unwrap();
         let text = String::from_utf8_lossy(&pdf);
@@ -252,11 +252,11 @@ mod tests {
     #[test]
     fn many_questions_spill_to_second_page() {
         let mut spec = basic_spec();
-        spec.answers.count = 150; // > 4 columns × 30 rows
+        spec.answers.count = 160; // > 5 columns × 30 rows
         let pdf = render_answer_sheet(&spec, &ready_ctx()).unwrap();
         assert!(pdf.starts_with(b"%PDF-"));
         let text = String::from_utf8_lossy(&pdf);
-        assert!(text.contains("/Count 2"), "150 questions must produce 2 pages");
+        assert!(text.contains("/Count 2"), "160 questions must produce 2 pages");
     }
 
     #[test]

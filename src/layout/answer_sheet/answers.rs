@@ -44,7 +44,12 @@ const LETTER_TOP_DY: f64 = 4.51;
 const RESERVED_COLS: usize = 5;
 const LETTERS: [&str; RESERVED_COLS] = ["A", "B", "C", "D", "E"];
 /// Horizontal stride between wrapped question columns.
-const COLUMN_STRIDE: f64 = CONTENT_W / 4.0;
+///
+/// Measured from the multi-column ENEM reference (3 columns of 30, A-bubbles
+/// at x = 70.907 + k·98.714): the columns advance by a fixed 98.714 pt, not the
+/// content width ÷ N. At this stride up to 5 columns fit inside the box before
+/// the grid spills onto a continuation page. See ANALYSIS.md §7.
+const COLUMN_STRIDE: f64 = 98.714;
 
 /// Lay out the answers box onto `page1`; returns all pages (continuation
 /// pages are created when the grid exceeds the box capacity).
@@ -56,7 +61,7 @@ pub(crate) fn layout_answers(
     let mut pages = vec![page1];
 
     let rows_per_col = spec.answers.rows_per_column.max(1) as usize;
-    let max_cols = ((CONTENT_X1 - NUM_CELL_X) / COLUMN_STRIDE).floor() as usize; // 4
+    let max_cols = ((CONTENT_X1 - NUM_CELL_X) / COLUMN_STRIDE).floor() as usize; // 5
     let per_page = rows_per_col * max_cols;
 
     let count = spec.answers.count as usize;
@@ -125,6 +130,62 @@ pub(crate) fn layout_answers(
     }
 
     pages
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fonts::resolve::FontResolver;
+    use crate::layout::fragment::FragmentKind;
+    use crate::test_helpers::fixtures::make_resolver_and_rules;
+
+    /// x-lefts of the visible (BUBBLE_GRAY) answer bubbles on the page.
+    fn bubble_xs(count: u32) -> Vec<f64> {
+        let (registry, rules) = make_resolver_and_rules();
+        let resolver = FontResolver::new(&registry, &rules);
+        let ctx = SheetCtx::new(&resolver);
+        let mut spec = AnswerSheetSpec::default();
+        spec.answers.count = count;
+        spec.answers.alternatives = 5;
+        let pages = layout_answers(&spec, &ctx, Vec::new());
+        pages[0]
+            .iter()
+            .filter_map(|f| match &f.kind {
+                FragmentKind::StrokedCircle(c) if c.color.eq_ignore_ascii_case(BUBBLE_GRAY) => Some(f.x),
+                _ => None,
+            })
+            .collect()
+    }
+
+    fn near(xs: &[f64], target: f64) -> bool {
+        xs.iter().any(|x| (x - target).abs() < 0.05)
+    }
+
+    #[test]
+    fn columns_advance_at_measured_enem_stride() {
+        // 90 questions (30 rows/col) fill exactly 3 columns, like the ENEM ref.
+        let xs = bubble_xs(90);
+        // A-bubble left of column k = CELL_X0 + BUBBLE_DX + k·98.714 = 68.0 + k·98.714.
+        let a0 = CELL_X0 + BUBBLE_DX;
+        assert!(near(&xs, a0),                     "col 0 A-bubble missing at {a0}");
+        assert!(near(&xs, a0 + COLUMN_STRIDE),     "col 1 A-bubble missing at {}", a0 + COLUMN_STRIDE);
+        assert!(near(&xs, a0 + 2.0 * COLUMN_STRIDE), "col 2 A-bubble missing at {}", a0 + 2.0 * COLUMN_STRIDE);
+        // The old CONTENT_W/4 = 137.5 guess must be gone.
+        assert!(!near(&xs, a0 + 137.5), "column must not land at the old 137.5 stride");
+    }
+
+    #[test]
+    fn five_columns_fit_before_spilling() {
+        // 150 = 5 cols × 30 fits one page; the 151st opens a second page.
+        let (registry, rules) = make_resolver_and_rules();
+        let resolver = FontResolver::new(&registry, &rules);
+        let ctx = SheetCtx::new(&resolver);
+        let mut spec = AnswerSheetSpec::default();
+        spec.answers.count = 150;
+        assert_eq!(layout_answers(&spec, &ctx, Vec::new()).len(), 1);
+        spec.answers.count = 151;
+        assert_eq!(layout_answers(&spec, &ctx, Vec::new()).len(), 2);
+    }
 }
 
 /// Box borders (filled rects) + centered bold title.
