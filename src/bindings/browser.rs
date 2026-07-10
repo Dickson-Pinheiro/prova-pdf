@@ -164,6 +164,24 @@ pub fn generate_answer_sheet(input: JsValue) -> Result<Vec<u8>, JsError> {
     generate_answer_sheet_from_spec(spec).map_err(|e| JsError::new(&e))
 }
 
+/// Generate a single PDF containing several OMR answer sheets (gabaritos),
+/// one sheet after another.
+///
+/// Accepts an array of `AnswerSheetSpec` objects; each sheet starts on a fresh
+/// page (long answer grids still spill onto continuation pages within their own
+/// sheet). Uses the same font/image registries as `generate_answer_sheet`.
+///
+/// @param input - An array of plain objects matching the `AnswerSheetSpec` schema
+/// @returns     - `Uint8Array` containing the complete PDF bytes
+#[cfg(feature = "answer-sheet")]
+#[wasm_bindgen]
+pub fn generate_answer_sheets(input: JsValue) -> Result<Vec<u8>, JsError> {
+    let specs: Vec<crate::spec::AnswerSheetSpec> = serde_wasm_bindgen::from_value(input)
+        .map_err(|e| JsError::new(&format!("spec list deserialization error: {e}")))?;
+
+    generate_answer_sheets_from_specs(specs).map_err(|e| JsError::new(&e))
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Internal helper — testable without JsValue
 // ─────────────────────────────────────────────────────────────────────────────
@@ -202,6 +220,27 @@ pub(crate) fn generate_answer_sheet_from_spec(
                     images:   images.borrow().clone(),
                 };
                 pipeline::answer_sheet::render_answer_sheet(&spec, &ctx)
+                    .map_err(|e| e.to_string())
+            })
+        })
+    })
+}
+
+/// Run the answer-sheet pipeline for a batch of specs from already-deserialized
+/// specs.
+#[cfg(feature = "answer-sheet")]
+pub(crate) fn generate_answer_sheets_from_specs(
+    specs: Vec<crate::spec::AnswerSheetSpec>,
+) -> Result<Vec<u8>, String> {
+    FONT_REGISTRY.with(|reg| {
+        FONT_RULES.with(|rules| {
+            IMAGE_STORE.with(|images| {
+                let ctx = RenderContext {
+                    registry: reg.borrow().clone(),
+                    rules:    rules.borrow().clone(),
+                    images:   images.borrow().clone(),
+                };
+                pipeline::answer_sheet::render_answer_sheets(&specs, &ctx)
                     .map_err(|e| e.to_string())
             })
         })

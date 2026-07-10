@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
-__version__ = "0.1.3"
-__all__ = ["generate_pdf", "generate_answer_sheet", "FontInput", "ProvaPdfError"]
+__version__ = "0.3.0"
+__all__ = [
+    "generate_pdf",
+    "generate_answer_sheet",
+    "generate_answer_sheets",
+    "FontInput",
+    "ProvaPdfError",
+]
 
 import ctypes
 import json
@@ -75,6 +81,8 @@ class _Runtime:
         self._generate = exports["prova_pdf_generate"]
         # Present in builds with the "answer-sheet" feature (>= 0.2).
         self._generate_answer_sheet = exports.get("prova_pdf_generate_answer_sheet")
+        # Batch answer sheets (list -> one PDF), present in builds >= 0.3.
+        self._generate_answer_sheets = exports.get("prova_pdf_generate_answer_sheets")
         self._output_ptr = exports["prova_pdf_output_ptr"]
         self._output_len = exports["prova_pdf_output_len"]
         self._last_error_len = exports["prova_pdf_last_error_len"]
@@ -169,10 +177,23 @@ class _Runtime:
             self._free_pair(key_ptr, key_len)
             self._free_pair(dat_ptr, dat_len)
 
-    def generate(self, spec_json: bytes, *, answer_sheet: bool = False) -> bytes:
+    def generate(
+        self,
+        spec_json: bytes,
+        *,
+        answer_sheet: bool = False,
+        answer_sheets: bool = False,
+    ) -> bytes:
         """Run the two-call generate protocol and return PDF bytes."""
         fn = self._generate
-        if answer_sheet:
+        if answer_sheets:
+            if self._generate_answer_sheets is None:
+                raise ProvaPdfError(
+                    "this prova_pdf.wasm build does not export "
+                    "prova_pdf_generate_answer_sheets"
+                )
+            fn = self._generate_answer_sheets
+        elif answer_sheet:
             if self._generate_answer_sheet is None:
                 raise ProvaPdfError(
                     "this prova_pdf.wasm build does not export "
@@ -275,3 +296,32 @@ def generate_answer_sheet(
         rt.set_font_rules(font_rules)
     spec_bytes = json.dumps(spec).encode("utf-8")
     return rt.generate(spec_bytes, answer_sheet=True)
+
+
+def generate_answer_sheets(
+    specs: list[dict[str, Any]],
+    fonts: list[FontInput],
+    images: dict[str, bytes] | None = None,
+    font_rules: dict[str, Any] | None = None,
+) -> bytes:
+    """Generate one PDF containing several OMR answer sheets (gabaritos).
+
+    *specs* is a list of AnswerSheetSpec dicts; each sheet starts on a fresh
+    page (a long answer grid still spills onto continuation pages within its
+    own sheet). Same contract as :func:`generate_answer_sheet` otherwise.
+
+    If any sheet fails validation (missing font/logo image, oversized QR
+    payload), the whole batch aborts and :class:`ProvaPdfError` reports the
+    offending sheet's index — the PDF is never partial.
+    """
+    rt = _Runtime.get()
+    rt.clear_all()
+    for font in fonts:
+        rt.add_font(font["family"], font["variant"], font["data"])
+    if images:
+        for key, data in images.items():
+            rt.add_image(key, data)
+    if font_rules is not None:
+        rt.set_font_rules(font_rules)
+    spec_bytes = json.dumps(specs).encode("utf-8")
+    return rt.generate(spec_bytes, answer_sheets=True)

@@ -125,6 +125,24 @@ func GenerateAnswerSheet(spec any, fonts []FontInput, opts ...Option) ([]byte, e
 	return generate("prova_pdf_generate_answer_sheet", spec, fonts, opts...)
 }
 
+// GenerateAnswerSheets generates one PDF containing several OMR answer sheets
+// (gabaritos), one sheet after another.
+//
+// specs must be a JSON-serialisable list (e.g. []any or a typed slice) whose
+// elements each match the prova-pdf AnswerSheetSpec schema. Each sheet starts
+// on a fresh page; a long answer grid still spills onto continuation pages
+// within its own sheet.
+//
+// If any sheet fails validation (missing font/logo image, oversized QR
+// payload) the whole batch aborts and the returned error names the offending
+// sheet's index — the PDF is never partial.
+//
+// fonts must include at least one entry with Family="body" and Variant=0
+// (regular); the bold variant (Variant=1) is used for titles when present.
+func GenerateAnswerSheets(specs any, fonts []FontInput, opts ...Option) ([]byte, error) {
+	return generate("prova_pdf_generate_answer_sheets", specs, fonts, opts...)
+}
+
 func generate(exportName string, spec any, fonts []FontInput, opts ...Option) ([]byte, error) {
 	r, err := getRuntime()
 	if err != nil {

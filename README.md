@@ -224,6 +224,27 @@ Python: `generate_answer_sheet(spec, fonts, images=...)` · Go:
 `prova_pdf_generate_answer_sheet`. O layout é calibrado byte-a-byte contra a
 saída do Chromium do sistema lize — ver `tests/answer_sheet/ANALYSIS.md`.
 
+### Vários gabaritos num único PDF
+
+Passe uma **lista** de `AnswerSheetSpec` para gerar um PDF com um gabarito por
+folha (gabaritos longos ainda transbordam para páginas de continuação dentro
+do próprio gabarito). O subsetting de fontes é compartilhado por todo o lote.
+
+```typescript
+import { generate_answer_sheets } from "prova-pdf";
+
+const pdf = generate_answer_sheets([
+  { trackingCode: "#A:1:aluno-1#", header: { /* ... */ }, answers: { count: 10 } },
+  { trackingCode: "#A:1:aluno-2#", header: { /* ... */ }, answers: { count: 10 } },
+]);
+```
+
+Python: `generate_answer_sheets(specs, fonts, images=...)` · Go:
+`provapdf.GenerateAnswerSheets(specs, fonts, opts...)` · WASI:
+`prova_pdf_generate_answer_sheets` (JSON de entrada deve ser um array). Se
+qualquer gabarito falhar na validação (fonte/logo/QR), o lote inteiro é
+abortado com o índice do gabarito problemático — o PDF nunca sai parcial.
+
 ## Tipos de Questão
 
 | Tipo | `kind` | Descrição |

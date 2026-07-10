@@ -39,6 +39,8 @@ use self::validate::ValidationError;
 pub enum PipelineError {
     #[error("validation failed with {} error(s)", .0.len())]
     ValidationFailed(Vec<ValidationError>),
+    #[error("answer sheet #{index} invalid: validation failed with {} error(s)", .errors.len())]
+    AnswerSheetValidationFailed { index: usize, errors: Vec<ValidationError> },
     #[error("no font registered: call add_font('body', 0, bytes) first")]
     NoFont,
     #[error("PDF emission error: {0}")]
