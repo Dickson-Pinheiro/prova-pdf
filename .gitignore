@@ -41,3 +41,6 @@ tests/answer_sheet/out/
 
 # Large source reference PDFs (isolated single pages live under reference/)
 /Folha_de_Respostas_Avulsa_*.pdf
+
+# Loose reference image assets dropped in the project root
+/5080413624014146763.jpg
