@@ -12,7 +12,7 @@ use super::BLACK;
 pub const MARK_SIZE: f64 = 15.6;
 
 /// Top-left corners of the four marks, measured from the reference:
-/// two flanking the orientations/registration panels, two at the page bottom.
+/// two flanking the top of the orientations panel, two at the page bottom.
 pub const MARK_POSITIONS: [(f64, f64); 4] = [
     (25.60, 119.53),
     (554.81, 119.53),

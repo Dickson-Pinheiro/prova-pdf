@@ -45,11 +45,11 @@ const RESERVED_COLS: usize = 5;
 const LETTERS: [&str; RESERVED_COLS] = ["A", "B", "C", "D", "E"];
 /// Horizontal stride between wrapped question columns.
 ///
-/// Measured from the multi-column ENEM reference (3 columns of 30, A-bubbles
-/// at x = 70.907 + k·98.714): the columns advance by a fixed 98.714 pt, not the
-/// content width ÷ N. At this stride up to 5 columns fit inside the box before
-/// the grid spills onto a continuation page. See ANALYSIS.md §7.
-const COLUMN_STRIDE: f64 = 98.714;
+/// Measured from the multi-column ENEM reference (3 columns of 30): the A-bubble
+/// left edges sit at x = 67.967, 166.738, 265.509 — a fixed 98.77126 pt advance,
+/// not the content width ÷ N. At this stride up to 5 columns fit inside the box
+/// before the grid spills onto a continuation page. See ANALYSIS.md §7.
+const COLUMN_STRIDE: f64 = 98.77126;
 
 /// Lay out the answers box onto `page1`; returns all pages (continuation
 /// pages are created when the grid exceeds the box capacity).
@@ -75,7 +75,6 @@ pub(crate) fn layout_answers(
         while pages.len() <= page_idx {
             let mut page = Vec::new();
             push_box(ctx, &mut page);
-            super::marks::push_fiducials(&mut page);
             pages.push(page);
         }
         let local = q % per_page;
@@ -165,7 +164,7 @@ mod tests {
     fn columns_advance_at_measured_enem_stride() {
         // 90 questions (30 rows/col) fill exactly 3 columns, like the ENEM ref.
         let xs = bubble_xs(90);
-        // A-bubble left of column k = CELL_X0 + BUBBLE_DX + k·98.714 = 68.0 + k·98.714.
+        // A-bubble left of column k = CELL_X0 + BUBBLE_DX + k·COLUMN_STRIDE = 68.0 + k·98.77126.
         let a0 = CELL_X0 + BUBBLE_DX;
         assert!(near(&xs, a0),                     "col 0 A-bubble missing at {a0}");
         assert!(near(&xs, a0 + COLUMN_STRIDE),     "col 1 A-bubble missing at {}", a0 + COLUMN_STRIDE);

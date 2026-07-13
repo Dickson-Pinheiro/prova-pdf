@@ -28,7 +28,10 @@ pub struct AnswerSheetSpec {
     pub qr_data: Option<serde_json::Value>,
     /// Institutional header (logo, institution, exam title, student fields).
     pub header: InstitutionalHeader,
-    /// Bullet items of the "Orientações" panel. Empty = default lize wording.
+    /// Bullet items of the "Orientações" panel. Empty/omitted = the panel is
+    /// left blank (no title, no bullets); the reserved vertical space is kept
+    /// so the layout below does not shift. The combined length of all items
+    /// must not exceed [`MAX_ORIENTATIONS_CHARS`].
     pub orientations: Vec<String>,
     /// Label under the signature line.
     pub signature_label: Option<String>,
@@ -37,9 +40,6 @@ pub struct AnswerSheetSpec {
     /// Draw the Correto/Errado marking example inside the grey strip.
     #[serde(default = "default_true")]
     pub show_fill_example: bool,
-    /// Student-registration (matrícula) bubble grid. Omitted = not rendered
-    /// (the sheet identifies the student via header fields + QR code).
-    pub registration: Option<RegistrationGrid>,
     /// Answer bubble grid.
     pub answers: AnswerGrid,
     /// Centered footer under the answers box (e.g. "Lize - 2026").
@@ -56,29 +56,9 @@ impl Default for AnswerSheetSpec {
             signature_label:   None,
             fill_instructions: None,
             show_fill_example: true,
-            registration:      None,
             answers:           AnswerGrid::default(),
             footer_text:       None,
         }
-    }
-}
-
-/// Matrícula / RA digit-marking grid (one column per digit, rows 0–9).
-///
-/// Present in the lize reference sheet but disabled by default here — include
-/// the object in the spec to render it.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", default)]
-pub struct RegistrationGrid {
-    /// Panel title.
-    pub label: String,
-    /// Number of digit columns. 0 hides the whole panel.
-    pub digits: u8,
-}
-
-impl Default for RegistrationGrid {
-    fn default() -> Self {
-        Self { label: "Matrícula".to_owned(), digits: 10 }
     }
 }
 
@@ -116,17 +96,9 @@ impl AnswerSheetSpec {
     }
 }
 
-/// Default "Orientações" bullet items (lize wording).
-pub const DEFAULT_ORIENTATIONS: [&str; 3] = [
-    "Preencha corretamente os dados do cabeçalho acima com o seu nome de forma \
-     legível. No quadro ao lado, preencha sua matrícula (ou RA) da esquerda para \
-     a direita e realize a marcação do número correspondente.",
-    "O preenchimento deste caderno de respostas é de responsabilidade do aluno e \
-     deverá ser realizado com caneta esferográfica de cor preta. Não rasure e não \
-     marque fora dos círculos correspondentes às respostas das questões.",
-    "Não serão consideradas as respostas rasuradas, marcações duplicadas, marcadas \
-     fora do local ou sem o preenchimento total do espaço correspondente.",
-];
+/// Maximum combined length (Unicode scalar values) of all "Orientações"
+/// bullet items. Specs exceeding this are rejected during validation.
+pub const MAX_ORIENTATIONS_CHARS: usize = 700;
 
 /// Default signature-line label.
 pub const DEFAULT_SIGNATURE_LABEL: &str = "Assinatura do aluno";
@@ -146,7 +118,6 @@ mod tests {
         assert_eq!(spec.answers.count, 5);
         assert_eq!(spec.answers.alternatives, 4);
         assert_eq!(spec.answers.start_number, 1);
-        assert!(spec.registration.is_none(), "matrícula must be off by default");
         assert!(spec.show_fill_example);
         assert!(spec.qr_data.is_none());
         assert!(spec.orientations.is_empty());

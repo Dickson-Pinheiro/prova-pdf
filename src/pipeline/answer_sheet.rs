@@ -9,7 +9,7 @@ use crate::layout::answer_sheet::layout_answer_sheet;
 use crate::layout::fragment::Fragment;
 use crate::layout::page::PageGeometry;
 use crate::pdf::emit::PdfEmitter;
-use crate::spec::answer_sheet::AnswerSheetSpec;
+use crate::spec::answer_sheet::{AnswerSheetSpec, MAX_ORIENTATIONS_CHARS};
 
 use super::{PipelineError, RenderContext};
 use super::validate::ValidationError;
@@ -57,6 +57,13 @@ fn validate_answer_sheet(
         if qrcodegen::QrCode::encode_text(&payload, qrcodegen::QrCodeEcc::Medium).is_err() {
             errors.push(ValidationError::QrPayloadTooLarge { len: payload.len() });
         }
+    }
+    let orientations_len: usize = spec.orientations.iter().map(|s| s.chars().count()).sum();
+    if orientations_len > MAX_ORIENTATIONS_CHARS {
+        errors.push(ValidationError::OrientationsTooLong {
+            len: orientations_len,
+            max: MAX_ORIENTATIONS_CHARS,
+        });
     }
     errors
 }
@@ -185,6 +192,31 @@ mod tests {
             }
             other => panic!("expected AnswerSheetValidationFailed, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn fails_with_too_long_orientations() {
+        let mut spec = basic_spec();
+        // Two items whose combined length exceeds MAX_ORIENTATIONS_CHARS (700).
+        spec.orientations = vec!["a".repeat(400), "b".repeat(400)];
+        let err = render_answer_sheet(&spec, &ready_ctx()).unwrap_err();
+        match err {
+            PipelineError::AnswerSheetValidationFailed { index, errors } => {
+                assert_eq!(index, 0);
+                assert!(errors.iter().any(|e| matches!(
+                    e,
+                    ValidationError::OrientationsTooLong { len: 800, max: 700 }
+                )));
+            }
+            other => panic!("expected AnswerSheetValidationFailed, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn orientations_within_limit_ok() {
+        let mut spec = basic_spec();
+        spec.orientations = vec!["a".repeat(350), "b".repeat(350)];
+        assert!(render_answer_sheet(&spec, &ready_ctx()).is_ok());
     }
 
     // ── Batch (list of sheets) ────────────────────────────────────────────

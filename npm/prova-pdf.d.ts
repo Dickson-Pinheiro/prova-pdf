@@ -396,7 +396,9 @@ export interface AnswerSheetSpec {
    *  share the row above "PROVA:"; the last one gets the full-width bottom
    *  row (e.g. [UNIDADE, TURMA, ALUNO]). */
   header?: InstitutionalHeader;
-  /** Bullet items of the "Orientações" panel. Empty/omitted = default lize wording. */
+  /** Bullet items of the "Orientações" panel. Empty/omitted leaves the panel
+   *  blank (no title, no bullets); the reserved space is kept. The combined
+   *  length of all items must not exceed 700 characters. */
   orientations?: string[];
   /** Label under the signature line. Default "Assinatura do aluno". */
   signatureLabel?: string;
@@ -404,19 +406,10 @@ export interface AnswerSheetSpec {
   fillInstructions?: string;
   /** Draw the Correto/Errado marking example. Default true. */
   showFillExample?: boolean;
-  /** Matrícula/RA bubble grid. Omitted = not rendered. */
-  registration?: RegistrationGrid;
   /** Answer bubble grid. */
   answers?: AnswerGrid;
   /** Centered footer under the answers box (e.g. "Lize - 2026"). */
   footerText?: string;
-}
-
-export interface RegistrationGrid {
-  /** Panel title. Default "Matrícula". */
-  label?: string;
-  /** Number of digit columns. Default 10; 0 hides the panel. */
-  digits?: number;
 }
 
 export interface AnswerGrid {

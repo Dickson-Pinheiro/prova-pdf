@@ -41,8 +41,6 @@ pub const SHADE: &str = "#eaedf3";
 pub const STRIP_BG: &str = "#dedede";
 /// Fill-instructions strip top hairline.
 pub const STRIP_TOP: &str = "#485e90";
-/// Separators of the invisible index row of the registration grid.
-pub const IDX_SEP: &str = "#adb0b8";
 pub const WHITE: &str = "#ffffff";
 pub const BLACK: &str = "#000000";
 
@@ -327,7 +325,7 @@ pub(crate) fn filled_rect(x: f64, y: f64, w: f64, h: f64, color: &str) -> Fragme
 /// Lay out a complete answer sheet into pages of page-absolute fragments.
 ///
 /// Page 1 carries the full template (tracking code, header, fiducial marks,
-/// orientations, registration grid, fill instructions, answers, footer).
+/// orientations, fill instructions, answers, footer).
 /// If the answer grid overflows its column capacity, continuation pages
 /// carry only the answers box (plus fiducials and footer).
 pub fn layout_answer_sheet(
@@ -349,18 +347,19 @@ pub fn layout_answer_sheet(
     // ── Institutional header table (logo | fields | QR) ───────────────────
     header::layout_sheet_header(spec, &ctx, images, &mut page1);
 
-    // ── Orientations + registration + fill-instructions strip ─────────────
+    // ── Orientations + signature + fill-instructions strip ────────────────
     panels::layout_panels(spec, &ctx, &mut page1);
-
-    // ── Fiducial corner marks (over the panels' white backgrounds) ────────
-    marks::push_fiducials(&mut page1);
 
     // ── Answers box (may spill onto continuation pages) ───────────────────
     let mut pages = answers::layout_answers(spec, &ctx, page1);
 
-    // ── Footer on every page ──────────────────────────────────────────────
-    if let Some(ref footer) = spec.footer_text {
-        for page in pages.iter_mut() {
+    // ── Fiducial corner marks + footer on every page ──────────────────────
+    // The marks are drawn last, on top of everything: the answers box paints a
+    // white interior down to y≈811, which would otherwise cover the two bottom
+    // marks (y≈793) and leave only the two top marks visible.
+    for page in pages.iter_mut() {
+        marks::push_fiducials(page);
+        if let Some(ref footer) = spec.footer_text {
             page.push(ctx.text_centered(CONTENT_CX, FOOTER_TOP, footer, SIZE_HEADER, false, NAVY));
         }
     }

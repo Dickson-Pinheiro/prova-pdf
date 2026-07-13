@@ -79,8 +79,9 @@ Escala CSS→pt observada: **1px = 0.52pt** (bordas 2px = 1.04; fonte 14px = 7.2
      (`#EAEDF3` em linha sombreada, `#FFFFFF` caso contrário) — invisíveis, mas presentes.
    - **Múltiplas colunas de questões** (calibrado com a referência ENEM `OUTUBRO`,
      p.1 isolada em `reference/folha_respostas_enem_multicol.pdf`, 90 questões):
-     as colunas de questões avançam por um **stride fixo de 98.714 pt** (A-bolhas em
-     x = 70.907 + k·98.714), com 30 linhas por coluna. Até **5 colunas** cabem na caixa
+     as colunas de questões avançam por um **stride fixo de 98.77126 pt** (bordas
+     esquerdas das A-bolhas medidas em x = 67.967, 166.738, 265.509 na referência),
+     com 30 linhas por coluna. Até **5 colunas** cabem na caixa
      antes de transbordar para uma página de continuação. O passo interno de cada coluna
      (célula do número, 5 bolhas, pitch 11.825, row pitch 13.776) é idêntico ao da coluna 0.
      Verificado: candidato vs. referência com IBM Plex Sans → colunas dentro de 0.05pt e

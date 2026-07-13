@@ -1,68 +1,47 @@
 //! Middle panels of the answer sheet:
-//! - "Orientações" bullet list + signature line (left panel)
-//! - "Matrícula" registration bubble grid (right panel)
+//! - "Orientações" bullet list + signature line (full content width, centered)
 //! - grey fill-instructions strip with the vector Correto/Errado example
 
 use crate::layout::fragment::{FilledCircle, Fragment, FragmentKind, StrokedCircle};
 use crate::spec::answer_sheet::{
-    AnswerSheetSpec, DEFAULT_FILL_INSTRUCTIONS, DEFAULT_ORIENTATIONS, DEFAULT_SIGNATURE_LABEL,
+    AnswerSheetSpec, DEFAULT_FILL_INSTRUCTIONS, DEFAULT_SIGNATURE_LABEL,
 };
 
 use super::{
-    filled_rect, SheetCtx, BODY_LINE_H, BUBBLE_GRAY, CONTENT_X0, CONTENT_X1, IDX_SEP, NAVY,
-    SHADE, SIZE_BODY, SIZE_BUBBLE, SIZE_HEADER, STRIP_BG, STRIP_TOP, HAIR_W, WHITE,
+    filled_rect, SheetCtx, BODY_LINE_H, BUBBLE_GRAY, CONTENT_CX, CONTENT_X0, CONTENT_X1, NAVY,
+    SIZE_BODY, SIZE_BUBBLE, SIZE_HEADER, STRIP_BG, STRIP_TOP, HAIR_W, WHITE,
 };
 
-// ── Orientations panel (x 23 → 422.24) ──────────────────────────────────────
+// ── Orientations panel (full content width, x 23 → 573) ─────────────────────
+// The matrícula grid was removed, so the panel spans the whole content width.
+// The title and signature label are centered on CONTENT_CX; the bullet block
+// keeps its left inset mirrored on the right, so it too is centered.
 
-/// Right edge of the orientations panel (the invisible cell border).
-const ORIENT_X1: f64 = 422.24;
-/// Panel horizontal center.
-const ORIENT_CX: f64 = (CONTENT_X0 + ORIENT_X1) / 2.0;
 /// "Orientações" title glyph top.
 const ORIENT_TITLE_TOP: f64 = 127.37;
 /// First bullet line glyph top.
 const BULLETS_TOP: f64 = 146.86;
-/// Bullet text left edge and wrap width.
+/// Bullet text left edge and wrap width. The left inset (`BULLET_TEXT_X -
+/// CONTENT_X0`) is mirrored on the right so the block is centered.
 const BULLET_TEXT_X: f64 = 49.51;
-const BULLET_TEXT_W: f64 = 367.1;
+const BULLET_TEXT_W: f64 = CONTENT_X1 - BULLET_TEXT_X - (BULLET_TEXT_X - CONTENT_X0);
 /// Bullet dot: x, diameter, offset from the line's glyph top.
 const BULLET_DOT_X: f64 = 42.23;
 const BULLET_DOT_D: f64 = 2.08;
 const BULLET_DOT_DY: f64 = 3.34;
 
-// ── Signature ────────────────────────────────────────────────────────────────
+// ── Signature (centered on the full content width) ───────────────────────────
 
-const SIG_LINE_X: f64 = 86.94;
 const SIG_LINE_W: f64 = 271.36;
+const SIG_LINE_X: f64 = CONTENT_CX - SIG_LINE_W / 2.0;
 const SIG_LINE_Y: f64 = 280.16;
 const SIG_LABEL_TOP: f64 = 282.54;
 
-// ── Registration (matrícula) panel (x 421.72 → 573) ─────────────────────────
+// ── Shared answer bubble metrics ─────────────────────────────────────────────
 
-const REG_X0: f64 = 421.72;
-const REG_CX: f64 = (REG_X0 + CONTENT_X1) / 2.0;
-const REG_TITLE_TOP: f64 = 123.21;
-/// First bubble column left edge and horizontal pitch.
-const REG_COL_X0: f64 = 439.66;
-const REG_COL_PITCH: f64 = 11.783;
-/// First bubble row top edge and vertical pitch.
-const REG_ROW_Y0: f64 = 155.14;
-const REG_ROW_PITCH: f64 = 13.7511;
-/// Bubble diameter and outline width (1px CSS).
+/// Bubble diameter and outline width (1px CSS). Used by the answers grid.
 pub const BUBBLE_D: f64 = 9.36;
 pub const BUBBLE_STROKE: f64 = 0.52;
-/// Digit glyph top relative to its bubble top.
-const REG_DIGIT_DY: f64 = 2.17;
-/// Shaded-cell offsets relative to the bubble box.
-const REG_SHADE_DX: f64 = -1.86;
-const REG_SHADE_DY: f64 = -2.34;
-const REG_SHADE_W: f64 = 11.96;
-/// Invisible column-index row: white digits + grey separators (template
-/// artifact preserved for scanner compatibility and snapshot parity).
-const IDX_DIGIT_TOP: f64 = 143.48;
-const IDX_SEP_Y: f64 = 141.88;
-const IDX_SEP_H: f64 = 10.92;
 
 // ── Fill-instructions strip ──────────────────────────────────────────────────
 
@@ -79,16 +58,13 @@ const EXAMPLE_BUBBLE_D: f64 = 7.8;
 const EXAMPLE_PITCH: f64 = 9.9;
 const EXAMPLE_LABEL_W: f64 = 26.0;
 
-/// Invisible white rects of the panels table (cell backgrounds + borders),
-/// verbatim from the reference snapshot (x, y, w, h).
-const PANEL_WHITES: [(f64, f64, f64, f64); 7] = [
-    (23.0, 116.93, 0.52, 178.83),
-    (23.0, 116.93, 399.24, 0.52),
-    (421.72, 116.93, 0.52, 178.83),
-    (422.24, 116.93, 150.76, 0.52),
-    (572.48, 116.93, 0.52, 178.83),
-    (23.52, 117.45, 398.2, 178.31),
-    (421.72, 117.45, 151.28, 178.31),
+/// Invisible white rects of the panel table (single full-width cell: borders +
+/// background). White-on-white, kept for structural parity with the template.
+const PANEL_WHITES: [(f64, f64, f64, f64); 4] = [
+    (23.0, 116.93, 0.52, 178.83),    // left border
+    (23.0, 116.93, 549.48, 0.52),    // top border (full width, 23 → 572.48)
+    (572.48, 116.93, 0.52, 178.83),  // right border
+    (23.52, 117.45, 549.48, 178.31), // cell background (full width)
 ];
 
 pub(crate) fn layout_panels(spec: &AnswerSheetSpec, ctx: &SheetCtx<'_>, out: &mut Vec<Fragment>) {
@@ -96,9 +72,6 @@ pub(crate) fn layout_panels(spec: &AnswerSheetSpec, ctx: &SheetCtx<'_>, out: &mu
         out.push(filled_rect(x, y, w, h, WHITE));
     }
     layout_orientations(spec, ctx, out);
-    if let Some(ref reg) = spec.registration {
-        layout_registration(reg, ctx, out);
-    }
     layout_strip(spec, ctx, out);
 }
 
@@ -107,79 +80,35 @@ pub(crate) fn layout_panels(spec: &AnswerSheetSpec, ctx: &SheetCtx<'_>, out: &mu
 // ─────────────────────────────────────────────────────────────────────────────
 
 fn layout_orientations(spec: &AnswerSheetSpec, ctx: &SheetCtx<'_>, out: &mut Vec<Fragment>) {
-    out.push(ctx.text_centered(ORIENT_CX, ORIENT_TITLE_TOP, "Orientações", SIZE_HEADER, true, NAVY));
+    // Orientations are optional: when omitted the title and bullets are left
+    // blank, but the reserved vertical space (and everything below) is kept.
+    if !spec.orientations.is_empty() {
+        out.push(ctx.text_centered(CONTENT_CX, ORIENT_TITLE_TOP, "Orientações", SIZE_HEADER, true, NAVY));
 
-    let default_items: Vec<String> = DEFAULT_ORIENTATIONS.iter().map(|s| s.to_string()).collect();
-    let items: &[String] = if spec.orientations.is_empty() { &default_items } else { &spec.orientations };
-
-    // Bullets flow continuously (line pitch only, no inter-item spacing).
-    let mut top = BULLETS_TOP;
-    for item in items {
-        out.push(Fragment {
-            x: BULLET_DOT_X,
-            y: top + BULLET_DOT_DY,
-            width: BULLET_DOT_D,
-            height: BULLET_DOT_D,
-            kind: FragmentKind::FilledCircle(FilledCircle { color: NAVY.to_owned() }),
-        });
-        let lines = ctx.paragraph_justified(
-            BULLET_TEXT_X, top, BULLET_TEXT_W, item, SIZE_BODY, BODY_LINE_H, true, out,
-        );
-        top += lines as f64 * BODY_LINE_H;
+        // Bullets flow continuously (line pitch only, no inter-item spacing).
+        let mut top = BULLETS_TOP;
+        for item in &spec.orientations {
+            out.push(Fragment {
+                x: BULLET_DOT_X,
+                y: top + BULLET_DOT_DY,
+                width: BULLET_DOT_D,
+                height: BULLET_DOT_D,
+                kind: FragmentKind::FilledCircle(FilledCircle { color: NAVY.to_owned() }),
+            });
+            let lines = ctx.paragraph_justified(
+                BULLET_TEXT_X, top, BULLET_TEXT_W, item, SIZE_BODY, BODY_LINE_H, true, out,
+            );
+            top += lines as f64 * BODY_LINE_H;
+        }
     }
 
-    // Signature line + label.
+    // Signature line + label — always drawn, centered across the full width.
     out.push(filled_rect(SIG_LINE_X, SIG_LINE_Y, SIG_LINE_W, HAIR_W, NAVY));
     let label = spec.signature_label.as_deref().unwrap_or(DEFAULT_SIGNATURE_LABEL);
-    out.push(ctx.text_centered(ORIENT_CX, SIG_LABEL_TOP, label, SIZE_BODY, false, NAVY));
+    out.push(ctx.text_centered(CONTENT_CX, SIG_LABEL_TOP, label, SIZE_BODY, false, NAVY));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Registration grid
-// ─────────────────────────────────────────────────────────────────────────────
-
-fn layout_registration(reg: &crate::spec::answer_sheet::RegistrationGrid, ctx: &SheetCtx<'_>, out: &mut Vec<Fragment>) {
-    let digits = reg.digits as usize;
-    if digits == 0 {
-        return;
-    }
-
-    out.push(ctx.text_centered(REG_CX, REG_TITLE_TOP, &reg.label, SIZE_HEADER, true, NAVY));
-
-    let col_cx = |k: usize| REG_COL_X0 + k as f64 * REG_COL_PITCH + BUBBLE_D / 2.0;
-
-    // Invisible index row: one white digit per column + separators between.
-    for k in 0..digits {
-        let d = (k % 10).to_string();
-        out.push(ctx.text_centered(col_cx(k), IDX_DIGIT_TOP, &d, SIZE_HEADER, false, WHITE));
-        if k + 1 < digits {
-            let sep_x = (col_cx(k) + col_cx(k + 1)) / 2.0 - HAIR_W / 2.0;
-            out.push(filled_rect(sep_x, IDX_SEP_Y, HAIR_W, IDX_SEP_H, IDX_SEP));
-        }
-    }
-
-    // Alternate-column shading (even columns), one cell per row.
-    for k in (0..digits).step_by(2) {
-        let x = REG_COL_X0 + k as f64 * REG_COL_PITCH + REG_SHADE_DX;
-        for r in 0..10 {
-            let y = REG_ROW_Y0 + r as f64 * REG_ROW_PITCH + REG_SHADE_DY;
-            out.push(filled_rect(x, y, REG_SHADE_W, REG_ROW_PITCH, SHADE));
-        }
-    }
-
-    // 10 rows × N columns of digit bubbles; row r carries digit r.
-    for r in 0..10u32 {
-        let y = REG_ROW_Y0 + r as f64 * REG_ROW_PITCH;
-        let digit = r.to_string();
-        for k in 0..digits {
-            let x = REG_COL_X0 + k as f64 * REG_COL_PITCH;
-            out.push(bubble(x, y, BUBBLE_GRAY));
-            out.push(ctx.text_centered(col_cx(k), y + REG_DIGIT_DY, &digit, SIZE_BUBBLE, false, NAVY));
-        }
-    }
-}
-
-/// A stroked answer/registration bubble at box top-left (`x`, `y`).
+/// A stroked answer bubble at box top-left (`x`, `y`).
 pub(crate) fn bubble(x: f64, y: f64, color: &str) -> Fragment {
     Fragment {
         x,

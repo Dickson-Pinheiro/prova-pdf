@@ -41,6 +41,10 @@ pub enum ValidationError {
     /// The answer-sheet QR payload exceeds the QR byte-mode capacity.
     #[cfg(feature = "answer-sheet")]
     QrPayloadTooLarge { len: usize },
+    /// The combined length of the answer-sheet "Orientações" items exceeds the
+    /// allowed maximum.
+    #[cfg(feature = "answer-sheet")]
+    OrientationsTooLong { len: usize, max: usize },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

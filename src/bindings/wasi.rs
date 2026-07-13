@@ -841,10 +841,16 @@ mod tests {
     }
 
     #[test]
-    fn generate_fails_with_empty_sections() {
+    fn generate_empty_sections_renders_header_only() {
         setup();
-        let err = generate_from_json(r#"{"sections":[]}"#).unwrap_err();
-        assert!(!err.is_empty());
+        // An empty `sections` array is allowed since the 2026-07-06 calibration
+        // work (header-only rendering; see validate::check_sections). It must
+        // produce a valid PDF, not an error.
+        let bytes = generate_from_json(r#"{"sections":[]}"#)
+            .expect("empty sections must render a header-only PDF");
+        assert!(bytes.starts_with(b"%PDF-"), "output must start with %PDF-");
+        let tail = &bytes[bytes.len().saturating_sub(10)..];
+        assert!(tail.windows(5).any(|w| w == b"%%EOF"), "must end with %%EOF");
     }
 
     #[test]
